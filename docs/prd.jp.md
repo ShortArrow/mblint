@@ -161,7 +161,7 @@ upstream_bus = "pcie"
 upstream_lanes = 4
 upstream_generation = 4
 downstream_bus = "usb4"
-max_throughput_gbps = 40.0
+max_throughput_gbps = 38.8 # USB4 40 Gbps を 128b/132b 符号化した後の値
 
 # --- 4. 物理ソケット (Sockets) ---
 [nodes.PCI_E1]
@@ -227,7 +227,7 @@ protocol = "usb4"
 [bridge]
 chipset = "intel_jhl7440"
 translates_to = "pcie"
-max_tunneling_gbps = 32.0   # PCIe Gen3 x4 相当
+max_tunneling_gbps = 31.5   # PCIe Gen3 x4
 
 [downstream_sockets.EGPU_SLOT]
 category = "pcie_slot"
@@ -248,7 +248,7 @@ type = "adapter"
 [upstream]
 connector = "type_a"
 protocol = "usb3_gen1x1"
-max_gbps = 5.0
+max_gbps = 4.0           # 5 Gbps を 8b/10b 符号化した後の値
 
 [bridge]
 translates_to = "sata"
@@ -364,7 +364,7 @@ PORT_TYPEC_1 = "devices/peripherals/razer_core_x.toml"
               │ (合格なら次へ)
               ▼
   【Pass 4: 論理トポロジー・実効スループット・IOMMU】
-  ・最終的なリンク（Gen、レーン数、プロトコル）から実効転送レート（GB/s）を算出
+  ・最終的なリンク（Gen、レーン数、プロトコル）から実効転送レート（Gbps）を算出
   ・デバイスの要求帯域に対するボトルネック警告
   ・IOMMU グループの分離境界: VFIO パススルー時に道連れになるデバイス群
               │
@@ -390,9 +390,9 @@ PORT_TYPEC_1 = "devices/peripherals/razer_core_x.toml"
            "code": "BANDWIDTH_TUNNELING_BOTTLENECK",
            "endpoint": "PORT_TYPEC_1.EGPU_SLOT",
            "device": "RTX 3060",
-           "message": "Device operates at PCIe Gen3 x4 equivalent (approx 32 Gbps) limited by USB4 controller tunneling.",
+           "message": "Device operates at PCIe Gen3 x4 equivalent (31.5 Gbps) limited by USB4 controller tunneling.",
            "theoretical_max_gbps": 64.0,
-           "actual_gbps": 32.0
+           "actual_gbps": 31.5
          },
          {
            "code": "VFIO_IOMMU_GROUP_SHARED",

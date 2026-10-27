@@ -88,6 +88,10 @@ A protocol condition holds only while the socket is occupied by a device running
 
 A protocol is one of `pcie`, `sata`, `usb4` and `usb3_gen1x1`.
 
+## Bandwidth
+
+A bandwidth figure, in a field ending in `_gbps`, is in Gbps of data after line encoding and before protocol overhead. PCIe Gen3 x4, which signals at 8 GT/s per lane with 128b/130b encoding, is written as `31.5`; USB 3 Gen 1, which signals at 5 Gbps with 8b/10b encoding, as `4.0`.
+
 ## Devices
 
 `devices/**/<id>.toml` describes one device.
@@ -109,6 +113,8 @@ A card or M.2 module declares what it speaks in `[interface]` and what it occupi
 
 - `thickness_slots` counts the bracket positions the card covers, its own included, and is at least 1. A thickness between whole positions is rounded up, so a 3.5-slot card is written as `4`.
 - `keys` lists the notches cut in the module, so a B+M module is written as `["B", "M"]`.
+
+A card or M.2 module requires the bandwidth of its `[interface]` link.
 
 ### Adapters
 

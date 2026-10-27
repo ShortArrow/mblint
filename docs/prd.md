@@ -161,7 +161,7 @@ upstream_bus = "pcie"
 upstream_lanes = 4
 upstream_generation = 4
 downstream_bus = "usb4"
-max_throughput_gbps = 40.0
+max_throughput_gbps = 38.8 # USB4 40 Gbps after 128b/132b encoding
 
 # --- 4. Physical sockets ---
 [nodes.PCI_E1]
@@ -227,7 +227,7 @@ protocol = "usb4"
 [bridge]
 chipset = "intel_jhl7440"
 translates_to = "pcie"
-max_tunneling_gbps = 32.0   # equivalent to PCIe Gen3 x4
+max_tunneling_gbps = 31.5   # PCIe Gen3 x4
 
 [downstream_sockets.EGPU_SLOT]
 category = "pcie_slot"
@@ -248,7 +248,7 @@ type = "adapter"
 [upstream]
 connector = "type_a"
 protocol = "usb3_gen1x1"
-max_gbps = 5.0
+max_gbps = 4.0           # 5 Gbps after 8b/10b encoding
 
 [bridge]
 translates_to = "sata"
@@ -364,7 +364,7 @@ The engine runs four passes over the graph.
               │ (proceed if passed)
               ▼
   [Pass 4: logical topology, effective throughput, IOMMU]
-  - Effective transfer rate (GB/s) from the final link (generation, lanes, protocol)
+  - Effective transfer rate (Gbps) from the final link (generation, lanes, protocol)
   - Bottleneck warnings against each device's required bandwidth
   - IOMMU group boundaries: the devices that must be passed through together under VFIO
               │
@@ -390,9 +390,9 @@ The engine runs four passes over the graph.
            "code": "BANDWIDTH_TUNNELING_BOTTLENECK",
            "endpoint": "PORT_TYPEC_1.EGPU_SLOT",
            "device": "RTX 3060",
-           "message": "Device operates at PCIe Gen3 x4 equivalent (approx 32 Gbps) limited by USB4 controller tunneling.",
+           "message": "Device operates at PCIe Gen3 x4 equivalent (31.5 Gbps) limited by USB4 controller tunneling.",
            "theoretical_max_gbps": 64.0,
-           "actual_gbps": 32.0
+           "actual_gbps": 31.5
          },
          {
            "code": "VFIO_IOMMU_GROUP_SHARED",
