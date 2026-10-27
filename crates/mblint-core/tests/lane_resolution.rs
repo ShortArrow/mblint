@@ -31,11 +31,15 @@ allocate = { PCI_E1 = 8, PCI_E2 = 8 }
 type = "socket"
 category = "pcie_slot"
 parent = "mux_peg_bifurcation"
+slot_index = 2
+physical_form_factor = "x16"
 
 [nodes.PCI_E2]
 type = "socket"
 category = "pcie_slot"
 parent = "mux_peg_bifurcation"
+slot_index = 4
+physical_form_factor = "x16"
 "#;
 
 const USB4_BRIDGE: &str = r#"

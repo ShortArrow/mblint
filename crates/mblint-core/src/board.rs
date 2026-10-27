@@ -4,6 +4,7 @@ use std::collections::BTreeMap;
 
 use serde::Deserialize;
 
+use crate::connector::{M2Key, PcieWidth};
 use crate::occupancy::Occupancy;
 use crate::parse::ParseError;
 use crate::protocol::Protocol;
@@ -23,6 +24,14 @@ impl Board {
     /// Parses a board definition, rejecting values outside the schema's enumerations.
     pub fn from_toml(source: &str) -> Result<Self, ParseError> {
         toml::from_str(source).map_err(ParseError::from_toml)
+    }
+
+    /// The socket with id `id`; `None` if no node has that id or the node is not a socket.
+    pub fn socket(&self, id: &str) -> Option<&Socket> {
+        match self.nodes.get(id) {
+            Some(Node::Socket(socket)) => Some(socket),
+            _ => None,
+        }
     }
 }
 
@@ -133,9 +142,49 @@ pub struct Bridge {
     pub upstream_lanes: u32,
 }
 
-/// A physical socket that devices are installed into.
+/// A physical socket that devices are installed into, with the attributes of its category.
 #[derive(Debug, Clone, Deserialize)]
-pub struct Socket {
-    pub category: String,
+#[serde(tag = "category", rename_all = "snake_case")]
+pub enum Socket {
+    PcieSlot(PcieSlot),
+    M2Slot(M2Slot),
+    SataPort(SataPort),
+    UsbC(UsbC),
+}
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct PcieSlot {
+    pub parent: String,
+    /// Bracket position on the board, counted away from the CPU.
+    pub slot_index: u8,
+    pub physical_form_factor: PcieWidth,
+    /// Whether the back of the slot is open, so that a wider card edge overhangs it.
+    #[serde(default)]
+    pub open_ended: bool,
+    pub iommu_group: Option<u32>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct M2Slot {
+    pub parent: String,
+    pub key: M2Key,
+    #[serde(default)]
+    pub supported_protocols: Vec<Protocol>,
+    pub max_lanes: Option<u8>,
+    pub iommu_group: Option<u32>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct SataPort {
+    pub parent: String,
+    pub iommu_group: Option<u32>,
+}
+
+/// A Type-C port. Attributes other than `parent` are accepted unchecked until Pass 3 types them.
+#[derive(Debug, Clone, Deserialize)]
+pub struct UsbC {
     pub parent: String,
 }

@@ -42,6 +42,7 @@ const SOCKETS: &str = r#"
 type = "socket"
 category = "m2_slot"
 parent = "mux_m2_sata_exclusive"
+key = "M"
 
 [nodes.SATA_5]
 type = "socket"
