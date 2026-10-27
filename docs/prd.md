@@ -2,8 +2,6 @@
 
 [日本語](prd.jp.md)
 
-Points still undecided are listed in [open-issues.md](spec/open-issues.md).
-
 ## 1. Executive summary
 
 `mblint` (display name `mb-lint`) is an open-source specification checker for building PCs, workstations and hypervisors with VFIO / PCI passthrough. It deterministically models and checks:
@@ -54,7 +52,7 @@ All hardware, whatever the protocol, is abstracted as a directed graph of the fo
 [Node: Device]        (GPU, NVMe SSD, eGPU box, display, USB hub)
 ```
 
-Onboard controllers that have an IOMMU group of their own are nodes of kind `controller` ([ADR-0002](adr/0002-iommu-groups-declared-in-board.md)).
+Onboard controllers that have an IOMMU group of their own are nodes of kind `controller`.
 
 ### System diagram
 
@@ -91,8 +89,6 @@ Onboard controllers that have an IOMMU group of their own are nodes of kind `con
 ## 4. Data schema (TOML v2.0)
 
 ### 4.1 Board definition (`boards/<vendor>/<model>.toml`)
-
-Mux conditions follow [ADR-0001](adr/0001-mux-mode-condition-as-structured-toml.md) and mux modes [ADR-0003](adr/0003-mux-modes-share-one-shape.md); IOMMU groups follow [ADR-0002](adr/0002-iommu-groups-declared-in-board.md).
 
 ```toml
 schema_version = "2.0.0"
@@ -214,8 +210,6 @@ dp_alt_max_lanes = 4
 ---
 
 ### 4.2 Device and adapter definitions (`devices/...`)
-
-Cards and M.2 modules follow [ADR-0004](adr/0004-device-interface-and-physical-shape.md), adapters [ADR-0006](adr/0006-adapters-and-nested-bindings.md).
 
 #### Example 1: eGPU box (USB4 / TB4 → PCIe bridge)
 

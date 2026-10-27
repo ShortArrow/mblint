@@ -2,8 +2,6 @@
 
 [English](prd.md)
 
-未決事項は [open-issues.jp.md](spec/open-issues.jp.md) にまとめている。
-
 ## 1. エグゼクティブサマリー
 
 `mblint`（プロジェクト表示名: `mb-lint`）は、PC 自作・ワークステーション・ハイパーバイザー（VFIO / PCI パススルー）構築における次の事項を決定論的に検証・モデル化するオープンソースの仕様検証ツールキットである。
@@ -54,7 +52,7 @@
 [Node: Device]        (GPU, NVMe SSD, eGPU ボックス, ディスプレイ, USB ハブ)
 ```
 
-独自の IOMMU グループを持つオンボードコントローラは、種別 `controller` のノードとする（[ADR-0002](adr/0002-iommu-groups-declared-in-board.jp.md)）。
+独自の IOMMU グループを持つオンボードコントローラは、種別 `controller` のノードとする。
 
 ### システム構成図
 
@@ -91,8 +89,6 @@
 ## 4. データスキーマ仕様 (TOML v2.0)
 
 ### 4.1 マザーボード定義 (`boards/<vendor>/<model>.toml`)
-
-Mux の条件は [ADR-0001](adr/0001-mux-mode-condition-as-structured-toml.jp.md)、Mux の mode は [ADR-0003](adr/0003-mux-modes-share-one-shape.jp.md)、IOMMU グループは [ADR-0002](adr/0002-iommu-groups-declared-in-board.jp.md) に従う。
 
 ```toml
 schema_version = "2.0.0"
@@ -214,8 +210,6 @@ dp_alt_max_lanes = 4
 ---
 
 ### 4.2 デバイス / アダプタ定義 (`devices/...`)
-
-カードと M.2 モジュールは [ADR-0004](adr/0004-device-interface-and-physical-shape.jp.md)、アダプタは [ADR-0006](adr/0006-adapters-and-nested-bindings.jp.md) に従う。
 
 #### 例1: eGPU ボックス（USB4 / TB4 → PCIe ブリッジ）
 

@@ -26,12 +26,13 @@ Unless you explicitly state otherwise, any contribution intentionally submitted 
 | Question | Place |
 | --- | --- |
 | What the product must do | [`docs/prd.md`](prd.md) |
+| What the data files contain and how the passes evaluate them | [`docs/spec/schema.md`](spec/schema.md), [`docs/spec/passes.md`](spec/passes.md) |
 | Why a design decision was made | `docs/adr/NNNN-<title>.md`, written as in [Architecture decision records](#architecture-decision-records) |
 | What is still undecided | [`docs/spec/open-issues.md`](spec/open-issues.md) |
 | What an interface guarantees | The docstring of the type or function |
 | Why a single change was made | The commit message, in one or two sentences |
 
-A decision that settles an open issue is recorded as an ADR, and the issue is removed from `open-issues.md`.
+A decision that settles an open issue is written into the specification and recorded as an ADR, and the issue is removed from `open-issues.md`.
 
 ## Architecture decision records
 
@@ -73,4 +74,4 @@ cargo clippy --all-targets
 | Path | Contents |
 | --- | --- |
 | `crates/mblint-core` | Topology model and resolution passes, shared by the CLI and the Wasm build |
-| `docs/` | Requirements, ADRs and open issues |
+| `docs/` | Requirements, specifications, ADRs and open issues |
