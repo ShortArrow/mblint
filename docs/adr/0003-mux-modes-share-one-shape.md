@@ -1,5 +1,7 @@
 # ADR-0003: Every mux mode has the same shape
 
+[日本語](0003-mux-modes-share-one-shape.jp.md)
+
 - Status: Accepted
 - Date: 2026-10-27
 

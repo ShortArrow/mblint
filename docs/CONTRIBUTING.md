@@ -1,8 +1,19 @@
 # Contributing to mblint
 
+[日本語](CONTRIBUTING.jp.md)
+
 ## Language
 
-mblint is an open-source project. Write every Markdown file, code comment, docstring, commit message and pull request in English.
+mblint is an open-source project. Write code comments, docstrings, commit messages and pull requests in English.
+
+Documentation is written in English and kept with a Japanese counterpart:
+
+| English | Japanese |
+| --- | --- |
+| `README.md` | `docs/README.jp.md` |
+| `docs/**/<name>.md` | `docs/**/<name>.jp.md`, in the same directory |
+
+The English file is the source. Change both files of a pair in the same commit, so that neither side describes a state the other has left.
 
 ## License
 

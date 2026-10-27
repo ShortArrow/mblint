@@ -1,5 +1,7 @@
 # Product Requirements Document: mblint (v2.0)
 
+[日本語](prd.jp.md)
+
 Points still undecided are listed in [open-issues.md](spec/open-issues.md).
 
 ## 1. Executive summary

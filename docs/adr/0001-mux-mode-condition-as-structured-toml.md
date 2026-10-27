@@ -1,5 +1,7 @@
 # ADR-0001: Mux mode conditions are structured TOML
 
+[日本語](0001-mux-mode-condition-as-structured-toml.jp.md)
+
 - Status: Accepted
 - Date: 2026-10-27
 

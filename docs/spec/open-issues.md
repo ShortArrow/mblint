@@ -1,5 +1,7 @@
 # Open issues in PRD v2.0
 
+[日本語](open-issues.jp.md)
+
 Points of the [PRD](../prd.md) that need agreement before they are implemented. A decided point moves to an ADR or the relevant specification and is removed from this list.
 
 Ordered by impact.
@@ -24,4 +26,4 @@ Ordered by impact.
 | # | Section | Undecided |
 | --- | --- | --- |
 | 9 | 5 | "Proceed if passed" means a failing pass suppresses the diagnostics of later passes. Whether the CLI output reports a pass as `skipped` is undecided. |
-| 10 | 4.1 `root_pch_hsio` | `bus = "hsio"` lanes are shared among PCIe, SATA and USB. Apart from `cost_lanes`, there is no way to state how many HSIO lanes a socket consumes. |
+| 10 | 4.1 `root_pch_hsio` | `bus = "hsio"` lanes are shared among PCIe, SATA and USB. Apart from `allocate`, there is no way to state how many HSIO lanes a socket consumes. |

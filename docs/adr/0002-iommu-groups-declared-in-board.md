@@ -1,5 +1,7 @@
 # ADR-0002: IOMMU groups are declared in the board definition
 
+[日本語](0002-iommu-groups-declared-in-board.jp.md)
+
 - Status: Accepted
 - Date: 2026-10-27
 
