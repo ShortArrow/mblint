@@ -158,7 +158,11 @@ fn installed(devices: &[(&str, &str)]) -> BTreeMap<String, Device> {
 
 /// Passes 2 to 4 over devices bound to the fixture board.
 fn throughput(devices: &[(&str, &str)]) -> Throughput {
-    let board = board();
+    throughput_on(board(), devices)
+}
+
+/// Passes 2 to 4 over devices bound to `board`.
+fn throughput_on(board: Board, devices: &[(&str, &str)]) -> Throughput {
     let installed = installed(devices);
     let mut occupancy = Occupancy::default();
     for (socket, device) in installed.iter().filter(|(path, _)| !path.contains('.')) {
@@ -236,6 +240,40 @@ fn socket_without_a_mux_runs_at_its_max_lanes_and_its_root_generation() {
             required_gbps: gen5_lane() * 4.0,
             actual_gbps: gen4_lane() * 4.0,
         }]
+    );
+}
+
+/// The fixture board with M2_1 stating `generation`.
+fn board_with_m2_1_generation(generation: u8) -> Board {
+    let source = BOARD.replacen(
+        "max_lanes = 4",
+        &format!("max_lanes = 4\ngeneration = {generation}"),
+        1,
+    );
+    Board::from_toml(&source).expect("fixture board must parse")
+}
+
+#[test]
+fn socket_stating_an_older_generation_than_its_root_runs_at_its_own() {
+    let result = throughput_on(board_with_m2_1_generation(3), &[("M2_1", SSD_GEN5_X4)]);
+
+    assert_eq!(
+        result.links.get("M2_1"),
+        Some(&Link {
+            generation: 3,
+            lanes: 4,
+            gbps: gen3_lane() * 4.0,
+        })
+    );
+}
+
+#[test]
+fn socket_stating_a_newer_generation_than_its_root_runs_at_the_root_s() {
+    let result = throughput_on(board_with_m2_1_generation(5), &[("M2_1", SSD_GEN5_X4)]);
+
+    assert_eq!(
+        result.links.get("M2_1").map(|link| link.generation),
+        Some(4)
     );
 }
 

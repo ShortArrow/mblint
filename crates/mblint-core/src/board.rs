@@ -185,6 +185,15 @@ impl Socket {
         }
     }
 
+    /// The PCIe generation the socket's wiring is limited to; `None` if it states none.
+    pub fn generation(&self) -> Option<u8> {
+        match self {
+            Socket::PcieSlot(slot) => slot.generation,
+            Socket::M2Slot(slot) => slot.generation,
+            Socket::SataPort(_) | Socket::UsbC(_) | Socket::UsbA(_) => None,
+        }
+    }
+
     pub fn parent(&self) -> &str {
         match self {
             Socket::PcieSlot(slot) => &slot.parent,
@@ -206,6 +215,8 @@ pub struct PcieSlot {
     /// Whether the back of the slot is open, so that a wider card edge overhangs it.
     #[serde(default)]
     pub open_ended: bool,
+    /// PCIe generation of the slot's wiring, for a slot slower than its root.
+    pub generation: Option<u8>,
     pub iommu_group: Option<u32>,
 }
 
@@ -217,6 +228,8 @@ pub struct M2Slot {
     #[serde(default)]
     pub supported_protocols: Vec<Protocol>,
     pub max_lanes: Option<u8>,
+    /// PCIe generation of the slot's wiring, for a slot slower than its root.
+    pub generation: Option<u8>,
     pub iommu_group: Option<u32>,
 }
 

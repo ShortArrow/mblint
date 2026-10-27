@@ -110,8 +110,8 @@ fn settle(interface: &Interface, socket: Capacity, cap: Option<f64>) -> Option<L
 
 /// The capacity of the socket at `path`; `None` if it states no lane count or generation.
 ///
-/// A board socket has the generation of its root and the lanes a mux allocates to it, or else
-/// its `max_lanes`. A socket inside an adapter states both itself.
+/// A board socket has the smaller of its own `generation` and its root's, and the lanes a mux
+/// allocates to it, or else its `max_lanes`. A socket inside an adapter states both itself.
 fn socket_capacity(
     board: &Board,
     installed: &BTreeMap<String, Device>,
@@ -133,13 +133,15 @@ fn socket_capacity(
             })
         }
         None => {
+            let socket = board.socket(path)?;
             let allocated = lanes.allocations.get(path).copied();
-            let max_lanes = match board.socket(path)? {
+            let max_lanes = match socket {
                 Socket::M2Slot(slot) => slot.max_lanes.map(u32::from),
                 _ => None,
             };
+            let root = root_generation(board, path)?;
             Some(Capacity {
-                generation: root_generation(board, path)?,
+                generation: socket.generation().map_or(root, |own| own.min(root)),
                 lanes: allocated.or(max_lanes)?,
             })
         }
