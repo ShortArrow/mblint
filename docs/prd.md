@@ -90,7 +90,7 @@ Onboard controllers that have an IOMMU group of their own are nodes of kind `con
 
 ### 4.1 Board definition (`boards/<vendor>/<model>.toml`)
 
-Mux conditions follow [ADR-0001](adr/0001-mux-mode-condition-as-structured-toml.md); IOMMU groups follow [ADR-0002](adr/0002-iommu-groups-declared-in-board.md).
+Mux conditions follow [ADR-0001](adr/0001-mux-mode-condition-as-structured-toml.md) and mux modes [ADR-0003](adr/0003-mux-modes-share-one-shape.md); IOMMU groups follow [ADR-0002](adr/0002-iommu-groups-declared-in-board.md).
 
 ```toml
 schema_version = "2.0.0"
@@ -145,14 +145,15 @@ subtype = "exclusive"
 parent = "root_pch_hsio"
 
 [[nodes.mux_m2_sata_exclusive.modes]]
+when = { socket = "M2_2", is = "empty" }
+
+[[nodes.mux_m2_sata_exclusive.modes]]
 when = { socket = "M2_2", protocol = "pcie" }
-active_targets = ["M2_2"]
-cost_lanes = 4
+allocate = { M2_2 = 4 }
+disables = ["SATA_5", "SATA_6"]
 
 [[nodes.mux_m2_sata_exclusive.modes]]
 when = { socket = "M2_2", protocol = "sata" }
-active_targets = ["M2_2", "SATA_5", "SATA_6"]
-notes = "SATA_5/6 disabled when M.2 runs PCIe"
 
 # --- 3. Protocol bridges ---
 [nodes.bridge_asm4242_usb4]
@@ -189,6 +190,16 @@ parent = "mux_m2_sata_exclusive"
 key = "M"
 supported_protocols = ["pcie", "sata"]
 max_lanes = 4
+
+[nodes.SATA_5]
+type = "socket"
+category = "sata_port"
+parent = "root_pch_hsio"
+
+[nodes.SATA_6]
+type = "socket"
+category = "sata_port"
+parent = "root_pch_hsio"
 
 [nodes.PORT_TYPEC_1]
 type = "socket"
