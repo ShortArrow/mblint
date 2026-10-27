@@ -1,7 +1,7 @@
-use std::collections::BTreeSet;
-
 use mblint_core::board::Board;
 use mblint_core::lanes::{Diagnostic, resolve_lanes};
+use mblint_core::occupancy::Occupancy;
+use mblint_core::protocol::Protocol;
 
 const PEG_HEADER: &str = r#"
 schema_version = "2.0.0"
@@ -61,8 +61,12 @@ fn board(toml: &str) -> Board {
     Board::from_toml(toml).expect("fixture board must parse")
 }
 
-fn occupied(sockets: &[&str]) -> BTreeSet<String> {
-    sockets.iter().map(|s| s.to_string()).collect()
+fn occupied(sockets: &[&str]) -> Occupancy {
+    let mut occupancy = Occupancy::default();
+    for socket in sockets {
+        occupancy.install(*socket, Protocol::Pcie);
+    }
+    occupancy
 }
 
 fn bridge_under(parent: &str) -> String {

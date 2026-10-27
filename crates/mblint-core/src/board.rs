@@ -1,9 +1,11 @@
 //! Board definition: a directed graph of roots, muxes, bridges and sockets.
 
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::BTreeMap;
 use std::fmt;
 
 use serde::Deserialize;
+
+use crate::occupancy::Occupancy;
 
 /// A motherboard as declared in `boards/<vendor>/<model>.toml`.
 ///
@@ -53,26 +55,26 @@ pub struct Root {
 }
 
 /// A switch whose lane allocation depends on which sockets are occupied.
+///
+/// Every subtype is evaluated the same way; `subtype` only describes the hardware.
 #[derive(Debug, Clone, Deserialize)]
 pub struct Mux {
     pub parent: String,
-    #[serde(flatten)]
-    pub kind: MuxKind,
+    pub subtype: MuxSubtype,
+    pub modes: Vec<Mode>,
 }
 
 impl Mux {
     /// The first mode, in declaration order, whose condition holds; `None` if no mode applies.
-    pub fn select_mode(&self, occupied: &BTreeSet<String>) -> Option<&Mode> {
-        match &self.kind {
-            MuxKind::Bifurcation { modes } => modes.iter().find(|mode| mode.when.holds(occupied)),
-        }
+    pub fn select_mode(&self, occupancy: &Occupancy) -> Option<&Mode> {
+        self.modes.iter().find(|mode| mode.when.holds(occupancy))
     }
 }
 
-#[derive(Debug, Clone, Deserialize)]
-#[serde(tag = "subtype", rename_all = "snake_case")]
-pub enum MuxKind {
-    Bifurcation { modes: Vec<Mode> },
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum MuxSubtype {
+    Bifurcation,
 }
 
 /// One configuration of a mux: the lanes each socket receives while `when` holds.
@@ -90,8 +92,8 @@ pub struct Condition {
 }
 
 impl Condition {
-    pub fn holds(&self, occupied: &BTreeSet<String>) -> bool {
-        let is_occupied = occupied.contains(&self.socket);
+    pub fn holds(&self, occupancy: &Occupancy) -> bool {
+        let is_occupied = occupancy.is_occupied(&self.socket);
         match self.is {
             SocketState::Empty => !is_occupied,
             SocketState::Occupied => is_occupied,
