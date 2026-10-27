@@ -215,6 +215,8 @@ pub struct PcieSlot {
     /// Whether the back of the slot is open, so that a wider card edge overhangs it.
     #[serde(default)]
     pub open_ended: bool,
+    /// Lanes wired to the slot, which may be fewer than its form factor holds.
+    pub max_electrical_lanes: Option<u8>,
     /// PCIe generation of the slot's wiring, for a slot slower than its root.
     pub generation: Option<u8>,
     pub iommu_group: Option<u32>,

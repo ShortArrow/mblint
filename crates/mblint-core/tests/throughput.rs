@@ -278,6 +278,33 @@ fn socket_stating_a_newer_generation_than_its_root_runs_at_the_root_s() {
 }
 
 #[test]
+fn pcie_slot_without_a_mux_runs_at_its_electrical_lanes() {
+    let source = format!(
+        "{BOARD}
+[nodes.PCI_E3]
+type = \"socket\"
+category = \"pcie_slot\"
+parent = \"root_pch\"
+slot_index = 7
+physical_form_factor = \"x16\"
+max_electrical_lanes = 4
+"
+    );
+    let board = Board::from_toml(&source).expect("fixture board must parse");
+
+    let result = throughput_on(board, &[("PCI_E3", CARD_GEN4_X16)]);
+
+    assert_eq!(
+        result.links.get("PCI_E3"),
+        Some(&Link {
+            generation: 4,
+            lanes: 4,
+            gbps: gen4_lane() * 4.0,
+        })
+    );
+}
+
+#[test]
 fn socket_without_a_lane_count_is_unrated() {
     let result = throughput(&[("M2_2", SSD_GEN5_X4)]);
 
