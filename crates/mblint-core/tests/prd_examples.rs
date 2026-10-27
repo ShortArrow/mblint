@@ -7,6 +7,8 @@ use mblint_core::device::Device;
 use mblint_core::lanes::resolve_lanes;
 use mblint_core::occupancy::Occupancy;
 use mblint_core::physical::check_physical;
+use mblint_core::throughput::{Diagnostic, rate_links};
+use mblint_core::tunnels::resolve_tunnels;
 
 const PRD: &str = include_str!("../../../docs/prd.md");
 
@@ -64,4 +66,25 @@ fn prd_adapter_examples_parse() {
         let adapter = Device::from_toml(example(heading));
         assert!(adapter.is_ok(), "{heading}: {:?}", adapter.err());
     }
+}
+
+#[test]
+fn ssd_of_the_prd_examples_is_held_to_the_generation_of_the_pch() {
+    let board = prd_board();
+    let installed = BTreeMap::from([
+        ("PCI_E1".to_string(), prd_card()),
+        ("M2_2".to_string(), prd_ssd()),
+    ]);
+    let mut occupancy = Occupancy::default();
+    for (socket, device) in &installed {
+        occupancy.install(socket.clone(), device.protocol());
+    }
+    let lanes = resolve_lanes(&board, &occupancy);
+
+    let result = rate_links(&board, &installed, &lanes, &resolve_tunnels(&installed));
+
+    assert!(matches!(
+        result.diagnostics.as_slice(),
+        [Diagnostic::Bottleneck { socket, .. }] if socket == "M2_2"
+    ));
 }

@@ -10,3 +10,5 @@ pub mod parse;
 pub mod physical;
 pub mod protocol;
 pub mod rig;
+pub mod throughput;
+pub mod tunnels;

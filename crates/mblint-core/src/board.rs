@@ -45,6 +45,18 @@ pub enum Node {
     Socket(Socket),
 }
 
+impl Node {
+    /// The upstream node's id; `None` for a root.
+    pub fn parent(&self) -> Option<&str> {
+        match self {
+            Node::Root(_) => None,
+            Node::Mux(mux) => Some(&mux.parent),
+            Node::Bridge(bridge) => Some(&bridge.parent),
+            Node::Socket(socket) => Some(socket.parent()),
+        }
+    }
+}
+
 /// A resource provider that supplies a fixed number of lanes to its children.
 #[derive(Debug, Clone, Deserialize)]
 pub struct Root {
@@ -152,6 +164,18 @@ pub enum Socket {
     SataPort(SataPort),
     UsbC(UsbC),
     UsbA(UsbA),
+}
+
+impl Socket {
+    pub fn parent(&self) -> &str {
+        match self {
+            Socket::PcieSlot(slot) => &slot.parent,
+            Socket::M2Slot(slot) => &slot.parent,
+            Socket::SataPort(port) => &port.parent,
+            Socket::UsbC(port) => &port.parent,
+            Socket::UsbA(port) => &port.parent,
+        }
+    }
 }
 
 #[derive(Debug, Clone, Deserialize)]

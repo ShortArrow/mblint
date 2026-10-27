@@ -8,7 +8,7 @@ Hardware is described in declarative TOML, so the same data drives a CLI for peo
 
 ## Status
 
-Early development, Phase 1 of the [roadmap](docs/prd.md#8-roadmap). The core library `mblint-core` currently checks that each card and M.2 module fits its socket and that thick cards do not cover occupied slots, selects mux modes (PCIe bifurcation and M.2 / SATA exclusivity), reports devices in sockets those modes disable, and checks the lane balance of each root. It loads a rig with its board and devices, including devices installed inside adapters such as an eGPU box, and runs these checks as Passes 1 and 2. There is no CLI yet.
+Early development, Phase 1 of the [roadmap](docs/prd.md#8-roadmap). The core library `mblint-core` currently checks that each card and M.2 module fits its socket and that thick cards do not cover occupied slots, selects mux modes (PCIe bifurcation and M.2 / SATA exclusivity), reports devices in sockets those modes disable, and checks the lane balance of each root. It loads a rig with its board and devices, including devices installed inside adapters such as an eGPU box, and runs these checks as Passes 1 and 2. Passes 3 and 4 cap PCIe links tunnelled through an adapter and report each PCIe device's link rate, warning when it is below the rate of the device's own interface. There is no CLI yet.
 
 ## Documentation
 

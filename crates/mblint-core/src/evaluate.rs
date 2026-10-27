@@ -4,14 +4,20 @@ use crate::lanes::{LaneResolution, resolve_lanes};
 use crate::occupancy::Occupancy;
 use crate::physical::{self, check_physical};
 use crate::rig::LoadedRig;
+use crate::throughput::{Throughput, rate_links};
+use crate::tunnels::{Tunnelling, resolve_tunnels};
 
 /// The outcome of every pass, in pipeline order.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Evaluation {
     /// Pass 1. Every diagnostic is an error.
     pub physical: Vec<physical::Diagnostic>,
-    /// Pass 2, not run if Pass 1 reported an error.
+    /// Pass 2, not run if Pass 1 reported an error. Every diagnostic is an error.
     pub lanes: PassOutcome<LaneResolution>,
+    /// Pass 3, not run if Pass 2 did not run or reported an error.
+    pub tunnels: PassOutcome<Tunnelling>,
+    /// Pass 4, not run if Pass 3 did not run. Every diagnostic is a warning.
+    pub throughput: PassOutcome<Throughput>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -28,7 +34,26 @@ pub fn evaluate(rig: &LoadedRig) -> Evaluation {
     } else {
         PassOutcome::NotRun
     };
-    Evaluation { physical, lanes }
+    let clean_lanes = match &lanes {
+        PassOutcome::Ran(resolution) if resolution.diagnostics.is_empty() => Some(resolution),
+        _ => None,
+    };
+    let tunnels = match clean_lanes {
+        Some(_) => PassOutcome::Ran(resolve_tunnels(&rig.installed)),
+        None => PassOutcome::NotRun,
+    };
+    let throughput = match (clean_lanes, &tunnels) {
+        (Some(resolution), PassOutcome::Ran(tunnels)) => {
+            PassOutcome::Ran(rate_links(&rig.board, &rig.installed, resolution, tunnels))
+        }
+        _ => PassOutcome::NotRun,
+    };
+    Evaluation {
+        physical,
+        lanes,
+        tunnels,
+        throughput,
+    }
 }
 
 /// The devices in board sockets; a device inside an adapter draws on no board lanes.
