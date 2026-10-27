@@ -226,13 +226,15 @@ pub struct SataPort {
     pub iommu_group: Option<u32>,
 }
 
-/// A Type-C port. Attributes other than `parent` are accepted unchecked until Pass 3 types them.
+/// A Type-C port. Attributes not listed here, such as `supported_protocols`, are accepted unchecked.
 #[derive(Debug, Clone, Deserialize)]
 pub struct UsbC {
     pub parent: String,
+    /// DisplayPort Alt Mode lanes the port can drive; `None` if it has no DP Alt Mode.
+    pub dp_alt_max_lanes: Option<u8>,
 }
 
-/// A Type-A port. Attributes other than `parent` are accepted unchecked until Pass 3 types them.
+/// A Type-A port. Attributes other than `parent` are accepted unchecked.
 #[derive(Debug, Clone, Deserialize)]
 pub struct UsbA {
     pub parent: String,

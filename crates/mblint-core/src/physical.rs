@@ -116,6 +116,7 @@ fn misfit(id: &str, receptacle: Receptacle, device: &Device) -> Option<Diagnosti
         {
             None
         }
+        (Receptacle::UsbC, DeviceKind::Display { .. }) => None,
         (Receptacle::UsbA, DeviceKind::Adapter { upstream, .. })
             if upstream.connector == UpstreamConnector::TypeA =>
         {

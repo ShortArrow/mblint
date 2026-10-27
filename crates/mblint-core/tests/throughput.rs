@@ -165,7 +165,7 @@ fn throughput(devices: &[(&str, &str)]) -> Throughput {
         occupancy.install(socket.clone(), device.protocol());
     }
     let lanes = resolve_lanes(&board, &occupancy);
-    let tunnels = resolve_tunnels(&installed);
+    let tunnels = resolve_tunnels(&board, &installed);
     rate_links(&board, &installed, &lanes, &tunnels)
 }
 
@@ -282,9 +282,10 @@ fn adapter_with_a_tunnelling_limit_caps_the_sockets_inside_it() {
     ]);
 
     assert_eq!(
-        resolve_tunnels(&devices),
+        resolve_tunnels(&board(), &devices),
         Tunnelling {
             caps: BTreeMap::from([("PORT_TYPEC_1.EGPU_SLOT".to_string(), 31.5)]),
+            diagnostics: vec![],
         }
     );
 }
@@ -297,7 +298,7 @@ fn adapter_without_a_tunnelling_limit_caps_nothing() {
         ("PORT_TYPEC_1.EGPU_SLOT", CARD_GEN4_X16),
     ]);
 
-    assert!(resolve_tunnels(&devices).caps.is_empty());
+    assert!(resolve_tunnels(&board(), &devices).caps.is_empty());
 }
 
 #[test]

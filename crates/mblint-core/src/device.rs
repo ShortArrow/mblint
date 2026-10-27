@@ -31,6 +31,7 @@ impl Device {
                 interface.protocol
             }
             DeviceKind::Adapter { upstream, .. } => upstream.protocol,
+            DeviceKind::Display { .. } => Protocol::Displayport,
         }
     }
 }
@@ -54,6 +55,8 @@ pub enum DeviceKind {
         #[serde(default)]
         downstream_sockets: BTreeMap<String, DownstreamSocket>,
     },
+    /// A monitor driven over DisplayPort Alt Mode.
+    Display { display: DisplaySpec },
 }
 
 /// The link a device runs: protocol, generation and electrical lane count.
@@ -117,4 +120,15 @@ pub struct AdapterPcieSlot {
     pub open_ended: bool,
     pub max_electrical_lanes: u8,
     pub generation: u8,
+}
+
+/// What a display needs to show its resolution at its refresh rate.
+#[derive(Debug, Clone, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct DisplaySpec {
+    pub resolution: String,
+    pub refresh_rate: u16,
+    pub dsc_supported: bool,
+    pub required_dp_lanes: u8,
+    pub bandwidth_requirement_gbps: f64,
 }

@@ -9,4 +9,5 @@ pub enum Protocol {
     Sata,
     Usb4,
     Usb3Gen1x1,
+    Displayport,
 }

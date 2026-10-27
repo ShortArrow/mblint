@@ -9,7 +9,7 @@ use mblint_core::lanes::resolve_lanes;
 use mblint_core::occupancy::Occupancy;
 use mblint_core::physical::check_physical;
 use mblint_core::throughput::{Diagnostic, rate_links};
-use mblint_core::tunnels::resolve_tunnels;
+use mblint_core::tunnels::{self, resolve_tunnels};
 
 const PRD: &str = include_str!("../../../docs/prd.md");
 
@@ -82,7 +82,12 @@ fn ssd_of_the_prd_examples_is_held_to_the_generation_of_the_pch() {
     }
     let lanes = resolve_lanes(&board, &occupancy);
 
-    let result = rate_links(&board, &installed, &lanes, &resolve_tunnels(&installed));
+    let result = rate_links(
+        &board,
+        &installed,
+        &lanes,
+        &resolve_tunnels(&board, &installed),
+    );
 
     assert!(matches!(
         result.diagnostics.as_slice(),
@@ -99,6 +104,21 @@ fn card_in_pci_e2_of_the_prd_board_shares_its_group_with_the_sata_controller() {
         vec![SharedIommuGroup {
             group: 14,
             endpoints: vec!["ONBOARD_SATA_CONTROLLER".into(), "PCI_E2".into()],
+        }]
+    );
+}
+
+#[test]
+fn prd_monitor_on_the_type_c_port_limits_its_usb_data_to_usb_2() {
+    let monitor =
+        Device::from_toml(example("#### Example 3: ")).expect("PRD display example must parse");
+    let installed = BTreeMap::from([("PORT_TYPEC_1".to_string(), monitor)]);
+
+    assert!(check_physical(&prd_board(), &installed).is_empty());
+    assert_eq!(
+        resolve_tunnels(&prd_board(), &installed).diagnostics,
+        vec![tunnels::Diagnostic::UsbLimitedToUsb2 {
+            socket: "PORT_TYPEC_1".into(),
         }]
     );
 }

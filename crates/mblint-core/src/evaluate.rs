@@ -17,7 +17,7 @@ pub struct Evaluation {
     pub lanes: PassOutcome<LaneResolution>,
     /// Pass 3, not run if Pass 2 did not run or reported an error.
     pub tunnels: PassOutcome<Tunnelling>,
-    /// Pass 4, not run if Pass 3 did not run. Every diagnostic is a warning.
+    /// Pass 4, not run if Pass 3 did not run or reported an error. Every diagnostic is a warning.
     pub throughput: PassOutcome<Throughput>,
     /// Pass 4, under the same condition as `throughput`. Every diagnostic is a warning.
     pub iommu: PassOutcome<Vec<SharedIommuGroup>>,
@@ -42,14 +42,18 @@ pub fn evaluate(rig: &LoadedRig) -> Evaluation {
         _ => None,
     };
     let tunnels = match clean_lanes {
-        Some(_) => PassOutcome::Ran(resolve_tunnels(&rig.installed)),
+        Some(_) => PassOutcome::Ran(resolve_tunnels(&rig.board, &rig.installed)),
         None => PassOutcome::NotRun,
     };
     let (throughput, iommu) = match (clean_lanes, &tunnels) {
-        (Some(resolution), PassOutcome::Ran(tunnels)) => (
-            PassOutcome::Ran(rate_links(&rig.board, &rig.installed, resolution, tunnels)),
-            PassOutcome::Ran(shared_iommu_groups(&rig.board, &rig.installed)),
-        ),
+        (Some(resolution), PassOutcome::Ran(tunnels))
+            if !tunnels.diagnostics.iter().any(|d| d.is_error()) =>
+        {
+            (
+                PassOutcome::Ran(rate_links(&rig.board, &rig.installed, resolution, tunnels)),
+                PassOutcome::Ran(shared_iommu_groups(&rig.board, &rig.installed)),
+            )
+        }
         _ => (PassOutcome::NotRun, PassOutcome::NotRun),
     };
     Evaluation {
