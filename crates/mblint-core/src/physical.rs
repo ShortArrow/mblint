@@ -35,27 +35,47 @@ pub fn check_physical(board: &Board, installed: &BTreeMap<String, Device>) -> Ve
         .iter()
         .filter_map(|(id, device)| match board.socket(id) {
             None => Some(Diagnostic::UnknownSocket { socket: id.clone() }),
-            Some(socket) => misfit(id, socket, device),
+            Some(socket) => misfit(id, Receptacle::from(socket), device),
         })
         .collect();
     diagnostics.extend(obstructions(board, installed));
     diagnostics
 }
 
-fn misfit(id: &str, socket: &Socket, device: &Device) -> Option<Diagnostic> {
-    match (socket, &device.kind) {
-        (Socket::PcieSlot(slot), DeviceKind::Card { physical, .. }) => {
-            let fits = physical.edge <= slot.physical_form_factor || slot.open_ended;
+/// The shape of a socket as far as fitting a device into it is concerned.
+enum Receptacle {
+    Pcie { width: PcieWidth, open_ended: bool },
+    M2 { key: M2Key },
+    Other,
+}
+
+impl From<&Socket> for Receptacle {
+    fn from(socket: &Socket) -> Self {
+        match socket {
+            Socket::PcieSlot(slot) => Receptacle::Pcie {
+                width: slot.physical_form_factor,
+                open_ended: slot.open_ended,
+            },
+            Socket::M2Slot(slot) => Receptacle::M2 { key: slot.key },
+            Socket::SataPort(_) | Socket::UsbC(_) => Receptacle::Other,
+        }
+    }
+}
+
+fn misfit(id: &str, receptacle: Receptacle, device: &Device) -> Option<Diagnostic> {
+    match (receptacle, &device.kind) {
+        (Receptacle::Pcie { width, open_ended }, DeviceKind::Card { physical, .. }) => {
+            let fits = physical.edge <= width || open_ended;
             (!fits).then(|| Diagnostic::EdgeTooWide {
                 socket: id.to_string(),
                 edge: physical.edge,
-                slot: slot.physical_form_factor,
+                slot: width,
             })
         }
-        (Socket::M2Slot(slot), DeviceKind::M2Module { physical, .. }) => {
-            (!physical.keys.contains(&slot.key)).then(|| Diagnostic::KeyMismatch {
+        (Receptacle::M2 { key }, DeviceKind::M2Module { physical, .. }) => {
+            (!physical.keys.contains(&key)).then(|| Diagnostic::KeyMismatch {
                 socket: id.to_string(),
-                slot: slot.key,
+                slot: key,
             })
         }
         _ => Some(Diagnostic::WrongSocketCategory {
