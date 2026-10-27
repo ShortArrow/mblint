@@ -43,13 +43,14 @@ pub enum Node {
     Mux(Mux),
     Bridge(Bridge),
     Socket(Socket),
+    Controller(Controller),
 }
 
 impl Node {
-    /// The upstream node's id; `None` for a root.
+    /// The upstream node's id; `None` for a root or a controller.
     pub fn parent(&self) -> Option<&str> {
         match self {
-            Node::Root(_) => None,
+            Node::Root(_) | Node::Controller(_) => None,
             Node::Mux(mux) => Some(&mux.parent),
             Node::Bridge(bridge) => Some(&bridge.parent),
             Node::Socket(socket) => Some(socket.parent()),
@@ -155,6 +156,12 @@ pub struct Bridge {
     pub upstream_lanes: u32,
 }
 
+/// An onboard controller with an IOMMU group of its own. Other fields are accepted unchecked.
+#[derive(Debug, Clone, Deserialize)]
+pub struct Controller {
+    pub iommu_group: u32,
+}
+
 /// A physical socket that devices are installed into, with the attributes of its category.
 #[derive(Debug, Clone, Deserialize)]
 #[serde(tag = "category", rename_all = "snake_case")]
@@ -167,6 +174,16 @@ pub enum Socket {
 }
 
 impl Socket {
+    /// The IOMMU group observed for the socket; `None` if not declared or not declarable.
+    pub fn iommu_group(&self) -> Option<u32> {
+        match self {
+            Socket::PcieSlot(slot) => slot.iommu_group,
+            Socket::M2Slot(slot) => slot.iommu_group,
+            Socket::SataPort(port) => port.iommu_group,
+            Socket::UsbC(_) | Socket::UsbA(_) => None,
+        }
+    }
+
     pub fn parent(&self) -> &str {
         match self {
             Socket::PcieSlot(slot) => &slot.parent,

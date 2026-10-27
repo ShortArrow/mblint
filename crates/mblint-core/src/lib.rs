@@ -4,6 +4,7 @@ pub mod board;
 pub mod connector;
 pub mod device;
 pub mod evaluate;
+pub mod iommu;
 pub mod lanes;
 pub mod occupancy;
 pub mod parse;

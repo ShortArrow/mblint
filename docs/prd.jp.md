@@ -205,6 +205,11 @@ category = "usb_c"
 parent = "bridge_asm4242_usb4"
 supported_protocols = ["usb4", "usb3", "dp_alt_mode", "pcie_tunneling"]
 dp_alt_max_lanes = 4
+
+# --- 5. オンボードコントローラ (Controllers) ---
+[nodes.ONBOARD_SATA_CONTROLLER]
+type = "controller"
+iommu_group = 14
 ```
 
 ---

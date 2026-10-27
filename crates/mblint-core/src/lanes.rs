@@ -55,7 +55,7 @@ pub fn resolve_lanes(board: &Board, occupancy: &Occupancy) -> LaneResolution {
             Node::Bridge(bridge) => {
                 *demand.entry(&bridge.parent).or_default() += bridge.upstream_lanes;
             }
-            Node::Root(_) | Node::Socket(_) => {}
+            Node::Root(_) | Node::Socket(_) | Node::Controller(_) => {}
         }
     }
 

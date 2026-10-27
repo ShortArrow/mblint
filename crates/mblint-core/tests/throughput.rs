@@ -343,6 +343,7 @@ fn evaluation_runs_passes_3_and_4_after_a_clean_pass_2() {
     let evaluation = evaluate(&loaded_rig(&[("M2_1", SSD_GEN5_X4)]));
 
     assert!(matches!(evaluation.tunnels, PassOutcome::Ran(_)));
+    assert_eq!(evaluation.iommu, PassOutcome::Ran(vec![]));
     assert!(matches!(
         evaluation.throughput,
         PassOutcome::Ran(Throughput { ref diagnostics, .. }) if diagnostics.len() == 1
@@ -362,4 +363,5 @@ fn pass_2_error_stops_passes_3_and_4() {
     );
     assert_eq!(evaluation.tunnels, PassOutcome::NotRun);
     assert_eq!(evaluation.throughput, PassOutcome::NotRun);
+    assert_eq!(evaluation.iommu, PassOutcome::NotRun);
 }

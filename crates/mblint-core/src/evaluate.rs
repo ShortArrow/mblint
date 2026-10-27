@@ -1,5 +1,6 @@
 //! The resolution pipeline: each pass runs only if the passes before it reported no error.
 
+use crate::iommu::{SharedIommuGroup, shared_iommu_groups};
 use crate::lanes::{LaneResolution, resolve_lanes};
 use crate::occupancy::Occupancy;
 use crate::physical::{self, check_physical};
@@ -18,6 +19,8 @@ pub struct Evaluation {
     pub tunnels: PassOutcome<Tunnelling>,
     /// Pass 4, not run if Pass 3 did not run. Every diagnostic is a warning.
     pub throughput: PassOutcome<Throughput>,
+    /// Pass 4, under the same condition as `throughput`. Every diagnostic is a warning.
+    pub iommu: PassOutcome<Vec<SharedIommuGroup>>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -42,17 +45,19 @@ pub fn evaluate(rig: &LoadedRig) -> Evaluation {
         Some(_) => PassOutcome::Ran(resolve_tunnels(&rig.installed)),
         None => PassOutcome::NotRun,
     };
-    let throughput = match (clean_lanes, &tunnels) {
-        (Some(resolution), PassOutcome::Ran(tunnels)) => {
-            PassOutcome::Ran(rate_links(&rig.board, &rig.installed, resolution, tunnels))
-        }
-        _ => PassOutcome::NotRun,
+    let (throughput, iommu) = match (clean_lanes, &tunnels) {
+        (Some(resolution), PassOutcome::Ran(tunnels)) => (
+            PassOutcome::Ran(rate_links(&rig.board, &rig.installed, resolution, tunnels)),
+            PassOutcome::Ran(shared_iommu_groups(&rig.board, &rig.installed)),
+        ),
+        _ => (PassOutcome::NotRun, PassOutcome::NotRun),
     };
     Evaluation {
         physical,
         lanes,
         tunnels,
         throughput,
+        iommu,
     }
 }
 

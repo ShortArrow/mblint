@@ -4,6 +4,7 @@ use std::collections::BTreeMap;
 
 use mblint_core::board::Board;
 use mblint_core::device::Device;
+use mblint_core::iommu::{SharedIommuGroup, shared_iommu_groups};
 use mblint_core::lanes::resolve_lanes;
 use mblint_core::occupancy::Occupancy;
 use mblint_core::physical::check_physical;
@@ -87,4 +88,17 @@ fn ssd_of_the_prd_examples_is_held_to_the_generation_of_the_pch() {
         result.diagnostics.as_slice(),
         [Diagnostic::Bottleneck { socket, .. }] if socket == "M2_2"
     ));
+}
+
+#[test]
+fn card_in_pci_e2_of_the_prd_board_shares_its_group_with_the_sata_controller() {
+    let installed = BTreeMap::from([("PCI_E2".to_string(), prd_card())]);
+
+    assert_eq!(
+        shared_iommu_groups(&prd_board(), &installed),
+        vec![SharedIommuGroup {
+            group: 14,
+            endpoints: vec!["ONBOARD_SATA_CONTROLLER".into(), "PCI_E2".into()],
+        }]
+    );
 }
