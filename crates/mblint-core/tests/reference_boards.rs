@@ -19,6 +19,9 @@ const MAG_Z890_TOMAHAWK_WIFI: &str =
 const PROART_X870E_CREATOR_WIFI: &str =
     include_str!("../../../data/boards/asus/proart_x870e_creator_wifi.toml");
 
+const ROG_STRIX_Z890_F_GAMING_WIFI: &str =
+    include_str!("../../../data/boards/asus/rog_strix_z890_f_gaming_wifi.toml");
+
 const CARD_GEN4_X16: &str = r#"
 schema_version = "2.0.0"
 id = "card"
@@ -62,6 +65,10 @@ fn z890_tomahawk() -> Board {
 
 fn proart_x870e() -> Board {
     Board::from_toml(PROART_X870E_CREATOR_WIFI).expect("reference board must parse")
+}
+
+fn strix_z890_f() -> Board {
+    Board::from_toml(ROG_STRIX_Z890_F_GAMING_WIFI).expect("reference board must parse")
 }
 
 fn installed(devices: &[(&str, &str)]) -> BTreeMap<String, Device> {
@@ -229,4 +236,36 @@ fn proart_x870e_ssd_in_m2_2_leaves_the_first_slot_x8() {
             actual_gbps: lane(4) * 8.0,
         }]
     );
+}
+
+#[test]
+fn strix_z890_f_gen5_ssd_in_m2_2_is_held_to_pcie_4_0() {
+    let (_, throughput) = resolve(&strix_z890_f(), &[("M2_2", SSD_GEN5_X4)]);
+
+    assert_eq!(
+        throughput.diagnostics,
+        vec![Diagnostic::Bottleneck {
+            socket: "M2_2".into(),
+            required_gbps: lane(5) * 4.0,
+            actual_gbps: lane(4) * 4.0,
+        }]
+    );
+}
+
+#[test]
+fn strix_z890_f_card_in_the_chipset_slot_runs_at_x4() {
+    let (_, throughput) = resolve(&strix_z890_f(), &[("PCIEX16(G4)", CARD_GEN4_X16)]);
+
+    assert_eq!(
+        throughput.links.get("PCIEX16(G4)").map(|link| link.lanes),
+        Some(4)
+    );
+}
+
+#[test]
+fn strix_z890_f_four_slot_card_leaves_the_chipset_slot_free() {
+    let thick_card = CARD_GEN4_X16.replace("thickness_slots = 2", "thickness_slots = 4");
+    let devices = installed(&[("PCIEX16(G5)", &thick_card), ("PCIEX16(G4)", CARD_GEN4_X16)]);
+
+    assert!(check_physical(&strix_z890_f(), &devices).is_empty());
 }

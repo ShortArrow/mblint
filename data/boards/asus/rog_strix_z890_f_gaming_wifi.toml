@@ -1,0 +1,116 @@
+# Described for Intel Core Ultra Processors (Series 2). Page numbers are as printed in the manual.
+# The manual's M.2 slot names contain a dot, which a node id cannot, so M.2_1 is written M2_1.
+# The manual does not say where the Thunderbolt 4 and USB ports draw their lanes from, so they
+# are not described.
+schema_version = "2.0.0"
+vendor = "ASUS"
+model = "ROG STRIX Z890-F GAMING WIFI"
+source_manual = "https://dlcdnets.asus.com/pub/ASUS/mb/LGA1851/ROG_STRIX_Z890-F_GAMING_WIFI/E26408_ROG_STRIX_Z890-F_GAMING_WIFI_EM_V2_WEB.pdf"
+source_page = 8
+
+[form_factor]
+standard = "ATX"
+total_slot_indices = 7
+
+# --- 1. Root providers ---
+
+# p.8: PCIEX16(G5) PCIe 5.0 x16, M2_1 PCIe 5.0 x4 and M2_2 PCIe 4.0 x4 from the CPU.
+[nodes.root_cpu]
+type = "root"
+bus = "pcie"
+lanes = 24
+generation = 5
+
+# p.8-9: PCIEX16(G4), M2_3, M2_4 and M2_5, each PCIe 4.0 x4, from the Z890 chipset.
+[nodes.root_chipset]
+type = "root"
+bus = "pcie"
+lanes = 16
+generation = 4
+
+# --- 2. Physical sockets ---
+
+# p.8, 20; position from the layout on p.16. Its x8/x4/x4 modes are set in the BIOS.
+[nodes."PCIEX16(G5)"]
+type = "socket"
+category = "pcie_slot"
+parent = "root_cpu"
+slot_index = 2
+physical_form_factor = "x16"
+max_electrical_lanes = 16
+
+# p.8, 20; position from the layout on p.16.
+[nodes."PCIEX16(G4)"]
+type = "socket"
+category = "pcie_slot"
+parent = "root_chipset"
+slot_index = 7
+physical_form_factor = "x16"
+max_electrical_lanes = 4
+
+# p.8, 24
+[nodes.M2_1]
+type = "socket"
+category = "m2_slot"
+parent = "root_cpu"
+key = "M"
+supported_protocols = ["pcie"]
+max_lanes = 4
+
+# p.8, 24
+[nodes.M2_2]
+type = "socket"
+category = "m2_slot"
+parent = "root_cpu"
+key = "M"
+supported_protocols = ["pcie"]
+max_lanes = 4
+generation = 4
+
+# p.9, 24
+[nodes.M2_3]
+type = "socket"
+category = "m2_slot"
+parent = "root_chipset"
+key = "M"
+supported_protocols = ["pcie"]
+max_lanes = 4
+
+# p.9, 24
+[nodes.M2_4]
+type = "socket"
+category = "m2_slot"
+parent = "root_chipset"
+key = "M"
+supported_protocols = ["pcie"]
+max_lanes = 4
+
+# p.9, 24
+[nodes.M2_5]
+type = "socket"
+category = "m2_slot"
+parent = "root_chipset"
+key = "M"
+supported_protocols = ["pcie", "sata"]
+max_lanes = 4
+
+# p.9, 24
+[nodes.SATA6G_1]
+type = "socket"
+category = "sata_port"
+parent = "root_chipset"
+
+[nodes.SATA6G_2]
+type = "socket"
+category = "sata_port"
+parent = "root_chipset"
+
+[nodes.SATA6G_3]
+type = "socket"
+category = "sata_port"
+parent = "root_chipset"
+
+[nodes.SATA6G_4]
+type = "socket"
+category = "sata_port"
+parent = "root_chipset"
