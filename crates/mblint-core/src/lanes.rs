@@ -1,14 +1,16 @@
-//! Pass 2: mux mode selection and root lane balance.
+//! Pass 2: mux mode selection, disabled sockets and root lane balance.
 
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 
 use crate::board::{Board, Node};
 use crate::occupancy::Occupancy;
 
-/// Lanes allocated to each socket, and the problems found while allocating them.
+/// Lanes allocated to each socket, the sockets switched off, and the problems found.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct LaneResolution {
     pub allocations: BTreeMap<String, u32>,
+    /// Sockets disabled by a selected mux mode, whether or not a device is installed in them.
+    pub disabled: BTreeSet<String>,
     pub diagnostics: Vec<Diagnostic>,
 }
 
@@ -22,15 +24,19 @@ pub enum Diagnostic {
     },
     /// No mode of the mux holds for the given occupancy; the mux allocates nothing.
     NoMatchingMode { mux: String },
+    /// A device is installed in a socket that the selected mode of `mux` disables.
+    SocketDisabled { socket: String, mux: String },
 }
 
-/// Selects a mode for every mux and checks that no root supplies fewer lanes than demanded.
+/// Selects a mode for every mux, then reports devices in disabled sockets and roots that
+/// supply fewer lanes than demanded.
 ///
 /// A mux demands the sum of its selected mode's allocations and a bridge its upstream lanes,
-/// both charged to their direct parent. Diagnostics are ordered by node id within each kind,
-/// mode selection first.
+/// both charged to their direct parent. Diagnostics are grouped by kind in the order
+/// `NoMatchingMode`, `SocketDisabled`, `LaneOvercommit`, each ordered by node id.
 pub fn resolve_lanes(board: &Board, occupancy: &Occupancy) -> LaneResolution {
     let mut allocations = BTreeMap::new();
+    let mut disabled_by: BTreeMap<String, &str> = BTreeMap::new();
     let mut demand: BTreeMap<&str, u32> = BTreeMap::new();
     let mut diagnostics = Vec::new();
 
@@ -40,6 +46,9 @@ pub fn resolve_lanes(board: &Board, occupancy: &Occupancy) -> LaneResolution {
                 Some(mode) => {
                     allocations.extend(mode.allocate.clone());
                     *demand.entry(&mux.parent).or_default() += mode.allocate.values().sum::<u32>();
+                    for socket in &mode.disables {
+                        disabled_by.entry(socket.clone()).or_insert(id);
+                    }
                 }
                 None => diagnostics.push(Diagnostic::NoMatchingMode { mux: id.clone() }),
             },
@@ -47,6 +56,15 @@ pub fn resolve_lanes(board: &Board, occupancy: &Occupancy) -> LaneResolution {
                 *demand.entry(&bridge.parent).or_default() += bridge.upstream_lanes;
             }
             Node::Root(_) | Node::Socket(_) => {}
+        }
+    }
+
+    for (socket, mux) in &disabled_by {
+        if occupancy.is_occupied(socket) {
+            diagnostics.push(Diagnostic::SocketDisabled {
+                socket: socket.clone(),
+                mux: mux.to_string(),
+            });
         }
     }
 
@@ -65,6 +83,7 @@ pub fn resolve_lanes(board: &Board, occupancy: &Occupancy) -> LaneResolution {
 
     LaneResolution {
         allocations,
+        disabled: disabled_by.into_keys().collect(),
         diagnostics,
     }
 }

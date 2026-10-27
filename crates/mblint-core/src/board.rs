@@ -6,6 +6,7 @@ use std::fmt;
 use serde::Deserialize;
 
 use crate::occupancy::Occupancy;
+use crate::protocol::Protocol;
 
 /// A motherboard as declared in `boards/<vendor>/<model>.toml`.
 ///
@@ -75,30 +76,59 @@ impl Mux {
 #[serde(rename_all = "snake_case")]
 pub enum MuxSubtype {
     Bifurcation,
+    Exclusive,
 }
 
-/// One configuration of a mux: the lanes each socket receives while `when` holds.
+/// One configuration of a mux, applied while `when` holds.
 #[derive(Debug, Clone, Deserialize)]
 pub struct Mode {
     pub when: Condition,
+    /// Lanes each socket receives from the mux's parent.
+    #[serde(default)]
     pub allocate: BTreeMap<String, u32>,
+    /// Sockets that stop working while this mode applies.
+    #[serde(default)]
+    pub disables: Vec<String>,
 }
 
-/// The occupancy of one socket.
+/// A test on one socket: either its occupancy or the protocol of the device in it.
 #[derive(Debug, Clone, Deserialize)]
-pub struct Condition {
-    pub socket: String,
-    pub is: SocketState,
+#[serde(untagged)]
+pub enum Condition {
+    State(StateCondition),
+    Protocol(ProtocolCondition),
 }
 
 impl Condition {
     pub fn holds(&self, occupancy: &Occupancy) -> bool {
-        let is_occupied = occupancy.is_occupied(&self.socket);
-        match self.is {
-            SocketState::Empty => !is_occupied,
-            SocketState::Occupied => is_occupied,
+        match self {
+            Condition::State(condition) => {
+                let is_occupied = occupancy.is_occupied(&condition.socket);
+                match condition.is {
+                    SocketState::Empty => !is_occupied,
+                    SocketState::Occupied => is_occupied,
+                }
+            }
+            Condition::Protocol(condition) => {
+                occupancy.protocol(&condition.socket) == Some(condition.protocol)
+            }
         }
     }
+}
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct StateCondition {
+    pub socket: String,
+    pub is: SocketState,
+}
+
+/// Holds only while the socket is occupied by a device running `protocol`.
+#[derive(Debug, Clone, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct ProtocolCondition {
+    pub socket: String,
+    pub protocol: Protocol,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize)]
