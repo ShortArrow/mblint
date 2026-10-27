@@ -57,3 +57,11 @@ fn rig_of_the_prd_examples_resolves_without_lane_problems() {
     assert_eq!(result.allocations.get("M2_2"), Some(&4));
     assert!(result.diagnostics.is_empty());
 }
+
+#[test]
+fn prd_adapter_examples_parse() {
+    for heading in ["#### Example 1: ", "#### Example 2: "] {
+        let adapter = Device::from_toml(example(heading));
+        assert!(adapter.is_ok(), "{heading}: {:?}", adapter.err());
+    }
+}

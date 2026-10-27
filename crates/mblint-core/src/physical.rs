@@ -3,12 +3,12 @@
 use std::collections::BTreeMap;
 
 use crate::board::{Board, Socket};
-use crate::connector::{M2Key, PcieWidth};
-use crate::device::{Device, DeviceKind};
+use crate::connector::{M2Key, PcieWidth, UpstreamConnector};
+use crate::device::{Device, DeviceKind, DownstreamSocket};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Diagnostic {
-    /// A device is bound to a socket id the board does not define.
+    /// A device is bound to a socket path that leads to no board or adapter socket.
     UnknownSocket { socket: String },
     /// The device is not made for this category of socket, such as a card in an M.2 slot.
     WrongSocketCategory { socket: String },
@@ -33,9 +33,9 @@ pub enum Diagnostic {
 pub fn check_physical(board: &Board, installed: &BTreeMap<String, Device>) -> Vec<Diagnostic> {
     let mut diagnostics: Vec<Diagnostic> = installed
         .iter()
-        .filter_map(|(id, device)| match board.socket(id) {
+        .filter_map(|(id, device)| match receptacle(board, installed, id) {
             None => Some(Diagnostic::UnknownSocket { socket: id.clone() }),
-            Some(socket) => misfit(id, Receptacle::from(socket), device),
+            Some(receptacle) => misfit(id, receptacle, device),
         })
         .collect();
     diagnostics.extend(obstructions(board, installed));
@@ -46,7 +46,27 @@ pub fn check_physical(board: &Board, installed: &BTreeMap<String, Device>) -> Ve
 enum Receptacle {
     Pcie { width: PcieWidth, open_ended: bool },
     M2 { key: M2Key },
+    UsbC,
+    UsbA,
     Other,
+}
+
+/// The receptacle at a socket path: a board socket id, or `<adapter path>.<socket name>` for a
+/// socket inside an installed adapter. `None` if the path leads to no socket.
+fn receptacle(
+    board: &Board,
+    installed: &BTreeMap<String, Device>,
+    path: &str,
+) -> Option<Receptacle> {
+    match path.rsplit_once('.') {
+        None => board.socket(path).map(Receptacle::from),
+        Some((parent, name)) => match installed.get(parent).map(|device| &device.kind) {
+            Some(DeviceKind::Adapter {
+                downstream_sockets, ..
+            }) => downstream_sockets.get(name).map(Receptacle::from),
+            _ => None,
+        },
+    }
 }
 
 impl From<&Socket> for Receptacle {
@@ -57,7 +77,20 @@ impl From<&Socket> for Receptacle {
                 open_ended: slot.open_ended,
             },
             Socket::M2Slot(slot) => Receptacle::M2 { key: slot.key },
-            Socket::SataPort(_) | Socket::UsbC(_) => Receptacle::Other,
+            Socket::UsbC(_) => Receptacle::UsbC,
+            Socket::UsbA(_) => Receptacle::UsbA,
+            Socket::SataPort(_) => Receptacle::Other,
+        }
+    }
+}
+
+impl From<&DownstreamSocket> for Receptacle {
+    fn from(socket: &DownstreamSocket) -> Self {
+        match socket {
+            DownstreamSocket::PcieSlot(slot) => Receptacle::Pcie {
+                width: slot.physical_form_factor,
+                open_ended: slot.open_ended,
+            },
         }
     }
 }
@@ -77,6 +110,16 @@ fn misfit(id: &str, receptacle: Receptacle, device: &Device) -> Option<Diagnosti
                 socket: id.to_string(),
                 slot: key,
             })
+        }
+        (Receptacle::UsbC, DeviceKind::Adapter { upstream, .. })
+            if upstream.connector == UpstreamConnector::TypeC =>
+        {
+            None
+        }
+        (Receptacle::UsbA, DeviceKind::Adapter { upstream, .. })
+            if upstream.connector == UpstreamConnector::TypeA =>
+        {
+            None
         }
         _ => Some(Diagnostic::WrongSocketCategory {
             socket: id.to_string(),

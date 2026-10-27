@@ -31,9 +31,11 @@ pub fn evaluate(rig: &LoadedRig) -> Evaluation {
     Evaluation { physical, lanes }
 }
 
+/// The devices in board sockets; a device inside an adapter draws on no board lanes.
 fn occupancy(rig: &LoadedRig) -> Occupancy {
     let mut occupancy = Occupancy::default();
-    for (socket, device) in &rig.installed {
+    let board_sockets = rig.installed.iter().filter(|(path, _)| !path.contains('.'));
+    for (socket, device) in board_sockets {
         occupancy.install(socket.clone(), device.protocol());
     }
     occupancy

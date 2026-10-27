@@ -1,10 +1,11 @@
 //! Device definitions: what a device speaks and what it physically occupies.
 
+use std::collections::BTreeMap;
 use std::num::NonZeroU8;
 
 use serde::Deserialize;
 
-use crate::connector::{M2Key, PcieWidth};
+use crate::connector::{M2Key, PcieWidth, UpstreamConnector};
 use crate::parse::ParseError;
 use crate::protocol::Protocol;
 
@@ -23,16 +24,14 @@ impl Device {
         toml::from_str(source).map_err(ParseError::from_toml)
     }
 
-    pub fn interface(&self) -> &Interface {
+    /// The protocol the device runs towards the socket it is installed in.
+    pub fn protocol(&self) -> Protocol {
         match &self.kind {
             DeviceKind::Card { interface, .. } | DeviceKind::M2Module { interface, .. } => {
-                interface
+                interface.protocol
             }
+            DeviceKind::Adapter { upstream, .. } => upstream.protocol,
         }
-    }
-
-    pub fn protocol(&self) -> Protocol {
-        self.interface().protocol
     }
 }
 
@@ -46,6 +45,14 @@ pub enum DeviceKind {
     M2Module {
         interface: Interface,
         physical: M2ModuleShape,
+    },
+    /// A device installed into a board socket that exposes sockets of its own.
+    Adapter {
+        upstream: Upstream,
+        bridge: Bridge,
+        /// Sockets inside the adapter, keyed by the name a rig appends to the adapter's path.
+        #[serde(default)]
+        downstream_sockets: BTreeMap<String, DownstreamSocket>,
     },
 }
 
@@ -73,4 +80,41 @@ pub struct M2ModuleShape {
     /// Notches cut in the module; it fits any slot whose key is listed.
     pub keys: Vec<M2Key>,
     pub form_factor: String,
+}
+
+/// The side of an adapter that plugs into the board.
+#[derive(Debug, Clone, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct Upstream {
+    pub connector: UpstreamConnector,
+    pub protocol: Protocol,
+    pub max_gbps: Option<f64>,
+}
+
+/// The protocol translation inside an adapter.
+#[derive(Debug, Clone, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct Bridge {
+    /// The protocol of the adapter's downstream side.
+    pub translates_to: Protocol,
+    pub chipset: Option<String>,
+    pub max_tunneling_gbps: Option<f64>,
+    pub sata_generation: Option<u8>,
+}
+
+/// A socket inside an adapter, with the attributes of its category.
+#[derive(Debug, Clone, Deserialize)]
+#[serde(tag = "category", rename_all = "snake_case")]
+pub enum DownstreamSocket {
+    PcieSlot(AdapterPcieSlot),
+}
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct AdapterPcieSlot {
+    pub physical_form_factor: PcieWidth,
+    #[serde(default)]
+    pub open_ended: bool,
+    pub max_electrical_lanes: u8,
+    pub generation: u8,
 }

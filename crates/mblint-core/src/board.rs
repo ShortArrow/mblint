@@ -11,7 +11,8 @@ use crate::protocol::Protocol;
 
 /// A motherboard as declared in `boards/<vendor>/<model>.toml`.
 ///
-/// Nodes are keyed by their id; every non-root node names its upstream node in `parent`.
+/// Nodes are keyed by their id, which contains no `.`; every non-root node names its upstream
+/// node in `parent`.
 #[derive(Debug, Clone, Deserialize)]
 pub struct Board {
     pub schema_version: String,
@@ -150,6 +151,7 @@ pub enum Socket {
     M2Slot(M2Slot),
     SataPort(SataPort),
     UsbC(UsbC),
+    UsbA(UsbA),
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -186,5 +188,11 @@ pub struct SataPort {
 /// A Type-C port. Attributes other than `parent` are accepted unchecked until Pass 3 types them.
 #[derive(Debug, Clone, Deserialize)]
 pub struct UsbC {
+    pub parent: String,
+}
+
+/// A Type-A port. Attributes other than `parent` are accepted unchecked until Pass 3 types them.
+#[derive(Debug, Clone, Deserialize)]
+pub struct UsbA {
     pub parent: String,
 }

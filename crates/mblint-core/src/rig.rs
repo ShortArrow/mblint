@@ -14,7 +14,8 @@ pub struct Rig {
     pub schema_version: String,
     pub name: String,
     pub board: String,
-    /// Device file installed in each socket, keyed by socket id.
+    /// Device file installed in each socket, keyed by socket path: a board socket id, or
+    /// `<adapter path>.<socket name>` for a socket inside an adapter.
     #[serde(default)]
     pub bindings: BTreeMap<String, String>,
 }
@@ -30,7 +31,7 @@ impl Rig {
 pub struct LoadedRig {
     pub rig: Rig,
     pub board: Board,
-    /// Installed devices keyed by socket id.
+    /// Installed devices keyed by socket path.
     pub installed: BTreeMap<String, Device>,
 }
 
@@ -40,14 +41,12 @@ pub enum LoadError {
     Read { path: String, message: String },
     /// The file at `path` does not conform to the schema.
     Parse { path: String, error: ParseError },
-    /// The binding installs a device into a socket of another device, which is not modelled yet.
-    NestedBinding { binding: String },
 }
 
 /// Reads the rig at `path`, then its board and bound devices, through `read`.
 ///
 /// `read` maps a data-root-relative path to the file's contents, or to a message saying why it
-/// cannot. Bindings are loaded in socket id order and the first failure is returned.
+/// cannot. Bindings are loaded in socket path order and the first failure is returned.
 pub fn load_rig(
     path: &str,
     read: impl Fn(&str) -> Result<String, String>,
@@ -57,11 +56,6 @@ pub fn load_rig(
 
     let mut installed = BTreeMap::new();
     for (socket, device_path) in &rig.bindings {
-        if socket.contains('.') {
-            return Err(LoadError::NestedBinding {
-                binding: socket.clone(),
-            });
-        }
         let device = parse_file(device_path, &read, Device::from_toml)?;
         installed.insert(socket.clone(), device);
     }

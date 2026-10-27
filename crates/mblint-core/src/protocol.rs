@@ -7,4 +7,6 @@ use serde::Deserialize;
 pub enum Protocol {
     Pcie,
     Sata,
+    Usb4,
+    Usb3Gen1x1,
 }

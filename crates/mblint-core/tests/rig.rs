@@ -191,16 +191,3 @@ fn invalid_rig_file_is_reported_with_its_path() {
 
     assert!(matches!(error, LoadError::Parse { path, .. } if path == "rigs/test.toml"));
 }
-
-#[test]
-fn nested_binding_is_not_supported_yet() {
-    let files = files(&rig(
-        r#""PORT_TYPEC_1.EGPU_SLOT" = "devices/cards/gpu.toml""#,
-    ));
-
-    let error = load_rig("rigs/test.toml", reader(&files)).unwrap_err();
-
-    assert!(
-        matches!(error, LoadError::NestedBinding { binding } if binding == "PORT_TYPEC_1.EGPU_SLOT")
-    );
-}
