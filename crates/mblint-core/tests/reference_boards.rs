@@ -16,6 +16,9 @@ const MAG_X870E_TOMAHAWK_WIFI: &str =
 const MAG_Z890_TOMAHAWK_WIFI: &str =
     include_str!("../../../data/boards/msi/mag_z890_tomahawk_wifi.toml");
 
+const PROART_X870E_CREATOR_WIFI: &str =
+    include_str!("../../../data/boards/asus/proart_x870e_creator_wifi.toml");
+
 const CARD_GEN4_X16: &str = r#"
 schema_version = "2.0.0"
 id = "card"
@@ -55,6 +58,10 @@ fn x870e_tomahawk() -> Board {
 
 fn z890_tomahawk() -> Board {
     Board::from_toml(MAG_Z890_TOMAHAWK_WIFI).expect("reference board must parse")
+}
+
+fn proart_x870e() -> Board {
+    Board::from_toml(PROART_X870E_CREATOR_WIFI).expect("reference board must parse")
 }
 
 fn installed(devices: &[(&str, &str)]) -> BTreeMap<String, Device> {
@@ -181,5 +188,45 @@ fn z890_tomahawk_card_in_pci_e2_runs_at_x4() {
             lanes: 4,
             gbps: lane(4) * 4.0,
         })
+    );
+}
+
+#[test]
+fn proart_x870e_card_alone_gets_x16() {
+    let (_, throughput) = resolve(&proart_x870e(), &[("PCIEX16(G5)_1", CARD_GEN4_X16)]);
+
+    assert!(throughput.diagnostics.is_empty());
+}
+
+#[test]
+fn proart_x870e_two_cards_split_x8_x8() {
+    let (lanes, _) = resolve(
+        &proart_x870e(),
+        &[
+            ("PCIEX16(G5)_1", CARD_GEN4_X16),
+            ("PCIEX16(G5)_2", CARD_GEN4_X16),
+        ],
+    );
+
+    assert_eq!(lanes.allocations.get("PCIEX16(G5)_1"), Some(&8));
+    assert_eq!(lanes.allocations.get("PCIEX16(G5)_2"), Some(&8));
+    assert!(lanes.diagnostics.is_empty());
+}
+
+#[test]
+fn proart_x870e_ssd_in_m2_2_leaves_the_first_slot_x8() {
+    let (lanes, throughput) = resolve(
+        &proart_x870e(),
+        &[("PCIEX16(G5)_1", CARD_GEN4_X16), ("M2_2", SSD_GEN5_X4)],
+    );
+
+    assert_eq!(lanes.allocations.get("M2_2"), Some(&4));
+    assert_eq!(
+        throughput.diagnostics,
+        vec![Diagnostic::Bottleneck {
+            socket: "PCIEX16(G5)_1".into(),
+            required_gbps: lane(4) * 16.0,
+            actual_gbps: lane(4) * 8.0,
+        }]
     );
 }

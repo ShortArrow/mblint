@@ -1,0 +1,133 @@
+# Described for AMD Ryzen 9000 and 7000 Series Desktop Processors. Page numbers are as printed in
+# the manual. The manual's M.2 slot names contain a dot, which a node id cannot, so M.2_1 is
+# written M2_1. The manual does not say where the ASM4242 USB4 controller or the other USB ports
+# draw their lanes from, so they are not described.
+schema_version = "2.0.0"
+vendor = "ASUS"
+model = "ProArt X870E-CREATOR WIFI"
+source_manual = "https://dlcdnets.asus.com/pub/ASUS/mb/SocketAM5/ProArt_X870E-CREATOR_WIFI/E28680_ProArt_X870E-CREATOR_WIFI_EM_V2_WEB.pdf"
+source_page = 8
+
+[form_factor]
+standard = "ATX"
+total_slot_indices = 7
+
+# --- 1. Root providers ---
+
+# p.8-9, 14: PCIEX16(G5)_1, PCIEX16(G5)_2 and M2_2 share x16; M2_1 x4; all PCIe 5.0.
+[nodes.root_cpu]
+type = "root"
+bus = "pcie"
+lanes = 20
+generation = 5
+
+# p.8-9, 14: PCIEX16(G4), M2_3 and M2_4, each PCIe 4.0 x4, from the X870E chipset.
+[nodes.root_chipset]
+type = "root"
+bus = "pcie"
+lanes = 12
+generation = 4
+
+# --- 2. Muxes ---
+
+# p.8, 14, 20: x16, x8/x8, or x8/x4/x4 "When M.2_2 is enabled", read here as occupied.
+[nodes.mux_cpu_x16]
+type = "mux"
+subtype = "bifurcation"
+parent = "root_cpu"
+
+[[nodes.mux_cpu_x16.modes]]
+when = { socket = "M2_2", is = "occupied" }
+allocate = { "PCIEX16(G5)_1" = 8, "PCIEX16(G5)_2" = 4, M2_2 = 4 }
+
+[[nodes.mux_cpu_x16.modes]]
+when = { socket = "PCIEX16(G5)_2", is = "occupied" }
+allocate = { "PCIEX16(G5)_1" = 8, "PCIEX16(G5)_2" = 8 }
+
+[[nodes.mux_cpu_x16.modes]]
+when = { socket = "PCIEX16(G5)_2", is = "empty" }
+allocate = { "PCIEX16(G5)_1" = 16 }
+
+# --- 3. Physical sockets ---
+
+# p.8, 20; position from the layout on p.16.
+[nodes."PCIEX16(G5)_1"]
+type = "socket"
+category = "pcie_slot"
+parent = "mux_cpu_x16"
+slot_index = 2
+physical_form_factor = "x16"
+
+# p.8, 20; position from the layout on p.16.
+[nodes."PCIEX16(G5)_2"]
+type = "socket"
+category = "pcie_slot"
+parent = "mux_cpu_x16"
+slot_index = 5
+physical_form_factor = "x16"
+
+# p.8, 20; position from the layout on p.16.
+[nodes."PCIEX16(G4)"]
+type = "socket"
+category = "pcie_slot"
+parent = "root_chipset"
+slot_index = 7
+physical_form_factor = "x16"
+max_electrical_lanes = 4
+
+# p.9, 25
+[nodes.M2_1]
+type = "socket"
+category = "m2_slot"
+parent = "root_cpu"
+key = "M"
+supported_protocols = ["pcie"]
+max_lanes = 4
+
+# p.9, 25
+[nodes.M2_2]
+type = "socket"
+category = "m2_slot"
+parent = "mux_cpu_x16"
+key = "M"
+supported_protocols = ["pcie"]
+max_lanes = 4
+
+# p.9, 25
+[nodes.M2_3]
+type = "socket"
+category = "m2_slot"
+parent = "root_chipset"
+key = "M"
+supported_protocols = ["pcie"]
+max_lanes = 4
+
+# p.9, 25
+[nodes.M2_4]
+type = "socket"
+category = "m2_slot"
+parent = "root_chipset"
+key = "M"
+supported_protocols = ["pcie"]
+max_lanes = 4
+
+# p.9, 14, 25
+[nodes.SATA6G_1]
+type = "socket"
+category = "sata_port"
+parent = "root_chipset"
+
+[nodes.SATA6G_2]
+type = "socket"
+category = "sata_port"
+parent = "root_chipset"
+
+[nodes.SATA6G_3]
+type = "socket"
+category = "sata_port"
+parent = "root_chipset"
+
+[nodes.SATA6G_4]
+type = "socket"
+category = "sata_port"
+parent = "root_chipset"

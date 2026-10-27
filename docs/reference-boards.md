@@ -11,7 +11,7 @@ One ATX board from each of ASUS, ASRock, GIGABYTE and MSI for each of the socket
 | Socket | Vendor | Model | File |
 | --- | --- | --- | --- |
 | AM5 | MSI | MAG X870E TOMAHAWK WIFI | `data/boards/msi/mag_x870e_tomahawk_wifi.toml` |
-| AM5 | ASUS | ProArt X870E-CREATOR WIFI | |
+| AM5 | ASUS | ProArt X870E-CREATOR WIFI | `data/boards/asus/proart_x870e_creator_wifi.toml` |
 | AM5 | GIGABYTE | B850M D3HP | |
 | AM5 | ASRock | X870 Taichi Creator | |
 | LGA1851 | MSI | MAG Z890 TOMAHAWK WIFI | `data/boards/msi/mag_z890_tomahawk_wifi.toml` |
@@ -23,6 +23,7 @@ One ATX board from each of ASUS, ASRock, GIGABYTE and MSI for each of the socket
 
 - Every value comes from the vendor's manual for the board, in English. `source_manual` is its URL and `source_page` the page that lists the board's expansion and storage. A comment above each node names the page it was read from, as printed in the manual.
 - The board is described for the CPU family that gives it the most lanes, named in a comment at the top of the file.
+- A socket's id is the name the manual gives its connector, with any `.` removed, so `M.2_1` is written `M2_1`.
 - A value the manual does not state is left out rather than inferred. Slot positions read from the manual's layout diagram count as stated.
 - A root's `lanes` is the sum of the lanes the manual lists from that root, since manuals do not state a supply.
 - `iommu_group` is written only from observation on the board under Linux.
