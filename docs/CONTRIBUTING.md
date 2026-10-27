@@ -26,7 +26,7 @@ Unless you explicitly state otherwise, any contribution intentionally submitted 
 | Question | Place |
 | --- | --- |
 | What the product must do | [`docs/prd.md`](prd.md) |
-| Why a design decision was made | `docs/adr/NNNN-<title>.md`, one decision per file, frozen once accepted |
+| Why a design decision was made | `docs/adr/NNNN-<title>.md`, in the format set by [ADR-0000](adr/0000-record-architecture-decisions.md) |
 | What is still undecided | [`docs/spec/open-issues.md`](spec/open-issues.md) |
 | What an interface guarantees | The docstring of the type or function |
 | Why a single change was made | The commit message, in one or two sentences |

@@ -3,7 +3,6 @@
 [日本語](0002-iommu-groups-declared-in-board.jp.md)
 
 - Status: Accepted
-- Date: 2026-10-27
 
 ## Context
 

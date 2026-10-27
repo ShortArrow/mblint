@@ -3,7 +3,6 @@
 [日本語](0001-mux-mode-condition-as-structured-toml.jp.md)
 
 - Status: Accepted
-- Date: 2026-10-27
 
 ## Context
 

@@ -3,7 +3,6 @@
 [日本語](0004-device-interface-and-physical-shape.jp.md)
 
 - Status: Accepted
-- Date: 2026-10-27
 
 ## Context
 

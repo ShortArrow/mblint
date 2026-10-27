@@ -3,7 +3,6 @@
 [English](0003-mux-modes-share-one-shape.md)
 
 - 状態: 採用
-- 日付: 2026-10-27
 
 ## 文脈
 

@@ -26,7 +26,7 @@ mblint は [MIT](../LICENSE-MIT) と [Apache-2.0](../LICENSE-APACHE) のいず�
 | 問い | 置き場所 |
 | --- | --- |
 | 製品が何をすべきか | [`docs/prd.md`](prd.md) |
-| 設計判断をなぜ下したか | `docs/adr/NNNN-<title>.md`。1 ファイルに 1 判断で、採用後は凍結する |
+| 設計判断をなぜ下したか | `docs/adr/NNNN-<title>.md`。書式は [ADR-0000](adr/0000-record-architecture-decisions.jp.md) に従う |
 | まだ決まっていないこと | [`docs/spec/open-issues.md`](spec/open-issues.md) |
 | インターフェースが何を保証するか | 型や関数の docstring |
 | 個々の変更をなぜ行ったか | コミットメッセージに 1〜2 文で |

@@ -3,7 +3,6 @@
 [日本語](0003-mux-modes-share-one-shape.jp.md)
 
 - Status: Accepted
-- Date: 2026-10-27
 
 ## Context
 
