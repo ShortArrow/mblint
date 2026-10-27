@@ -43,6 +43,8 @@ Fit diagnostics come first, ordered by socket path, followed by obstructions ord
 
 ## Pass 2: electrical exclusivity and mux resolution
 
+Every Pass 2 diagnostic is an error.
+
 ### Occupancy
 
 Pass 2 sees the devices bound to board sockets. A card or M.2 module runs the protocol of its `[interface]`, and an adapter runs its upstream protocol. Devices inside an adapter draw no lanes from the board.
@@ -63,4 +65,43 @@ A mux demands the sum of its selected mode's `allocate`, and a bridge demands it
 | `SocketDisabled` | A device is installed in a socket that the selected mode of a mux disables |
 | `LaneOvercommit` | A root's demand exceeds its supply |
 
-Diagnostics are grouped by kind in the order of this table, each group ordered by node id. Which Pass 2 diagnostics are errors is unspecified.
+Diagnostics are grouped by kind in the order of this table, each group ordered by node id.
+
+## Pass 3: tunnelling and protocol bridges
+
+Pass 3 computes the tunnel cap of each socket path inside an adapter: the smallest `max_tunneling_gbps` among the adapters that enclose the path. A path that no such adapter encloses has no cap. Pass 3 reports no diagnostics.
+
+## Pass 4: effective throughput
+
+Every Pass 4 diagnostic is a warning.
+
+### Link rate
+
+Pass 4 rates the link of each device whose `[interface]` protocol is `pcie`:
+
+| Link property | Value |
+| --- | --- |
+| Generation | The smaller of the device's `generation` and the socket's |
+| Lanes | The smaller of the device's `lanes` and the socket's |
+| Rate | The per-lane data rate of the generation times the lanes, lowered to the tunnel cap if there is one |
+
+A board socket has the generation of the root it descends from through `parent`, and the lanes a mux allocates to it, or else its `max_lanes`. An adapter's `pcie_slot` has its own `generation` and `max_electrical_lanes`.
+
+| Generation | Per-lane data rate (Gbps) |
+| --- | --- |
+| 1 | 2.5 × 8/10 |
+| 2 | 5 × 8/10 |
+| 3 | 8 × 128/130 |
+| 4 | 16 × 128/130 |
+| 5 | 32 × 128/130 |
+
+A device requires the rate of its own `[interface]` link, computed the same way without a socket.
+
+### Diagnostics
+
+| Diagnostic | Reported when |
+| --- | --- |
+| `Bottleneck` | A device's link rate is below the rate it requires |
+| `UnratedLink` | The socket has no lane count, or the generation has no per-lane data rate |
+
+Diagnostics are ordered by socket path.
