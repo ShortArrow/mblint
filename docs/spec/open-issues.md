@@ -25,6 +25,5 @@ Ordered by impact.
 
 | # | Section | Undecided |
 | --- | --- | --- |
-| 9 | 5 | "Proceed if passed" means a failing pass suppresses the diagnostics of later passes. Whether the CLI output reports a pass as `skipped` is undecided. |
 | 10 | 4.1 `root_pch_hsio` | `bus = "hsio"` lanes are shared among PCIe, SATA and USB. Apart from `allocate`, there is no way to state how many HSIO lanes a socket consumes. |
 | 11 | 4.1 `M2_2.supported_protocols` | Which pass rejects a module whose protocol the M.2 slot does not support, such as a SATA SSD in a PCIe-only slot, is undecided. The module fits physically, so Pass 1 does not report it. |
