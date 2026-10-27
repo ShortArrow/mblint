@@ -97,6 +97,10 @@ A board socket has the generation of the root it descends from through `parent`,
 
 A device requires the rate of its own `[interface]` link, computed the same way without a socket.
 
+### IOMMU groups
+
+The endpoints of an IOMMU group are the occupied board sockets and the controllers that carry its `iommu_group` number. A group is reported as shared when it has more than one endpoint and at least one of them is an occupied socket: under VFIO, a device in it can be passed through to a virtual machine only together with the others. Sockets inside an adapter belong to no group of the board.
+
 ### Diagnostics
 
 | Diagnostic | Reported when |
@@ -104,4 +108,6 @@ A device requires the rate of its own `[interface]` link, computed the same way 
 | `Bottleneck` | A device's link rate is below the rate it requires |
 | `UnratedLink` | The socket has no lane count, or the generation has no per-lane data rate |
 
-Diagnostics are ordered by socket path.
+| `SharedIommuGroup` | An IOMMU group is shared, listing its endpoints in id order |
+
+Link diagnostics come first, ordered by socket path, followed by shared groups ordered by group number.
