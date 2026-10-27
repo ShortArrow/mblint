@@ -26,12 +26,30 @@ Unless you explicitly state otherwise, any contribution intentionally submitted 
 | Question | Place |
 | --- | --- |
 | What the product must do | [`docs/prd.md`](prd.md) |
-| Why a design decision was made | `docs/adr/NNNN-<title>.md`, in the format set by [ADR-0000](adr/0000-record-architecture-decisions.md) |
+| Why a design decision was made | `docs/adr/NNNN-<title>.md`, written as in [Architecture decision records](#architecture-decision-records) |
 | What is still undecided | [`docs/spec/open-issues.md`](spec/open-issues.md) |
 | What an interface guarantees | The docstring of the type or function |
 | Why a single change was made | The commit message, in one or two sentences |
 
 A decision that settles an open issue is recorded as an ADR, and the issue is removed from `open-issues.md`.
+
+## Architecture decision records
+
+Each decision is a file `docs/adr/NNNN-<title>.md` with a Japanese counterpart `NNNN-<title>.jp.md`, numbered in order of acceptance. A file has these parts:
+
+| Part | Contents |
+| --- | --- |
+| Title | `ADR-NNNN: <the decision, stated as a sentence>` |
+| Status | `Accepted`, or `Superseded by ADR-NNNN` |
+| Context | The forces that made a decision necessary |
+| Decision | What was decided |
+| Rationale | Why this option |
+| Alternatives not taken | The options rejected, and why |
+| Consequences | What follows from the decision; omitted if nothing does |
+
+An ADR carries no date. The commits that touch the file record when it was accepted and every later change, and a date written in the file could disagree with them.
+
+An accepted ADR is not rewritten, so that what was decided at the time stays readable after the decision is replaced. A decision that replaces it is a new ADR, and the old one only has its status changed to `Superseded by ADR-NNNN`.
 
 ## Development workflow
 
