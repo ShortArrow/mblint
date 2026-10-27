@@ -75,7 +75,7 @@ when = { socket = "M2_2", protocol = "pcie" }
 
 | `category` | 厳格 | フィールド |
 | --- | --- | --- |
-| `pcie_slot` | はい | `parent`、`slot_index`、`physical_form_factor`、`open_ended`（既定値 `false`）、`generation`、`iommu_group` |
+| `pcie_slot` | はい | `parent`、`slot_index`、`physical_form_factor`、`open_ended`（既定値 `false`）、`max_electrical_lanes`、`generation`、`iommu_group` |
 | `m2_slot` | はい | `parent`、`key`、`supported_protocols`、`max_lanes`、`generation`、`iommu_group` |
 | `sata_port` | はい | `parent`、`iommu_group` |
 | `usb_c` | いいえ | `parent`、`dp_alt_max_lanes` |
@@ -84,6 +84,7 @@ when = { socket = "M2_2", protocol = "pcie" }
 - `slot_index` は、ボード上のブラケット位置です。CPU から離れる向き、つまり ATX のカードのクーラーが張り出す向きに数えます。
 - `physical_form_factor` は `x1`、`x4`、`x8`、`x16` のいずれかです。
 - `open_ended` は、スロットの奥が開いていて、それより幅の広いカードエッジがはみ出して挿さることを表します。
+- `max_electrical_lanes` は省略できます。スロットに配線されたレーン数で、形状が収める数より少ないことがあります。
 - `generation` は省略できます。ルートより遅いソケットについて、その配線の PCIe の世代を書きます。
 - `key` は `B`、`E`、`M` のいずれかです。
 - `dp_alt_max_lanes` は、そのポートが駆動できる DisplayPort Alt Mode のレーン数です。これが無いポートは DP Alt Mode を持ちません。

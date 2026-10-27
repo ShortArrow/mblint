@@ -75,7 +75,7 @@ A bridge whose parent is a mux draws the lanes the mux allocates to it.
 
 | `category` | Strict | Fields |
 | --- | --- | --- |
-| `pcie_slot` | yes | `parent`, `slot_index`, `physical_form_factor`, `open_ended` (default `false`), `generation`, `iommu_group` |
+| `pcie_slot` | yes | `parent`, `slot_index`, `physical_form_factor`, `open_ended` (default `false`), `max_electrical_lanes`, `generation`, `iommu_group` |
 | `m2_slot` | yes | `parent`, `key`, `supported_protocols`, `max_lanes`, `generation`, `iommu_group` |
 | `sata_port` | yes | `parent`, `iommu_group` |
 | `usb_c` | no | `parent`, `dp_alt_max_lanes` |
@@ -84,6 +84,7 @@ A bridge whose parent is a mux draws the lanes the mux allocates to it.
 - `slot_index` is the slot's bracket position on the board, counted away from the CPU, the direction in which an ATX card's cooler extends.
 - `physical_form_factor` is `x1`, `x4`, `x8` or `x16`.
 - `open_ended` means the back of the slot is open, so that a wider card edge overhangs it.
+- `max_electrical_lanes` is optional. It is the number of lanes wired to the slot, which may be fewer than its form factor holds.
 - `generation` is optional. It is the PCIe generation of the socket's wiring, for a socket slower than its root.
 - `key` is `B`, `E` or `M`.
 - `dp_alt_max_lanes` is the number of DisplayPort Alt Mode lanes the port can drive. A port without it has no DP Alt Mode.
