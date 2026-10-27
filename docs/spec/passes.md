@@ -102,7 +102,7 @@ Pass 4 rates the link of each device whose `[interface]` protocol is `pcie`:
 | Lanes | The smaller of the device's `lanes` and the socket's |
 | Rate | The per-lane data rate of the generation times the lanes, lowered to the tunnel cap if there is one |
 
-A board socket has the generation of the root it descends from through `parent`, and the lanes a mux allocates to it, or else its `max_lanes`. An adapter's `pcie_slot` has its own `generation` and `max_electrical_lanes`.
+A board socket has the smaller of its own `generation` and the generation of the root it descends from through `parent`, or the root's alone if it states none, and the lanes a mux allocates to it, or else its `max_lanes`. An adapter's `pcie_slot` has its own `generation` and `max_electrical_lanes`.
 
 | Generation | Per-lane data rate (Gbps) |
 | --- | --- |
