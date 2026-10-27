@@ -215,7 +215,7 @@ dp_alt_max_lanes = 4
 
 ### 4.2 デバイス / アダプタ定義 (`devices/...`)
 
-カードと M.2 モジュールは [ADR-0004](adr/0004-device-interface-and-physical-shape.jp.md) に従う。
+カードと M.2 モジュールは [ADR-0004](adr/0004-device-interface-and-physical-shape.jp.md)、アダプタは [ADR-0006](adr/0006-adapters-and-nested-bindings.jp.md) に従う。
 
 #### 例1: eGPU ボックス（USB4 / TB4 → PCIe ブリッジ）
 

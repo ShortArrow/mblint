@@ -215,7 +215,7 @@ dp_alt_max_lanes = 4
 
 ### 4.2 Device and adapter definitions (`devices/...`)
 
-Cards and M.2 modules follow [ADR-0004](adr/0004-device-interface-and-physical-shape.md).
+Cards and M.2 modules follow [ADR-0004](adr/0004-device-interface-and-physical-shape.md), adapters [ADR-0006](adr/0006-adapters-and-nested-bindings.md).
 
 #### Example 1: eGPU box (USB4 / TB4 → PCIe bridge)
 
