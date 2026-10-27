@@ -94,7 +94,7 @@ pub enum MuxSubtype {
 #[derive(Debug, Clone, Deserialize)]
 pub struct Mode {
     pub when: Condition,
-    /// Lanes each socket receives from the mux's parent.
+    /// Lanes each socket or bridge receives from the mux's parent, keyed by its id.
     #[serde(default)]
     pub allocate: BTreeMap<String, u32>,
     /// Sockets that stop working while this mode applies.
@@ -149,7 +149,8 @@ pub enum SocketState {
     Occupied,
 }
 
-/// A protocol bridge that consumes `upstream_lanes` from its parent.
+/// A protocol bridge. Under a root it consumes `upstream_lanes`; under a mux it receives the
+/// lanes the selected mode allocates to it.
 #[derive(Debug, Clone, Deserialize)]
 pub struct Bridge {
     pub parent: String,

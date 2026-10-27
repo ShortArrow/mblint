@@ -8,6 +8,7 @@ use crate::occupancy::Occupancy;
 /// Lanes allocated to each socket, the sockets switched off, and the problems found.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct LaneResolution {
+    /// Lanes a selected mux mode allocates, keyed by socket or bridge id.
     pub allocations: BTreeMap<String, u32>,
     /// Sockets disabled by a selected mux mode, whether or not a device is installed in them.
     pub disabled: BTreeSet<String>,
