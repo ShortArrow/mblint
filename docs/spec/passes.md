@@ -52,11 +52,11 @@ Pass 2 sees the devices bound to board sockets. A card or M.2 module runs the pr
 
 ### Mode selection
 
-Each mux selects the first of its modes, in declaration order, whose `when` holds. Each socket in the selected mode's `allocate` receives that many lanes. A mux with no mode that holds allocates nothing.
+Each mux selects the first of its modes, in declaration order, whose `when` holds. Each socket or bridge in the selected mode's `allocate` receives that many lanes. A mux with no mode that holds allocates nothing.
 
 ### Lane balance
 
-A mux demands the sum of its selected mode's `allocate`, and a bridge demands its `upstream_lanes`, both from their direct parent. A socket draws lanes only through a mux's `allocate`. A root whose demand exceeds its `lanes` is overcommitted.
+A mux demands the sum of its selected mode's `allocate` from its parent, and a bridge whose parent is a root demands its `upstream_lanes` from the root. A socket, and a bridge under a mux, draw lanes only through a mux's `allocate`. A root whose demand exceeds its `lanes` is overcommitted.
 
 ### Diagnostics
 

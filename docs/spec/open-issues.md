@@ -11,6 +11,7 @@ Ordered by impact.
 | # | Section | Undecided |
 | --- | --- | --- |
 | 1 | 4.1 `modes[].when` | `when` holds a single condition. How to combine several conditions in one mode is undecided. |
+| 12 | 4.3 Rig | A board file describes the BIOS at its default settings. How a rig states a BIOS setting that moves lanes, such as giving M.2 slot lanes shared with a USB4 controller to the slot alone, is undecided. |
 
 ## Inconsistent example data
 

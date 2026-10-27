@@ -8,7 +8,7 @@ Tables marked *strict* reject fields not listed for them. Elsewhere, unlisted fi
 
 ## Boards
 
-`boards/<vendor>/<model>.toml` describes a motherboard as a directed graph of nodes.
+`boards/<vendor>/<model>.toml` describes a motherboard as a directed graph of nodes, with its BIOS at the default settings.
 
 | Field | Contents |
 | --- | --- |
@@ -42,7 +42,7 @@ Every mode, whatever the subtype, has the same fields:
 | Field | Contents |
 | --- | --- |
 | `when` | The condition under which the mode applies |
-| `allocate` | Lanes each socket receives from the mux's parent, keyed by socket id; empty if omitted |
+| `allocate` | Lanes each socket or bridge receives from the mux's parent, keyed by its id; empty if omitted |
 | `disables` | Sockets that stop working while the mode applies; empty if omitted |
 
 `when` is a strict table in one of two forms:
@@ -61,7 +61,9 @@ A protocol condition holds only while the socket is occupied by a device running
 | Field | Contents |
 | --- | --- |
 | `parent` | The node it draws lanes from |
-| `upstream_lanes` | Lanes it draws |
+| `upstream_lanes` | Lanes it draws from a root parent |
+
+A bridge whose parent is a mux draws the lanes the mux allocates to it.
 
 ### Controllers
 
