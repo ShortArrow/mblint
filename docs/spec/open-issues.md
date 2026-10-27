@@ -11,7 +11,7 @@ Ordered by impact.
 | # | Section | Undecided |
 | --- | --- | --- |
 | 1 | 4.1 `modes[].when` | The notation is settled by [ADR-0001](../adr/0001-mux-mode-condition-as-structured-toml.md), and a mux with no matching mode reports `NoMatchingMode` and allocates nothing. How to combine several conditions in one mode is undecided. |
-| 3 | 4.2 / 5 Pass 1 | There is no schema for cards (`devices/cards/*.toml`, `devices/ssds/*.toml`). Where Pass 1 reads thickness, length, physical lane width and required bandwidth is undecided. |
+| 3 | 4.2 / 5 Pass 4 | Cards and M.2 modules are defined by [ADR-0004](../adr/0004-device-interface-and-physical-shape.md). Where Pass 4 reads a device's required bandwidth is undecided. |
 
 ## Inconsistent example data
 
@@ -27,3 +27,4 @@ Ordered by impact.
 | --- | --- | --- |
 | 9 | 5 | "Proceed if passed" means a failing pass suppresses the diagnostics of later passes. Whether the CLI output reports a pass as `skipped` is undecided. |
 | 10 | 4.1 `root_pch_hsio` | `bus = "hsio"` lanes are shared among PCIe, SATA and USB. Apart from `allocate`, there is no way to state how many HSIO lanes a socket consumes. |
+| 11 | 4.1 `M2_2.supported_protocols` | Which pass rejects a module whose protocol the M.2 slot does not support, such as a SATA SSD in a PCIe-only slot, is undecided. The module fits physically, so Pass 1 does not report it. |

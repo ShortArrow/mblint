@@ -215,6 +215,8 @@ dp_alt_max_lanes = 4
 
 ### 4.2 Device and adapter definitions (`devices/...`)
 
+Cards and M.2 modules follow [ADR-0004](adr/0004-device-interface-and-physical-shape.md).
+
 #### Example 1: eGPU box (USB4 / TB4 → PCIe bridge)
 
 ```toml
@@ -274,6 +276,45 @@ refresh_rate = 60
 dsc_supported = false
 required_dp_lanes = 4      # requires all four lanes for video
 bandwidth_requirement_gbps = 12.54
+```
+
+#### Example 4: graphics card
+
+```toml
+# devices/cards/rtx_4090.toml
+schema_version = "2.0.0"
+id = "rtx_4090"
+name = "NVIDIA GeForce RTX 4090 Founders Edition"
+type = "card"
+
+[interface]
+protocol = "pcie"
+generation = 4
+lanes = 16                # electrical lanes
+
+[physical]
+edge = "x16"              # card edge connector
+thickness_slots = 3       # bracket positions covered, its own included
+length_mm = 304
+```
+
+#### Example 5: M.2 SSD
+
+```toml
+# devices/ssds/crucial_t700.toml
+schema_version = "2.0.0"
+id = "crucial_t700"
+name = "Crucial T700"
+type = "m2_module"
+
+[interface]
+protocol = "pcie"
+generation = 5
+lanes = 4
+
+[physical]
+keys = ["M"]              # notches cut in the module
+form_factor = "2280"
 ```
 
 ---

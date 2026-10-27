@@ -11,7 +11,7 @@
 | # | 節 | 未決の内容 |
 | --- | --- | --- |
 | 1 | 4.1 `modes[].when` | 記法は [ADR-0001](../adr/0001-mux-mode-condition-as-structured-toml.jp.md) で決定済みで、どの mode にも一致しない Mux は `NoMatchingMode` を報告してレーンを割り当てない。一つの mode に複数の条件を組み合わせる方法は未定。 |
-| 3 | 4.2 / 5 Pass 1 | カード（`devices/cards/*.toml`、`devices/ssds/*.toml`）のスキーマが無い。Pass 1 が厚み、長さ、物理レーン幅、要求帯域をどこから読むかが未定。 |
+| 3 | 4.2 / 5 Pass 4 | カードと M.2 モジュールは [ADR-0004](../adr/0004-device-interface-and-physical-shape.jp.md) で定義済み。Pass 4 がデバイスの要求帯域をどこから読むかが未定。 |
 
 ## 例データの不整合
 
@@ -27,3 +27,4 @@
 | --- | --- | --- |
 | 9 | 5 | 「合格なら次へ」は、あるパスが失敗すると後続パスの診断が出力されないことを意味する。CLI 出力でパスを `skipped` として報告するかは未定。 |
 | 10 | 4.1 `root_pch_hsio` | `bus = "hsio"` のレーンは PCIe、SATA、USB で共有される。`allocate` 以外に、ソケットが HSIO のレーンをいくつ消費するかを書く方法が無い。 |
+| 11 | 4.1 `M2_2.supported_protocols` | M.2 スロットが対応しないプロトコルのモジュール（PCIe 専用スロットの SATA SSD など）を、どのパスで拒否するかが未定。物理的には収まるので、Pass 1 は報告しない。 |

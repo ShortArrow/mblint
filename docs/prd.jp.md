@@ -215,6 +215,8 @@ dp_alt_max_lanes = 4
 
 ### 4.2 デバイス / アダプタ定義 (`devices/...`)
 
+カードと M.2 モジュールは [ADR-0004](adr/0004-device-interface-and-physical-shape.jp.md) に従う。
+
 #### 例1: eGPU ボックス（USB4 / TB4 → PCIe ブリッジ）
 
 ```toml
@@ -274,6 +276,45 @@ refresh_rate = 60
 dsc_supported = false
 required_dp_lanes = 4      # 4 レーンすべてを映像に要求
 bandwidth_requirement_gbps = 12.54
+```
+
+#### 例4: グラフィックスカード
+
+```toml
+# devices/cards/rtx_4090.toml
+schema_version = "2.0.0"
+id = "rtx_4090"
+name = "NVIDIA GeForce RTX 4090 Founders Edition"
+type = "card"
+
+[interface]
+protocol = "pcie"
+generation = 4
+lanes = 16                # 電気的なレーン数
+
+[physical]
+edge = "x16"              # カードエッジコネクタ
+thickness_slots = 3       # 覆うブラケット位置の数。自身の位置を含む
+length_mm = 304
+```
+
+#### 例5: M.2 SSD
+
+```toml
+# devices/ssds/crucial_t700.toml
+schema_version = "2.0.0"
+id = "crucial_t700"
+name = "Crucial T700"
+type = "m2_module"
+
+[interface]
+protocol = "pcie"
+generation = 5
+lanes = 4
+
+[physical]
+keys = ["M"]              # モジュールの切り欠き
+form_factor = "2280"
 ```
 
 ---
