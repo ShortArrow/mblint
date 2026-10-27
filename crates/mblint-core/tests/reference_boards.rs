@@ -13,6 +13,9 @@ use mblint_core::tunnels::resolve_tunnels;
 const MAG_X870E_TOMAHAWK_WIFI: &str =
     include_str!("../../../data/boards/msi/mag_x870e_tomahawk_wifi.toml");
 
+const MAG_Z890_TOMAHAWK_WIFI: &str =
+    include_str!("../../../data/boards/msi/mag_z890_tomahawk_wifi.toml");
+
 const CARD_GEN4_X16: &str = r#"
 schema_version = "2.0.0"
 id = "card"
@@ -48,6 +51,10 @@ form_factor = "2280"
 
 fn tomahawk() -> Board {
     Board::from_toml(MAG_X870E_TOMAHAWK_WIFI).expect("reference board must parse")
+}
+
+fn z890_tomahawk() -> Board {
+    Board::from_toml(MAG_Z890_TOMAHAWK_WIFI).expect("reference board must parse")
 }
 
 fn installed(devices: &[(&str, &str)]) -> BTreeMap<String, Device> {
@@ -139,5 +146,40 @@ fn tomahawk_four_slot_card_in_pci_e1_covers_pci_e2() {
             socket: "PCI_E2".into(),
             by: "PCI_E1".into(),
         }]
+    );
+}
+
+#[test]
+fn z890_tomahawk_gen5_ssd_in_m2_1_runs_at_its_own_rate() {
+    let (_, throughput) = resolve(&z890_tomahawk(), &[("M2_1", SSD_GEN5_X4)]);
+
+    assert!(throughput.diagnostics.is_empty());
+}
+
+#[test]
+fn z890_tomahawk_gen5_ssd_in_m2_2_is_held_to_pcie_4_0() {
+    let (_, throughput) = resolve(&z890_tomahawk(), &[("M2_2", SSD_GEN5_X4)]);
+
+    assert_eq!(
+        throughput.diagnostics,
+        vec![Diagnostic::Bottleneck {
+            socket: "M2_2".into(),
+            required_gbps: lane(5) * 4.0,
+            actual_gbps: lane(4) * 4.0,
+        }]
+    );
+}
+
+#[test]
+fn z890_tomahawk_card_in_pci_e2_runs_at_x4() {
+    let (_, throughput) = resolve(&z890_tomahawk(), &[("PCI_E2", CARD_GEN4_X16)]);
+
+    assert_eq!(
+        throughput.links.get("PCI_E2"),
+        Some(&Link {
+            generation: 4,
+            lanes: 4,
+            gbps: lane(4) * 4.0,
+        })
     );
 }

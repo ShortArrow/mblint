@@ -14,7 +14,7 @@ One ATX board from each of ASUS, ASRock, GIGABYTE and MSI for each of the socket
 | AM5 | ASUS | ProArt X870E-CREATOR WIFI | |
 | AM5 | GIGABYTE | B850M D3HP | |
 | AM5 | ASRock | X870 Taichi Creator | |
-| LGA1851 | MSI | MAG Z890 TOMAHAWK WIFI | |
+| LGA1851 | MSI | MAG Z890 TOMAHAWK WIFI | `data/boards/msi/mag_z890_tomahawk_wifi.toml` |
 | LGA1851 | ASUS | ROG STRIX Z890-F GAMING WIFI | |
 | LGA1851 | GIGABYTE | Z890 AERO G | |
 | LGA1851 | ASRock | Z890 Steel Legend WiFi | |

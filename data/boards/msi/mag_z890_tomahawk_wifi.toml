@@ -1,0 +1,137 @@
+# Described for Intel Core Ultra Processors (Series 2). Page numbers are as printed in the manual.
+schema_version = "2.0.0"
+vendor = "MSI"
+model = "MAG Z890 TOMAHAWK WIFI"
+source_manual = "https://download.msi.com/archive/mnu_exe/mb/MAGZ890TOMAHAWKWIFI_English.pdf"
+source_page = 16
+
+[form_factor]
+standard = "ATX"
+total_slot_indices = 7
+
+# --- 1. Root providers ---
+
+# p.16-17: PCI_E1 PCIe 5.0 x16, M2_1 PCIe 5.0 x4 and M2_2 PCIe 4.0 x4 from the CPU.
+[nodes.root_cpu]
+type = "root"
+bus = "pcie"
+lanes = 24
+generation = 5
+
+# p.16-17: PCI_E2, PCI_E3, M2_3 and M2_4, each PCIe 4.0 x4, from the Z890 chipset.
+[nodes.root_chipset]
+type = "root"
+bus = "pcie"
+lanes = 16
+generation = 4
+
+# --- 2. Physical sockets ---
+
+# p.16, 33; position from the layout on p.28.
+[nodes.PCI_E1]
+type = "socket"
+category = "pcie_slot"
+parent = "root_cpu"
+slot_index = 2
+physical_form_factor = "x16"
+max_electrical_lanes = 16
+
+# p.16, 33; position from the layout on p.28.
+[nodes.PCI_E2]
+type = "socket"
+category = "pcie_slot"
+parent = "root_chipset"
+slot_index = 5
+physical_form_factor = "x16"
+max_electrical_lanes = 4
+
+# p.16, 33; position from the layout on p.28.
+[nodes.PCI_E3]
+type = "socket"
+category = "pcie_slot"
+parent = "root_chipset"
+slot_index = 7
+physical_form_factor = "x16"
+max_electrical_lanes = 4
+
+# p.17
+[nodes.M2_1]
+type = "socket"
+category = "m2_slot"
+parent = "root_cpu"
+key = "M"
+supported_protocols = ["pcie"]
+max_lanes = 4
+
+# p.17 gives PCIe 4.0 x4; the block diagram on p.76 labels M.2_1_2 together as GEN5 x4.
+[nodes.M2_2]
+type = "socket"
+category = "m2_slot"
+parent = "root_cpu"
+key = "M"
+supported_protocols = ["pcie"]
+max_lanes = 4
+generation = 4
+
+# p.17
+[nodes.M2_3]
+type = "socket"
+category = "m2_slot"
+parent = "root_chipset"
+key = "M"
+supported_protocols = ["pcie"]
+max_lanes = 4
+
+# p.17
+[nodes.M2_4]
+type = "socket"
+category = "m2_slot"
+parent = "root_chipset"
+key = "M"
+supported_protocols = ["pcie", "sata"]
+max_lanes = 4
+
+# p.16
+[nodes.SATA1]
+type = "socket"
+category = "sata_port"
+parent = "root_chipset"
+
+[nodes.SATA2]
+type = "socket"
+category = "sata_port"
+parent = "root_chipset"
+
+[nodes.SATA3]
+type = "socket"
+category = "sata_port"
+parent = "root_chipset"
+
+[nodes.SATA4]
+type = "socket"
+category = "sata_port"
+parent = "root_chipset"
+
+# p.16, 19: Thunderbolt 4 from the CPU with DisplayPort over USB Type-C; the manual gives no
+# lane count.
+[nodes.PORT_TB4_1]
+type = "socket"
+category = "usb_c"
+parent = "root_cpu"
+
+[nodes.PORT_TB4_2]
+type = "socket"
+category = "usb_c"
+parent = "root_cpu"
+
+# p.19: USB 10Gbps Type-C port on the back panel.
+[nodes.PORT_USBC_CHIPSET]
+type = "socket"
+category = "usb_c"
+parent = "root_chipset"
+
+# p.18: USB 20Gbps Type-C front panel connector.
+[nodes.JUSBC1]
+type = "socket"
+category = "usb_c"
+parent = "root_chipset"
