@@ -1,0 +1,161 @@
+# Described for AMD Ryzen 9000 and 7000 Series processors. Page numbers are as printed in the
+# manual.
+schema_version = "2.0.0"
+vendor = "MSI"
+model = "MAG X870E TOMAHAWK WIFI"
+source_manual = "https://download.msi.com/archive/mnu_exe/mb/MAGX870ETOMAHAWKWIFI_English.pdf"
+source_page = 17
+
+[form_factor]
+standard = "ATX"
+total_slot_indices = 7
+
+# --- 1. Root providers ---
+
+# p.17-18, 20: PCI_E1 x16, M2_1 x4, and M2_2 shared with the USB4 controller x4, all PCIe 5.0.
+[nodes.root_cpu]
+type = "root"
+bus = "pcie"
+lanes = 24
+generation = 5
+
+# p.17-18: PCI_E2 x1, PCI_E3 x4, M2_3 x4 and M2_4 x4 from the X870E chipset.
+[nodes.root_chipset]
+type = "root"
+bus = "pcie"
+lanes = 13
+generation = 4
+
+# --- 2. Muxes ---
+
+# p.20: "Both run at PCIe 5.0 x2 when a device is installed in the M2_2 slot."
+[nodes.mux_m2_2_usb4]
+type = "mux"
+subtype = "bifurcation"
+parent = "root_cpu"
+
+[[nodes.mux_m2_2_usb4.modes]]
+when = { socket = "M2_2", is = "empty" }
+allocate = { bridge_asm4242 = 4 }
+
+[[nodes.mux_m2_2_usb4.modes]]
+when = { socket = "M2_2", is = "occupied" }
+allocate = { M2_2 = 2, bridge_asm4242 = 2 }
+
+# --- 3. Protocol bridges ---
+
+# p.20: two USB 40Gbps Type-C ports from the ASM4242.
+[nodes.bridge_asm4242]
+type = "bridge"
+parent = "mux_m2_2_usb4"
+upstream_lanes = 4
+
+# --- 4. Physical sockets ---
+
+# p.17, 34; position from the layout on p.29.
+[nodes.PCI_E1]
+type = "socket"
+category = "pcie_slot"
+parent = "root_cpu"
+slot_index = 2
+physical_form_factor = "x16"
+max_electrical_lanes = 16
+
+# p.17, 34; position from the layout on p.29.
+[nodes.PCI_E2]
+type = "socket"
+category = "pcie_slot"
+parent = "root_chipset"
+slot_index = 5
+physical_form_factor = "x16"
+max_electrical_lanes = 1
+generation = 3
+
+# p.17, 34; position from the layout on p.29.
+[nodes.PCI_E3]
+type = "socket"
+category = "pcie_slot"
+parent = "root_chipset"
+slot_index = 7
+physical_form_factor = "x16"
+max_electrical_lanes = 4
+
+# p.18
+[nodes.M2_1]
+type = "socket"
+category = "m2_slot"
+parent = "root_cpu"
+key = "M"
+supported_protocols = ["pcie"]
+max_lanes = 4
+
+# p.18, 20
+[nodes.M2_2]
+type = "socket"
+category = "m2_slot"
+parent = "mux_m2_2_usb4"
+key = "M"
+supported_protocols = ["pcie"]
+max_lanes = 4
+
+# p.18
+[nodes.M2_3]
+type = "socket"
+category = "m2_slot"
+parent = "root_chipset"
+key = "M"
+supported_protocols = ["pcie"]
+max_lanes = 4
+
+# p.18
+[nodes.M2_4]
+type = "socket"
+category = "m2_slot"
+parent = "root_chipset"
+key = "M"
+supported_protocols = ["pcie"]
+max_lanes = 4
+
+# p.18, 45
+[nodes.SATA_S1]
+type = "socket"
+category = "sata_port"
+parent = "root_chipset"
+
+[nodes.SATA_S2]
+type = "socket"
+category = "sata_port"
+parent = "root_chipset"
+
+[nodes.SATA_S3]
+type = "socket"
+category = "sata_port"
+parent = "root_chipset"
+
+[nodes.SATA_S4]
+type = "socket"
+category = "sata_port"
+parent = "root_chipset"
+
+# p.17, 20: DisplayPort over USB Type-C; the manual gives no lane count.
+[nodes.PORT_USB4_1]
+type = "socket"
+category = "usb_c"
+parent = "bridge_asm4242"
+
+[nodes.PORT_USB4_2]
+type = "socket"
+category = "usb_c"
+parent = "bridge_asm4242"
+
+# p.20: USB 10Gbps Type-C port on the back panel.
+[nodes.PORT_USBC_CPU]
+type = "socket"
+category = "usb_c"
+parent = "root_cpu"
+
+# p.19, 49: USB 20Gbps Type-C front panel connector.
+[nodes.JUSBC1]
+type = "socket"
+category = "usb_c"
+parent = "root_chipset"

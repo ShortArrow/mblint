@@ -28,6 +28,7 @@ Unless you explicitly state otherwise, any contribution intentionally submitted 
 | What the product must do | [`docs/prd.md`](prd.md) |
 | What the data files contain and how the passes evaluate them | [`docs/spec/schema.md`](spec/schema.md), [`docs/spec/passes.md`](spec/passes.md) |
 | Why a design decision was made | `docs/adr/NNNN-<title>.md`, written as in [Architecture decision records](#architecture-decision-records) |
+| Which real boards are described, and where their values come from | [`docs/reference-boards.md`](reference-boards.md) |
 | What is still undecided | [`docs/spec/open-issues.md`](spec/open-issues.md) |
 | What an interface guarantees | The docstring of the type or function |
 | Why a single change was made | The commit message, in one or two sentences |
@@ -74,4 +75,5 @@ cargo clippy --all-targets
 | Path | Contents |
 | --- | --- |
 | `crates/mblint-core` | Topology model and resolution passes, shared by the CLI and the Wasm build |
+| `data/` | Data root holding the reference boards |
 | `docs/` | Requirements, specifications, ADRs and open issues |
