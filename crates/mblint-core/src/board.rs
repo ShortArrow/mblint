@@ -1,11 +1,11 @@
 //! Board definition: a directed graph of roots, muxes, bridges and sockets.
 
 use std::collections::BTreeMap;
-use std::fmt;
 
 use serde::Deserialize;
 
 use crate::occupancy::Occupancy;
+use crate::parse::ParseError;
 use crate::protocol::Protocol;
 
 /// A motherboard as declared in `boards/<vendor>/<model>.toml`.
@@ -22,21 +22,9 @@ pub struct Board {
 impl Board {
     /// Parses a board definition, rejecting values outside the schema's enumerations.
     pub fn from_toml(source: &str) -> Result<Self, ParseError> {
-        toml::from_str(source).map_err(ParseError)
+        toml::from_str(source).map_err(ParseError::from_toml)
     }
 }
-
-/// A board definition that does not conform to the schema.
-#[derive(Debug)]
-pub struct ParseError(toml::de::Error);
-
-impl fmt::Display for ParseError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        self.0.fmt(f)
-    }
-}
-
-impl std::error::Error for ParseError {}
 
 #[derive(Debug, Clone, Deserialize)]
 #[serde(tag = "type", rename_all = "snake_case")]
