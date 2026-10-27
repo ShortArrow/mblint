@@ -76,17 +76,19 @@ A protocol condition holds only while the socket is occupied by a device running
 | `pcie_slot` | yes | `parent`, `slot_index`, `physical_form_factor`, `open_ended` (default `false`), `iommu_group` |
 | `m2_slot` | yes | `parent`, `key`, `supported_protocols`, `max_lanes`, `iommu_group` |
 | `sata_port` | yes | `parent`, `iommu_group` |
-| `usb_c`, `usb_a` | no | `parent` |
+| `usb_c` | no | `parent`, `dp_alt_max_lanes` |
+| `usb_a` | no | `parent` |
 
 - `slot_index` is the slot's bracket position on the board, counted away from the CPU, the direction in which an ATX card's cooler extends.
 - `physical_form_factor` is `x1`, `x4`, `x8` or `x16`.
 - `open_ended` means the back of the slot is open, so that a wider card edge overhangs it.
 - `key` is `B`, `E` or `M`.
+- `dp_alt_max_lanes` is the number of DisplayPort Alt Mode lanes the port can drive. A port without it has no DP Alt Mode.
 - `iommu_group` is optional. It is the group number observed on real hardware under `/sys/kernel/iommu_groups`.
 
 ## Protocols
 
-A protocol is one of `pcie`, `sata`, `usb4` and `usb3_gen1x1`.
+A protocol is one of `pcie`, `sata`, `usb4`, `usb3_gen1x1` and `displayport`.
 
 ## Bandwidth
 
@@ -99,7 +101,7 @@ A bandwidth figure, in a field ending in `_gbps`, is in Gbps of data after line 
 | Field | Contents |
 | --- | --- |
 | `id`, `name` | Strings naming the device |
-| `type` | `card`, `m2_module` or `adapter` |
+| `type` | `card`, `m2_module`, `adapter` or `display` |
 
 ### Cards and M.2 modules
 
@@ -127,6 +129,18 @@ An adapter is installed into a board socket and has sockets of its own.
 | `[downstream_sockets.<NAME>]` | | `category` and the fields of that category; the adapter has no sockets if omitted |
 
 A downstream socket of category `pcie_slot` is strict and has `physical_form_factor`, `open_ended` (default `false`), `max_electrical_lanes` and `generation`.
+
+### Displays
+
+A display has a strict `[display]` table and runs `displayport`.
+
+| Field | Contents |
+| --- | --- |
+| `resolution` | String such as `"3840x2160"` |
+| `refresh_rate` | Hz |
+| `dsc_supported` | Whether it accepts Display Stream Compression |
+| `required_dp_lanes` | DisplayPort lanes it needs for its resolution and refresh rate |
+| `bandwidth_requirement_gbps` | Video data rate it needs |
 
 ## Rigs
 

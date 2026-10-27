@@ -76,17 +76,19 @@ when = { socket = "M2_2", protocol = "pcie" }
 | `pcie_slot` | はい | `parent`、`slot_index`、`physical_form_factor`、`open_ended`（既定値 `false`）、`iommu_group` |
 | `m2_slot` | はい | `parent`、`key`、`supported_protocols`、`max_lanes`、`iommu_group` |
 | `sata_port` | はい | `parent`、`iommu_group` |
-| `usb_c`、`usb_a` | いいえ | `parent` |
+| `usb_c` | いいえ | `parent`、`dp_alt_max_lanes` |
+| `usb_a` | いいえ | `parent` |
 
 - `slot_index` は、ボード上のブラケット位置です。CPU から離れる向き、つまり ATX のカードのクーラーが張り出す向きに数えます。
 - `physical_form_factor` は `x1`、`x4`、`x8`、`x16` のいずれかです。
 - `open_ended` は、スロットの奥が開いていて、それより幅の広いカードエッジがはみ出して挿さることを表します。
 - `key` は `B`、`E`、`M` のいずれかです。
+- `dp_alt_max_lanes` は、そのポートが駆動できる DisplayPort Alt Mode のレーン数です。これが無いポートは DP Alt Mode を持ちません。
 - `iommu_group` は省略できます。実機の `/sys/kernel/iommu_groups` で確認したグループ番号を書きます。
 
 ## プロトコル
 
-プロトコルは `pcie`、`sata`、`usb4`、`usb3_gen1x1` のいずれかです。
+プロトコルは `pcie`、`sata`、`usb4`、`usb3_gen1x1`、`displayport` のいずれかです。
 
 ## 帯域
 
@@ -99,7 +101,7 @@ when = { socket = "M2_2", protocol = "pcie" }
 | フィールド | 内容 |
 | --- | --- |
 | `id`、`name` | デバイスを示す文字列 |
-| `type` | `card`、`m2_module`、`adapter` のいずれか |
+| `type` | `card`、`m2_module`、`adapter`、`display` のいずれか |
 
 ### カードと M.2 モジュール
 
@@ -127,6 +129,18 @@ when = { socket = "M2_2", protocol = "pcie" }
 | `[downstream_sockets.<NAME>]` | | `category` と、その category のフィールド。省略するとアダプタはソケットを持たない |
 
 category が `pcie_slot` の下流ソケットは厳格で、`physical_form_factor`、`open_ended`（既定値 `false`）、`max_electrical_lanes`、`generation` を持ちます。
+
+### 表示機器
+
+表示機器は厳格な `[display]` テーブルを持ち、`displayport` で動作します。
+
+| フィールド | 内容 |
+| --- | --- |
+| `resolution` | `"3840x2160"` のような文字列 |
+| `refresh_rate` | リフレッシュレート（Hz） |
+| `dsc_supported` | Display Stream Compression を受け付けるか |
+| `required_dp_lanes` | その解像度とリフレッシュレートに必要な DisplayPort のレーン数 |
+| `bandwidth_requirement_gbps` | 必要な映像のデータレート |
 
 ## Rig
 

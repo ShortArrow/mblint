@@ -20,6 +20,7 @@ Board sockets and adapter sockets are checked by the same rules:
 | `m2_module` | An `m2_slot` whose key is among the module's `keys` |
 | `adapter` with `connector = "type_c"` | A `usb_c` socket |
 | `adapter` with `connector = "type_a"` | A `usb_a` socket |
+| `display` | A `usb_c` socket |
 
 A device in a socket of any other category is in the wrong socket category. A socket path that leads to no socket is an unknown socket: the id names no board socket, the parent path holds no adapter, or the adapter has no socket of that name.
 
@@ -47,7 +48,7 @@ Every Pass 2 diagnostic is an error.
 
 ### Occupancy
 
-Pass 2 sees the devices bound to board sockets. A card or M.2 module runs the protocol of its `[interface]`, and an adapter runs its upstream protocol. Devices inside an adapter draw no lanes from the board.
+Pass 2 sees the devices bound to board sockets. A card or M.2 module runs the protocol of its `[interface]`, an adapter runs its upstream protocol, and a display runs `displayport`. Devices inside an adapter draw no lanes from the board.
 
 ### Mode selection
 
@@ -69,7 +70,23 @@ Diagnostics are grouped by kind in the order of this table, each group ordered b
 
 ## Pass 3: tunnelling and protocol bridges
 
-Pass 3 computes the tunnel cap of each socket path inside an adapter: the smallest `max_tunneling_gbps` among the adapters that enclose the path. A path that no such adapter encloses has no cap. Pass 3 reports no diagnostics.
+### Tunnel caps
+
+Pass 3 computes the tunnel cap of each socket path inside an adapter: the smallest `max_tunneling_gbps` among the adapters that enclose the path. A path that no such adapter encloses has no cap.
+
+### DP Alt Mode
+
+A display in a board `usb_c` socket takes `required_dp_lanes` of the port's DP Alt Mode lanes. When it takes four, no lanes are left for USB 3 data, and USB data on the port runs at USB 2.0.
+
+### Diagnostics
+
+| Diagnostic | Severity | Reported when |
+| --- | --- | --- |
+| `DpAltModeUnsupported` | error | A display is in a port without `dp_alt_max_lanes` |
+| `DpLanesInsufficient` | error | A display needs more lanes than the port's `dp_alt_max_lanes` |
+| `UsbLimitedToUsb2` | warning | A display takes four lanes of the port |
+
+Diagnostics are ordered by socket path. An error stops Pass 4; a warning does not.
 
 ## Pass 4: effective throughput
 
