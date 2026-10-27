@@ -17,7 +17,6 @@ Ordered by impact.
 
 | # | Section | Problem |
 | --- | --- | --- |
-| 6 | 4.1 `mux_m2_sata_exclusive` | Following the draft's note, the example disables `SATA_5` and `SATA_6` in PCIe mode. Whether the real board disables them in PCIe or in SATA mode must be confirmed against the manual. |
 | 7 | 6.1 JSON | `theoretical_max_gbps = 64.0` for an RTX 3060 (PCIe Gen4 x16) matches neither Gen4 x16 (about 252 Gbps) nor Gen4 x8. `PCI_E2` is not used by the rig in 4.3. |
 
 ## Behaviour

@@ -92,9 +92,9 @@
 
 ```toml
 schema_version = "2.0.0"
-vendor = "MSI"
-model = "MAG X870E TOMAHAWK WIFI"
-source_manual = "https://download.msi.com/archive/mnu_exe/mb/MAGX870ETOMAHAWKWIFI.pdf"
+vendor = "Example"
+model = "Example X870E"
+source_manual = "https://example.com/manuals/example_x870e.pdf"
 source_page = 32
 
 [form_factor]
@@ -325,7 +325,7 @@ form_factor = "2280"
 ```toml
 schema_version = "2.0.0"
 name = "AI & Video Editing Rig with eGPU"
-board = "boards/msi/mag_x870e_tomahawk_wifi.toml"
+board = "boards/example/example_x870e.toml"
 
 [bindings]
 # マザーボード直結のソケット
@@ -444,7 +444,7 @@ PORT_TYPEC_1 = "devices/peripherals/razer_core_x.toml"
 * **Phase 1: 統一グラフエンジンと AST**
   * Root、Mux、Bridge、Socket ノードによる有向グラフモデル
   * 4 段階パイプライン（物理グリッド → Mux 排他 → ブリッジ / トンネリング → IOMMU / スループット）
-  * 代表的なボード（X870E、Z790）とネストアダプタ（eGPU、USB-SATA）のユニットテスト
+  * 代表的なボード（X870E、Z890）とネストアダプタ（eGPU、USB-SATA）のユニットテスト
 * **Phase 2: CLI と MCP サーバー**
   * `mblint` CLI（`check`、`lint`、`--json`）
   * MCP サーバー（stdio 経由の LLM 連携）

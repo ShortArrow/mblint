@@ -17,7 +17,6 @@
 
 | # | 節 | 問題 |
 | --- | --- | --- |
-| 6 | 4.1 `mux_m2_sata_exclusive` | 例は、草案の注記に従って PCIe mode で `SATA_5` と `SATA_6` を無効にしている。実機が PCIe mode と SATA mode のどちらで無効にするかは、マニュアルで確認する必要がある。 |
 | 7 | 6.1 JSON | RTX 3060（PCIe Gen4 x16）の `theoretical_max_gbps = 64.0` は、Gen4 x16（約 252 Gbps）とも Gen4 x8 とも一致しない。`PCI_E2` は 4.3 の rig で使われていない。 |
 
 ## 振る舞い

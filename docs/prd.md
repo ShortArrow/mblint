@@ -92,9 +92,9 @@ Onboard controllers that have an IOMMU group of their own are nodes of kind `con
 
 ```toml
 schema_version = "2.0.0"
-vendor = "MSI"
-model = "MAG X870E TOMAHAWK WIFI"
-source_manual = "https://download.msi.com/archive/mnu_exe/mb/MAGX870ETOMAHAWKWIFI.pdf"
+vendor = "Example"
+model = "Example X870E"
+source_manual = "https://example.com/manuals/example_x870e.pdf"
 source_page = 32
 
 [form_factor]
@@ -325,7 +325,7 @@ A rig supports **nested bindings**: a device installed into a socket of an adapt
 ```toml
 schema_version = "2.0.0"
 name = "AI & Video Editing Rig with eGPU"
-board = "boards/msi/mag_x870e_tomahawk_wifi.toml"
+board = "boards/example/example_x870e.toml"
 
 [bindings]
 # Sockets on the board
@@ -444,7 +444,7 @@ The engine runs four passes over the graph.
 * **Phase 1: unified graph engine and AST**
   * Directed graph model of Root, Mux, Bridge and Socket nodes
   * Four-pass pipeline (physical grid → mux exclusivity → bridges / tunnelling → IOMMU / throughput)
-  * Unit tests on representative boards (X870E, Z790) and nested adapters (eGPU, USB-SATA)
+  * Unit tests on representative boards (X870E, Z890) and nested adapters (eGPU, USB-SATA)
 * **Phase 2: CLI and MCP server**
   * `mblint` CLI (`check`, `lint`, `--json`)
   * MCP server (LLM integration over stdio)
