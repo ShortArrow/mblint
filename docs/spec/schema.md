@@ -13,6 +13,8 @@ Tables marked *strict* reject fields not listed for them. Elsewhere, unlisted fi
 | Field | Contents |
 | --- | --- |
 | `vendor`, `model` | Strings naming the board |
+| `source_manual` | Optional URL of the manual the values were read from |
+| `source_page` | Optional page of that manual listing the board's expansion and storage |
 | `nodes.<id>` | One node; its kind is given by `type` |
 
 A node id contains no `.`. Every node except a root names its upstream node in `parent`.
