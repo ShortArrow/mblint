@@ -49,7 +49,7 @@ keys = ["M"]
 form_factor = "2280"
 "#;
 
-fn tomahawk() -> Board {
+fn x870e_tomahawk() -> Board {
     Board::from_toml(MAG_X870E_TOMAHAWK_WIFI).expect("reference board must parse")
 }
 
@@ -90,8 +90,8 @@ fn lane(generation: u8) -> f64 {
 }
 
 #[test]
-fn tomahawk_card_in_pci_e1_runs_at_its_own_rate() {
-    let (lanes, throughput) = resolve(&tomahawk(), &[("PCI_E1", CARD_GEN4_X16)]);
+fn x870e_tomahawk_card_in_pci_e1_runs_at_its_own_rate() {
+    let (lanes, throughput) = resolve(&x870e_tomahawk(), &[("PCI_E1", CARD_GEN4_X16)]);
 
     assert!(lanes.diagnostics.is_empty());
     assert_eq!(
@@ -106,8 +106,8 @@ fn tomahawk_card_in_pci_e1_runs_at_its_own_rate() {
 }
 
 #[test]
-fn tomahawk_ssd_in_m2_2_halves_the_usb4_controller_and_itself() {
-    let (lanes, throughput) = resolve(&tomahawk(), &[("M2_2", SSD_GEN5_X4)]);
+fn x870e_tomahawk_ssd_in_m2_2_halves_the_usb4_controller_and_itself() {
+    let (lanes, throughput) = resolve(&x870e_tomahawk(), &[("M2_2", SSD_GEN5_X4)]);
 
     assert_eq!(lanes.allocations.get("bridge_asm4242"), Some(&2));
     assert!(lanes.diagnostics.is_empty());
@@ -122,8 +122,8 @@ fn tomahawk_ssd_in_m2_2_halves_the_usb4_controller_and_itself() {
 }
 
 #[test]
-fn tomahawk_pci_e2_runs_pcie_3_0_x1() {
-    let (_, throughput) = resolve(&tomahawk(), &[("PCI_E2", CARD_GEN4_X16)]);
+fn x870e_tomahawk_pci_e2_runs_pcie_3_0_x1() {
+    let (_, throughput) = resolve(&x870e_tomahawk(), &[("PCI_E2", CARD_GEN4_X16)]);
 
     assert_eq!(
         throughput.links.get("PCI_E2"),
@@ -136,12 +136,12 @@ fn tomahawk_pci_e2_runs_pcie_3_0_x1() {
 }
 
 #[test]
-fn tomahawk_four_slot_card_in_pci_e1_covers_pci_e2() {
+fn x870e_tomahawk_four_slot_card_in_pci_e1_covers_pci_e2() {
     let thick_card = CARD_GEN4_X16.replace("thickness_slots = 2", "thickness_slots = 4");
     let devices = installed(&[("PCI_E1", &thick_card), ("PCI_E2", CARD_GEN4_X16)]);
 
     assert_eq!(
-        check_physical(&tomahawk(), &devices),
+        check_physical(&x870e_tomahawk(), &devices),
         vec![physical::Diagnostic::Obstructed {
             socket: "PCI_E2".into(),
             by: "PCI_E1".into(),
