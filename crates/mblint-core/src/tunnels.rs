@@ -3,7 +3,7 @@
 
 use std::collections::BTreeMap;
 
-use crate::board::{Board, Socket};
+use crate::board::{Board, DpAltLanes, Socket};
 use crate::device::{Device, DeviceKind, DisplaySpec};
 
 /// DP Alt Mode lanes a Type-C connector carries; a display taking all of them leaves none for
@@ -32,12 +32,18 @@ pub enum Diagnostic {
     },
     /// A display takes every lane of the port, so USB data on it runs at USB 2.0.
     UsbLimitedToUsb2 { socket: String },
+    /// A display is in a port whose DP Alt Mode lane count is unknown, so whether it gets its
+    /// lanes is not known.
+    DpLanesUnknown { socket: String },
 }
 
 impl Diagnostic {
     /// Whether the diagnostic stops the passes after Pass 3.
     pub fn is_error(&self) -> bool {
-        !matches!(self, Diagnostic::UsbLimitedToUsb2 { .. })
+        !matches!(
+            self,
+            Diagnostic::UsbLimitedToUsb2 { .. } | Diagnostic::DpLanesUnknown { .. }
+        )
     }
 }
 
@@ -77,10 +83,16 @@ fn enclosing_limits<'a>(
         })
 }
 
-fn dp_alt_mode(socket: &str, display: &DisplaySpec, port_lanes: Option<u8>) -> Option<Diagnostic> {
+fn dp_alt_mode(
+    socket: &str,
+    display: &DisplaySpec,
+    port_lanes: Option<DpAltLanes>,
+) -> Option<Diagnostic> {
     let socket = socket.to_string();
-    let Some(available) = port_lanes else {
-        return Some(Diagnostic::DpAltModeUnsupported { socket });
+    let available = match port_lanes {
+        None => return Some(Diagnostic::DpAltModeUnsupported { socket }),
+        Some(DpAltLanes::Unknown(_)) => return Some(Diagnostic::DpLanesUnknown { socket }),
+        Some(DpAltLanes::Count(available)) => available,
     };
     let required = display.required_dp_lanes;
     if required > available {

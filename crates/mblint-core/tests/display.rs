@@ -37,6 +37,12 @@ type = "socket"
 category = "usb_c"
 parent = "root_usb"
 
+[nodes.PORT_TYPEC_4]
+type = "socket"
+category = "usb_c"
+parent = "unknown"
+dp_alt_max_lanes = "unknown"
+
 [nodes.PORT_USBA_1]
 type = "socket"
 category = "usb_a"
@@ -149,6 +155,26 @@ fn display_in_a_port_without_dp_alt_mode_is_an_error() {
         }]
     );
     assert!(diagnostics[0].is_error());
+}
+
+#[test]
+fn display_in_a_port_of_unknown_dp_lanes_is_a_warning() {
+    let diagnostics = pass_3(&[("PORT_TYPEC_4", MONITOR_4_LANES)]);
+
+    assert_eq!(
+        diagnostics,
+        vec![Diagnostic::DpLanesUnknown {
+            socket: "PORT_TYPEC_4".into(),
+        }]
+    );
+    assert!(!diagnostics[0].is_error());
+}
+
+#[test]
+fn display_fits_a_type_c_port_of_unknown_upstream() {
+    let devices = installed(&[("PORT_TYPEC_4", MONITOR_4_LANES)]);
+
+    assert!(check_physical(&board(), &devices).is_empty());
 }
 
 #[test]

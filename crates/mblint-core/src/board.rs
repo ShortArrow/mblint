@@ -243,14 +243,34 @@ pub struct SataPort {
 }
 
 /// A Type-C port. Attributes not listed here, such as `supported_protocols`, are accepted unchecked.
+///
+/// `parent` is `"unknown"` when the board's manual does not state the port's upstream.
 #[derive(Debug, Clone, Deserialize)]
 pub struct UsbC {
     pub parent: String,
     /// DisplayPort Alt Mode lanes the port can drive; `None` if it has no DP Alt Mode.
-    pub dp_alt_max_lanes: Option<u8>,
+    pub dp_alt_max_lanes: Option<DpAltLanes>,
+}
+
+/// The DP Alt Mode lanes of a Type-C port that has DP Alt Mode, written as a count or `"unknown"`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize)]
+#[serde(untagged)]
+pub enum DpAltLanes {
+    Count(u8),
+    /// The board's manual does not state the lane count.
+    Unknown(Unknown),
+}
+
+/// The value `"unknown"`, for a board value its manual does not state.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum Unknown {
+    Unknown,
 }
 
 /// A Type-A port. Attributes other than `parent` are accepted unchecked.
+///
+/// `parent` is `"unknown"` when the board's manual does not state the port's upstream.
 #[derive(Debug, Clone, Deserialize)]
 pub struct UsbA {
     pub parent: String,
