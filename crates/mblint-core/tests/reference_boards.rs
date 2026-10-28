@@ -22,6 +22,8 @@ const PROART_X870E_CREATOR_WIFI: &str =
 const ROG_STRIX_Z890_F_GAMING_WIFI: &str =
     include_str!("../../../data/boards/asus/rog_strix_z890_f_gaming_wifi.toml");
 
+const B850M_D3HP: &str = include_str!("../../../data/boards/gigabyte/b850m_d3hp.toml");
+
 const CARD_GEN4_X16: &str = r#"
 schema_version = "2.0.0"
 id = "card"
@@ -83,6 +85,14 @@ fn proart_x870e() -> Board {
 
 fn strix_z890_f() -> Board {
     Board::from_toml(ROG_STRIX_Z890_F_GAMING_WIFI).expect("reference board must parse")
+}
+
+fn b850m_d3hp() -> Board {
+    Board::from_toml(B850M_D3HP).expect("reference board must parse")
+}
+
+fn card_of_thickness(slots: u8) -> String {
+    CARD_GEN4_X16.replace("thickness_slots = 2", &format!("thickness_slots = {slots}"))
 }
 
 fn installed(devices: &[(&str, &str)]) -> BTreeMap<String, Device> {
@@ -336,4 +346,54 @@ fn strix_z890_f_monitor_fits_a_type_c_port() {
     let devices = installed(&[("C1", MONITOR)]);
 
     assert!(check_physical(&strix_z890_f(), &devices).is_empty());
+}
+
+#[test]
+fn b850m_d3hp_gen5_ssd_in_m2b_cpu_is_held_to_pcie_4_0() {
+    let (_, throughput) = resolve(&b850m_d3hp(), &[("M2B_CPU", SSD_GEN5_X4)]);
+
+    assert_eq!(
+        throughput.diagnostics,
+        vec![Diagnostic::Bottleneck {
+            socket: "M2B_CPU".into(),
+            required_gbps: lane(5) * 4.0,
+            actual_gbps: lane(4) * 4.0,
+        }]
+    );
+}
+
+#[test]
+fn b850m_d3hp_pciex4_runs_pcie_3_0_x4() {
+    let (_, throughput) = resolve(&b850m_d3hp(), &[("PCIEX4", CARD_GEN4_X16)]);
+
+    assert_eq!(
+        throughput.links.get("PCIEX4"),
+        Some(&Link {
+            generation: 3,
+            lanes: 4,
+            gbps: lane(3) * 4.0,
+        })
+    );
+}
+
+#[test]
+fn b850m_d3hp_four_slot_card_covers_pciex4() {
+    let thick_card = card_of_thickness(4);
+    let devices = installed(&[("PCIEX16", &thick_card), ("PCIEX4", CARD_GEN4_X16)]);
+
+    assert_eq!(
+        check_physical(&b850m_d3hp(), &devices),
+        vec![physical::Diagnostic::Obstructed {
+            socket: "PCIEX4".into(),
+            by: "PCIEX16".into(),
+        }]
+    );
+}
+
+#[test]
+fn b850m_d3hp_three_slot_card_leaves_pciex4_free() {
+    let thick_card = card_of_thickness(3);
+    let devices = installed(&[("PCIEX16", &thick_card), ("PCIEX4", CARD_GEN4_X16)]);
+
+    assert!(check_physical(&b850m_d3hp(), &devices).is_empty());
 }

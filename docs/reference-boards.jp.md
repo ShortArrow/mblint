@@ -6,13 +6,13 @@
 
 ## ボード
 
-AM5 と LGA1851 のそれぞれについて、ASUS、ASRock、GIGABYTE、MSI から ATX のボードを 1 枚ずつ選びます。
+AM5 と LGA1851 のそれぞれについて、ASUS、ASRock、GIGABYTE、MSI からボードを 1 枚ずつ選びます。
 
 | ソケット | メーカー | 型番 | ファイル |
 | --- | --- | --- | --- |
 | AM5 | MSI | MAG X870E TOMAHAWK WIFI | `data/boards/msi/mag_x870e_tomahawk_wifi.toml` |
 | AM5 | ASUS | ProArt X870E-CREATOR WIFI | `data/boards/asus/proart_x870e_creator_wifi.toml` |
-| AM5 | GIGABYTE | B850M D3HP | |
+| AM5 | GIGABYTE | B850M D3HP | `data/boards/gigabyte/b850m_d3hp.toml` |
 | AM5 | ASRock | X870 Taichi Creator | |
 | LGA1851 | MSI | MAG Z890 TOMAHAWK WIFI | `data/boards/msi/mag_z890_tomahawk_wifi.toml` |
 | LGA1851 | ASUS | ROG STRIX Z890-F GAMING WIFI | `data/boards/asus/rog_strix_z890_f_gaming_wifi.toml` |
@@ -26,5 +26,5 @@ AM5 と LGA1851 のそれぞれについて、ASUS、ASRock、GIGABYTE、MSI か
 - ソケットの id は、マニュアルがそのコネクタにつけた名前から `.` を除いたものとします。`M.2_1` は `M2_1` と書きます。
 - マニュアルに書かれていない値は、推測せずに省きます。マニュアルの配置図から読んだスロットの位置は、書かれている値として扱います。
 - マニュアルが上流を書いていない Type-C ポートは `parent = "unknown"` と書きます。マニュアルが DisplayPort を出力するとだけ書き、レーン数を書いていないポートは `dp_alt_max_lanes = "unknown"` と書きます。
-- マニュアルは供給量を書かないので、ルートの `lanes` は、マニュアルがそのルートから出ているとするレーン数の合計とします。
+- マニュアルは供給量を書かないので、ルートの `lanes` は、マニュアルがそのルートから出ているとするレーン数の合計とし、`generation` はそれらの世代のうち最も高いものとします。
 - `iommu_group` は、Linux 上でそのボードを観察した結果だけを書きます。

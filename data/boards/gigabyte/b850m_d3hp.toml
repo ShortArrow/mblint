@@ -1,0 +1,79 @@
+# Described for AMD Ryzen 9000 and 7000 Series Processors. Page numbers are as printed in the
+# manual. The manual does not say where the SATA connectors draw from, so they are not described.
+# Type-A ports are not described.
+schema_version = "2.0.0"
+vendor = "GIGABYTE"
+model = "B850M D3HP"
+source_manual = "https://download.gigabyte.com/FileList/Manual/mb_manual_b850m-d3hp_1001_e.pdf"
+source_page = 7
+
+[form_factor]
+standard = "Micro ATX"
+total_slot_indices = 4
+
+# --- 1. Root providers ---
+
+# p.7-8: PCIEX16 PCIe 5.0 x16, M2A_CPU PCIe 5.0 x4 and M2B_CPU PCIe 4.0 x4 from the CPU.
+[nodes.root_cpu]
+type = "root"
+bus = "pcie"
+lanes = 24
+generation = 5
+
+# p.7: PCIEX4, PCIe 3.0 x4, from the B850 chipset.
+[nodes.root_chipset]
+type = "root"
+bus = "pcie"
+lanes = 4
+generation = 3
+
+# --- 2. Physical sockets ---
+
+# p.7; position from the layout on p.4.
+[nodes.PCIEX16]
+type = "socket"
+category = "pcie_slot"
+parent = "root_cpu"
+slot_index = 1
+physical_form_factor = "x16"
+max_electrical_lanes = 16
+
+# p.7; position from the layout on p.4.
+[nodes.PCIEX4]
+type = "socket"
+category = "pcie_slot"
+parent = "root_chipset"
+slot_index = 4
+physical_form_factor = "x16"
+max_electrical_lanes = 4
+
+# p.8, 22
+[nodes.M2A_CPU]
+type = "socket"
+category = "m2_slot"
+parent = "root_cpu"
+key = "M"
+supported_protocols = ["pcie"]
+max_lanes = 4
+
+# p.8, 22
+[nodes.M2B_CPU]
+type = "socket"
+category = "m2_slot"
+parent = "root_cpu"
+key = "M"
+supported_protocols = ["pcie"]
+max_lanes = 4
+generation = 4
+
+# p.8, 15: USB 3.2 Gen 1 Type-C port on the back panel, from the CPU.
+[nodes.U3C_5G]
+type = "socket"
+category = "usb_c"
+parent = "root_cpu"
+
+# p.8, 24: USB 3.2 Gen 1 Type-C header, from the chipset.
+[nodes.FU3C_5G]
+type = "socket"
+category = "usb_c"
+parent = "root_chipset"

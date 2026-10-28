@@ -6,13 +6,13 @@ Reference boards are real motherboards described under `data/boards/`, the data 
 
 ## Boards
 
-One ATX board from each of ASUS, ASRock, GIGABYTE and MSI for each of the sockets AM5 and LGA1851.
+One board from each of ASUS, ASRock, GIGABYTE and MSI for each of the sockets AM5 and LGA1851.
 
 | Socket | Vendor | Model | File |
 | --- | --- | --- | --- |
 | AM5 | MSI | MAG X870E TOMAHAWK WIFI | `data/boards/msi/mag_x870e_tomahawk_wifi.toml` |
 | AM5 | ASUS | ProArt X870E-CREATOR WIFI | `data/boards/asus/proart_x870e_creator_wifi.toml` |
-| AM5 | GIGABYTE | B850M D3HP | |
+| AM5 | GIGABYTE | B850M D3HP | `data/boards/gigabyte/b850m_d3hp.toml` |
 | AM5 | ASRock | X870 Taichi Creator | |
 | LGA1851 | MSI | MAG Z890 TOMAHAWK WIFI | `data/boards/msi/mag_z890_tomahawk_wifi.toml` |
 | LGA1851 | ASUS | ROG STRIX Z890-F GAMING WIFI | `data/boards/asus/rog_strix_z890_f_gaming_wifi.toml` |
@@ -26,5 +26,5 @@ One ATX board from each of ASUS, ASRock, GIGABYTE and MSI for each of the socket
 - A socket's id is the name the manual gives its connector, with any `.` removed, so `M.2_1` is written `M2_1`.
 - A value the manual does not state is left out rather than inferred. Slot positions read from the manual's layout diagram count as stated.
 - A Type-C port whose upstream the manual does not state has `parent = "unknown"`, and one that the manual says outputs DisplayPort without giving a lane count has `dp_alt_max_lanes = "unknown"`.
-- A root's `lanes` is the sum of the lanes the manual lists from that root, since manuals do not state a supply.
+- A root's `lanes` is the sum of the lanes the manual lists from that root, since manuals do not state a supply, and its `generation` is the highest generation among them.
 - `iommu_group` is written only from observation on the board under Linux.
