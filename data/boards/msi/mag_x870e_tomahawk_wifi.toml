@@ -142,11 +142,13 @@ parent = "root_chipset"
 type = "socket"
 category = "usb_c"
 parent = "bridge_asm4242"
+dp_alt_max_lanes = "unknown"
 
 [nodes.PORT_USB4_2]
 type = "socket"
 category = "usb_c"
 parent = "bridge_asm4242"
+dp_alt_max_lanes = "unknown"
 
 # p.20: USB 10Gbps Type-C port on the back panel.
 [nodes.PORT_USBC_CPU]

@@ -8,7 +8,7 @@ use mblint_core::lanes::{LaneResolution, resolve_lanes};
 use mblint_core::occupancy::Occupancy;
 use mblint_core::physical::{self, check_physical};
 use mblint_core::throughput::{Diagnostic, Link, Throughput, rate_links};
-use mblint_core::tunnels::resolve_tunnels;
+use mblint_core::tunnels::{self, resolve_tunnels};
 
 const MAG_X870E_TOMAHAWK_WIFI: &str =
     include_str!("../../../data/boards/msi/mag_x870e_tomahawk_wifi.toml");
@@ -55,6 +55,20 @@ keys = ["M"]
 form_factor = "2280"
 "#;
 
+const MONITOR: &str = r#"
+schema_version = "2.0.0"
+id = "monitor"
+name = "Test Monitor"
+type = "display"
+
+[display]
+resolution = "3840x2160"
+refresh_rate = 60
+dsc_supported = false
+required_dp_lanes = 4
+bandwidth_requirement_gbps = 12.54
+"#;
+
 fn x870e_tomahawk() -> Board {
     Board::from_toml(MAG_X870E_TOMAHAWK_WIFI).expect("reference board must parse")
 }
@@ -79,6 +93,17 @@ fn installed(devices: &[(&str, &str)]) -> BTreeMap<String, Device> {
             (socket.to_string(), device)
         })
         .collect()
+}
+
+/// Pass 3 diagnostics for a monitor bound to `socket`.
+fn monitor_on(board: &Board, socket: &str) -> Vec<tunnels::Diagnostic> {
+    resolve_tunnels(board, &installed(&[(socket, MONITOR)])).diagnostics
+}
+
+fn dp_lanes_unknown(socket: &str) -> Vec<tunnels::Diagnostic> {
+    vec![tunnels::Diagnostic::DpLanesUnknown {
+        socket: socket.into(),
+    }]
 }
 
 /// Passes 2 and 4 over devices bound to the board.
@@ -266,6 +291,49 @@ fn strix_z890_f_card_in_the_chipset_slot_runs_at_x4() {
 fn strix_z890_f_four_slot_card_leaves_the_chipset_slot_free() {
     let thick_card = CARD_GEN4_X16.replace("thickness_slots = 2", "thickness_slots = 4");
     let devices = installed(&[("PCIEX16(G5)", &thick_card), ("PCIEX16(G4)", CARD_GEN4_X16)]);
+
+    assert!(check_physical(&strix_z890_f(), &devices).is_empty());
+}
+
+#[test]
+fn x870e_tomahawk_usb4_ports_carry_displayport_of_unknown_lanes() {
+    assert_eq!(
+        monitor_on(&x870e_tomahawk(), "PORT_USB4_1"),
+        dp_lanes_unknown("PORT_USB4_1")
+    );
+}
+
+#[test]
+fn z890_tomahawk_thunderbolt_ports_carry_displayport_of_unknown_lanes() {
+    assert_eq!(
+        monitor_on(&z890_tomahawk(), "PORT_TB4_1"),
+        dp_lanes_unknown("PORT_TB4_1")
+    );
+}
+
+#[test]
+fn proart_x870e_usb4_ports_carry_displayport_of_unknown_lanes() {
+    assert_eq!(monitor_on(&proart_x870e(), "EC1"), dp_lanes_unknown("EC1"));
+}
+
+#[test]
+fn proart_x870e_usb_20gbps_port_has_no_dp_alt_mode() {
+    assert_eq!(
+        monitor_on(&proart_x870e(), "C18"),
+        vec![tunnels::Diagnostic::DpAltModeUnsupported {
+            socket: "C18".into(),
+        }]
+    );
+}
+
+#[test]
+fn strix_z890_f_thunderbolt_ports_carry_displayport_of_unknown_lanes() {
+    assert_eq!(monitor_on(&strix_z890_f(), "C1"), dp_lanes_unknown("C1"));
+}
+
+#[test]
+fn strix_z890_f_monitor_fits_a_type_c_port() {
+    let devices = installed(&[("C1", MONITOR)]);
 
     assert!(check_physical(&strix_z890_f(), &devices).is_empty());
 }

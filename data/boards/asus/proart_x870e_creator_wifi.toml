@@ -1,7 +1,7 @@
 # Described for AMD Ryzen 9000 and 7000 Series Desktop Processors. Page numbers are as printed in
 # the manual. The manual's M.2 slot names contain a dot, which a node id cannot, so M.2_1 is
-# written M2_1. The manual does not say where the ASM4242 USB4 controller or the other USB ports
-# draw their lanes from, so they are not described.
+# written M2_1. The manual does not say where the Type-C ports draw their lanes from. Type-A ports
+# are not described.
 schema_version = "2.0.0"
 vendor = "ASUS"
 model = "ProArt X870E-CREATOR WIFI"
@@ -131,3 +131,29 @@ parent = "root_chipset"
 type = "socket"
 category = "sata_port"
 parent = "root_chipset"
+
+# p.8-9, 30, 47: USB4 through the ASMedia ASM4242 with DisplayPort over USB Type-C; the manual
+# gives no lane count.
+[nodes.EC1]
+type = "socket"
+category = "usb_c"
+parent = "unknown"
+dp_alt_max_lanes = "unknown"
+
+[nodes.EC2]
+type = "socket"
+category = "usb_c"
+parent = "unknown"
+dp_alt_max_lanes = "unknown"
+
+# p.9, 30: USB 20Gbps Type-C port on the back panel.
+[nodes.C18]
+type = "socket"
+category = "usb_c"
+parent = "unknown"
+
+# p.9, 26: USB 20Gbps Type-C front panel connector.
+[nodes.U20G_C6]
+type = "socket"
+category = "usb_c"
+parent = "unknown"

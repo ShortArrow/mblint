@@ -1,7 +1,7 @@
 # Described for Intel Core Ultra Processors (Series 2). Page numbers are as printed in the manual.
 # The manual's M.2 slot names contain a dot, which a node id cannot, so M.2_1 is written M2_1.
-# The manual does not say where the Thunderbolt 4 and USB ports draw their lanes from, so they
-# are not described.
+# The manual does not say where the Type-C ports draw their lanes from. Type-A ports are not
+# described.
 schema_version = "2.0.0"
 vendor = "ASUS"
 model = "ROG STRIX Z890-F GAMING WIFI"
@@ -114,3 +114,33 @@ parent = "root_chipset"
 type = "socket"
 category = "sata_port"
 parent = "root_chipset"
+
+# p.8-9, 30: Thunderbolt 4 with DisplayPort over USB Type-C; the manual gives no lane count.
+[nodes.C1]
+type = "socket"
+category = "usb_c"
+parent = "unknown"
+dp_alt_max_lanes = "unknown"
+
+[nodes.C2]
+type = "socket"
+category = "usb_c"
+parent = "unknown"
+dp_alt_max_lanes = "unknown"
+
+# p.9, 30: USB 10Gbps Type-C ports on the back panel.
+[nodes.C8]
+type = "socket"
+category = "usb_c"
+parent = "unknown"
+
+[nodes.C9]
+type = "socket"
+category = "usb_c"
+parent = "unknown"
+
+# p.9, 25: USB 20Gbps Type-C front panel connector.
+[nodes.U20G_C1]
+type = "socket"
+category = "usb_c"
+parent = "unknown"

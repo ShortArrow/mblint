@@ -118,11 +118,13 @@ parent = "root_chipset"
 type = "socket"
 category = "usb_c"
 parent = "root_cpu"
+dp_alt_max_lanes = "unknown"
 
 [nodes.PORT_TB4_2]
 type = "socket"
 category = "usb_c"
 parent = "root_cpu"
+dp_alt_max_lanes = "unknown"
 
 # p.19: USB 10Gbps Type-C port on the back panel.
 [nodes.PORT_USBC_CHIPSET]
