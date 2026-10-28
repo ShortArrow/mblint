@@ -17,7 +17,7 @@ mblint は、データルート（`boards/`、`devices/`、`rigs/` を含むデ�
 | `source_page` | そのマニュアルで、ボードの拡張スロットとストレージを一覧にしたページ。省略できる |
 | `nodes.<id>` | 一つのノード。種別は `type` で示す |
 
-ノード id は `.` を含みません。ルート以外のノードは、上流のノードを `parent` に書きます。
+ノード id は `.` を含まず、id が `unknown` のノードはありません。ルート以外のノードは、上流のノードを `parent` に書きます。ボードのマニュアルが上流を書いていない `usb_c` と `usb_a` のソケットは、`parent = "unknown"` と書きます。
 
 ### ルート
 
@@ -89,7 +89,7 @@ when = { socket = "M2_2", protocol = "pcie" }
 - `max_electrical_lanes` は省略できます。スロットに配線されたレーン数で、形状が収める数より少ないことがあります。
 - `generation` は省略できます。ルートより遅いソケットについて、その配線の PCIe の世代を書きます。
 - `key` は `B`、`E`、`M` のいずれかです。
-- `dp_alt_max_lanes` は、そのポートが駆動できる DisplayPort Alt Mode のレーン数です。これが無いポートは DP Alt Mode を持ちません。
+- `dp_alt_max_lanes` は、そのポートが駆動できる DisplayPort Alt Mode のレーン数です。DP Alt Mode を持つがボードのマニュアルがレーン数を書いていないポートでは `"unknown"` です。これが無いポートは DP Alt Mode を持ちません。
 - `iommu_group` は省略できます。実機の `/sys/kernel/iommu_groups` で確認したグループ番号を書きます。
 
 ## プロトコル

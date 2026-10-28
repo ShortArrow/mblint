@@ -25,5 +25,6 @@ One ATX board from each of ASUS, ASRock, GIGABYTE and MSI for each of the socket
 - The board is described for the CPU family that gives it the most lanes, named in a comment at the top of the file.
 - A socket's id is the name the manual gives its connector, with any `.` removed, so `M.2_1` is written `M2_1`.
 - A value the manual does not state is left out rather than inferred. Slot positions read from the manual's layout diagram count as stated.
+- A Type-C port whose upstream the manual does not state has `parent = "unknown"`, and one that the manual says outputs DisplayPort without giving a lane count has `dp_alt_max_lanes = "unknown"`.
 - A root's `lanes` is the sum of the lanes the manual lists from that root, since manuals do not state a supply.
 - `iommu_group` is written only from observation on the board under Linux.

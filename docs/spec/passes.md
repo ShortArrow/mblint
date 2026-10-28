@@ -76,7 +76,7 @@ Pass 3 computes the tunnel cap of each socket path inside an adapter: the smalle
 
 ### DP Alt Mode
 
-A display in a board `usb_c` socket takes `required_dp_lanes` of the port's DP Alt Mode lanes. When it takes four, no lanes are left for USB 3 data, and USB data on the port runs at USB 2.0.
+A display in a board `usb_c` socket takes `required_dp_lanes` of the port's DP Alt Mode lanes. When it takes four, no lanes are left for USB 3 data, and USB data on the port runs at USB 2.0. On a port whose `dp_alt_max_lanes` is `"unknown"`, whether the display gets its lanes is not known, and Pass 3 reports only that.
 
 ### Diagnostics
 
@@ -85,6 +85,7 @@ A display in a board `usb_c` socket takes `required_dp_lanes` of the port's DP A
 | `DpAltModeUnsupported` | error | A display is in a port without `dp_alt_max_lanes` |
 | `DpLanesInsufficient` | error | A display needs more lanes than the port's `dp_alt_max_lanes` |
 | `UsbLimitedToUsb2` | warning | A display takes four lanes of the port |
+| `DpLanesUnknown` | warning | A display is in a port whose `dp_alt_max_lanes` is `"unknown"` |
 
 Diagnostics are ordered by socket path. An error stops Pass 4; a warning does not.
 

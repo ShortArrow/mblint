@@ -17,7 +17,7 @@ Tables marked *strict* reject fields not listed for them. Elsewhere, unlisted fi
 | `source_page` | Optional page of that manual listing the board's expansion and storage |
 | `nodes.<id>` | One node; its kind is given by `type` |
 
-A node id contains no `.`. Every node except a root names its upstream node in `parent`.
+A node id contains no `.`, and no node has the id `unknown`. Every node except a root names its upstream node in `parent`. A `usb_c` or `usb_a` socket whose upstream the board's manual does not state has `parent = "unknown"`.
 
 ### Roots
 
@@ -89,7 +89,7 @@ A bridge whose parent is a mux draws the lanes the mux allocates to it.
 - `max_electrical_lanes` is optional. It is the number of lanes wired to the slot, which may be fewer than its form factor holds.
 - `generation` is optional. It is the PCIe generation of the socket's wiring, for a socket slower than its root.
 - `key` is `B`, `E` or `M`.
-- `dp_alt_max_lanes` is the number of DisplayPort Alt Mode lanes the port can drive. A port without it has no DP Alt Mode.
+- `dp_alt_max_lanes` is the number of DisplayPort Alt Mode lanes the port can drive, or `"unknown"` for a port with DP Alt Mode whose lane count the board's manual does not state. A port without it has no DP Alt Mode.
 - `iommu_group` is optional. It is the group number observed on real hardware under `/sys/kernel/iommu_groups`.
 
 ## Protocols

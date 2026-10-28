@@ -76,7 +76,7 @@ Pass 3 は、アダプタの中の各ソケットパスについて、トンネ�
 
 ### DP Alt Mode
 
-ボードの `usb_c` ソケットに挿した表示機器は、そのポートの DP Alt Mode のレーンを `required_dp_lanes` 本使います。4 本を使うと USB 3 のデータ用のレーンが残らず、そのポートの USB データは USB 2.0 で動作します。
+ボードの `usb_c` ソケットに挿した表示機器は、そのポートの DP Alt Mode のレーンを `required_dp_lanes` 本使います。4 本を使うと USB 3 のデータ用のレーンが残らず、そのポートの USB データは USB 2.0 で動作します。`dp_alt_max_lanes` が `"unknown"` のポートでは、表示機器が必要なレーンを得られるかが分からないので、Pass 3 はそのことだけを報告します。
 
 ### 診断
 
@@ -85,6 +85,7 @@ Pass 3 は、アダプタの中の各ソケットパスについて、トンネ�
 | `DpAltModeUnsupported` | エラー | `dp_alt_max_lanes` の無いポートに表示機器を挿した |
 | `DpLanesInsufficient` | エラー | 表示機器が、ポートの `dp_alt_max_lanes` より多くのレーンを必要とする |
 | `UsbLimitedToUsb2` | 警告 | 表示機器がポートの 4 レーンを使う |
+| `DpLanesUnknown` | 警告 | `dp_alt_max_lanes` が `"unknown"` のポートに表示機器を挿した |
 
 診断はソケットパスの順に並べます。エラーは Pass 4 を止め、警告は止めません。
 
