@@ -1,6 +1,7 @@
 //! Rig definitions and loading them, with the board and devices they name, through a reader.
 
 use std::collections::BTreeMap;
+use std::fmt;
 
 use serde::Deserialize;
 
@@ -42,6 +43,18 @@ pub enum LoadError {
     /// The file at `path` does not conform to the schema.
     Parse { path: String, error: ParseError },
 }
+
+/// Names the file that failed, then why.
+impl fmt::Display for LoadError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            LoadError::Read { path, message } => write!(f, "{path}: {message}"),
+            LoadError::Parse { path, error } => write!(f, "{path}: {error}"),
+        }
+    }
+}
+
+impl std::error::Error for LoadError {}
 
 /// Reads the rig at `path`, then its board and bound devices, through `read`.
 ///

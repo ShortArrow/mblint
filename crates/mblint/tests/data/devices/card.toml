@@ -1,0 +1,14 @@
+schema_version = "2.0.0"
+id = "card"
+name = "Test Card"
+type = "card"
+
+[interface]
+protocol = "pcie"
+generation = 4
+lanes = 16
+
+[physical]
+edge = "x16"
+thickness_slots = 2
+length_mm = 240

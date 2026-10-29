@@ -74,6 +74,7 @@ cargo clippy --all-targets
 
 | Path | Contents |
 | --- | --- |
+| `crates/mblint` | The `mblint` command line, which prints the core's report |
 | `crates/mblint-core` | Topology model and resolution passes, shared by the CLI and the Wasm build |
 | `data/` | Data root holding the reference boards |
 | `docs/` | Requirements, specifications, ADRs and open issues |

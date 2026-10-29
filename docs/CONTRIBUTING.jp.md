@@ -74,6 +74,7 @@ cargo clippy --all-targets
 
 | パス | 内容 |
 | --- | --- |
+| `crates/mblint` | `mblint` コマンドライン。コアのレポートを出力する |
 | `crates/mblint-core` | トポロジーモデルと解決パス。CLI と Wasm ビルドで共有する |
 | `data/` | 基準ボードを収めるデータルート |
 | `docs/` | 要求仕様、仕様書、ADR、未決事項 |

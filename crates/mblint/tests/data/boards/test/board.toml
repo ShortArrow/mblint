@@ -1,0 +1,25 @@
+schema_version = "2.0.0"
+vendor = "Test"
+model = "CLI Board"
+
+[nodes.root_cpu]
+type = "root"
+bus = "pcie"
+lanes = 8
+generation = 4
+
+[nodes.PCIE1]
+type = "socket"
+category = "pcie_slot"
+parent = "root_cpu"
+slot_index = 1
+physical_form_factor = "x16"
+max_electrical_lanes = 4
+
+[nodes.M2_1]
+type = "socket"
+category = "m2_slot"
+parent = "root_cpu"
+key = "M"
+supported_protocols = ["pcie"]
+max_lanes = 4
