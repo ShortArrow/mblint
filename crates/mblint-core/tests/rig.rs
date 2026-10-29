@@ -191,3 +191,38 @@ fn invalid_rig_file_is_reported_with_its_path() {
 
     assert!(matches!(error, LoadError::Parse { path, .. } if path == "rigs/test.toml"));
 }
+
+#[test]
+fn paths_that_could_leave_the_data_root_are_refused_before_reading() {
+    for path in [
+        "../secret.toml",
+        "devices/../../secret.toml",
+        "/etc/secret.toml",
+        "C:/secret.toml",
+        "devices\\..\\secret.toml",
+        "devices//gpu.toml",
+        "./devices/gpu.toml",
+    ] {
+        let files = files(&rig(&format!("PCI_E1 = {path:?}")));
+        let read = |requested: &str| {
+            assert_ne!(requested, path, "{path} must not be read");
+            reader(&files)(requested)
+        };
+
+        let error = load_rig("rigs/test.toml", read).unwrap_err();
+
+        assert!(
+            matches!(&error, LoadError::InvalidPath { path: refused } if refused == path),
+            "{path}: {error}"
+        );
+    }
+}
+
+#[test]
+fn rig_path_itself_follows_the_rule_for_paths() {
+    let files = files(&rig(""));
+
+    let error = load_rig("../rigs/test.toml", reader(&files)).unwrap_err();
+
+    assert!(matches!(error, LoadError::InvalidPath { path } if path == "../rigs/test.toml"));
+}

@@ -158,6 +158,6 @@ A display has a strict `[display]` table and runs `displayport`.
 | `board` | Path of the board file |
 | `bindings` | Path of the device file installed in each socket, keyed by socket path |
 
-File paths are relative to the data root, so a device file is named the same way from every rig.
+File paths are relative to the data root, so a device file is named the same way from every rig. A path is names separated by `/`; no name is empty, `.` or `..`, or contains `\` or `:`. So a path cannot be absolute, name a drive, or leave the data root.
 
 A socket path is a board socket id, or `<adapter path>.<NAME>` for the socket `NAME` of the adapter installed at the adapter path. An adapter path may itself be dotted, so adapters nest to any depth.

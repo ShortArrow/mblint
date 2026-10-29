@@ -24,7 +24,7 @@ The rig, its board and its devices are all read from under the data root, by the
 | --- | --- |
 | 0 | The rig was evaluated and no pass reported an error; warnings may have been reported |
 | 1 | The rig was evaluated and a pass reported an error |
-| 2 | The arguments are invalid, or a file could not be read or does not conform to the schema |
+| 2 | The arguments are invalid, a file path breaks the rule for paths, or a file could not be read or does not conform to the schema |
 
 When a file cannot be loaded, a message naming the file is printed to standard error and nothing is printed to standard output, with or without `--json`.
 

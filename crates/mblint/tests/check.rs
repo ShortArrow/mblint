@@ -82,6 +82,16 @@ fn unreadable_file_exits_2_naming_it_on_stderr_only() {
 }
 
 #[test]
+fn path_leaving_the_data_root_exits_2_without_reading_it() {
+    let output = check("rigs/escaping_device.toml", true);
+    let stderr = String::from_utf8(output.stderr).expect("stderr is UTF-8");
+
+    assert_eq!(output.status.code(), Some(2));
+    assert!(stderr.contains("../data/devices/card.toml"), "{stderr}");
+    assert!(output.stdout.is_empty());
+}
+
+#[test]
 fn missing_rig_argument_exits_2() {
     assert_eq!(mblint(&["check"]).status.code(), Some(2));
 }

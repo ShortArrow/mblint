@@ -38,6 +38,8 @@ pub struct LoadedRig {
 
 #[derive(Debug)]
 pub enum LoadError {
+    /// `path` breaks the rule for paths in `docs/spec/schema.md`, so it was not read.
+    InvalidPath { path: String },
     /// The reader could not supply the file at `path`.
     Read { path: String, message: String },
     /// The file at `path` does not conform to the schema.
@@ -48,6 +50,9 @@ pub enum LoadError {
 impl fmt::Display for LoadError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
+            LoadError::InvalidPath { path } => {
+                write!(f, "{path}: not a path of names under the data root")
+            }
             LoadError::Read { path, message } => write!(f, "{path}: {message}"),
             LoadError::Parse { path, error } => write!(f, "{path}: {error}"),
         }
@@ -59,7 +64,7 @@ impl std::error::Error for LoadError {}
 /// Reads the rig at `path`, then its board and bound devices, through `read`.
 ///
 /// `read` maps a data-root-relative path to the file's contents, or to a message saying why it
-/// cannot. Bindings are loaded in socket path order and the first failure is returned.
+/// cannot. `read` is only given paths that stay under the data root. Bindings are loaded in socket path order and the first failure is returned.
 pub fn load_rig(
     path: &str,
     read: impl Fn(&str) -> Result<String, String>,
@@ -85,6 +90,11 @@ fn parse_file<T>(
     read: &impl Fn(&str) -> Result<String, String>,
     parse: impl Fn(&str) -> Result<T, ParseError>,
 ) -> Result<T, LoadError> {
+    if !stays_under_data_root(path) {
+        return Err(LoadError::InvalidPath {
+            path: path.to_string(),
+        });
+    }
     let source = read(path).map_err(|message| LoadError::Read {
         path: path.to_string(),
         message,
@@ -93,4 +103,11 @@ fn parse_file<T>(
         path: path.to_string(),
         error,
     })
+}
+
+/// Whether `path` is names separated by `/`, none empty, `.` or `..`, and none holding `\` or
+/// `:`, so that it can be neither absolute nor a drive on any platform.
+fn stays_under_data_root(path: &str) -> bool {
+    path.split('/')
+        .all(|name| !matches!(name, "" | "." | "..") && !name.contains(['\\', ':']))
 }
