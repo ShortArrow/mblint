@@ -17,6 +17,7 @@ Early development, between Phases 1 and 2 of the [roadmap](docs/prd.md#8-roadmap
 | [Product requirements](docs/prd.md) | What mblint must do |
 | [Data schema](docs/spec/schema.md) | The fields of board, device and rig files |
 | [Resolution passes](docs/spec/passes.md) | What each pass checks and reports |
+| [Board lint](docs/spec/lint.md) | What lint checks in a board file on its own |
 | [Command line](docs/spec/cli.md) | The `mblint` commands, their output and exit status |
 | [Open issues](docs/spec/open-issues.md) | What is still undecided |
 | [Contributing](docs/CONTRIBUTING.md) | Language, workflow and where things are written |

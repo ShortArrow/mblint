@@ -2,7 +2,7 @@
 
 [日本語](cli.jp.md)
 
-The `mblint` binary evaluates rigs with the resolution passes.
+The `mblint` binary evaluates rigs with the resolution passes and lints boards.
 
 ## `mblint check`
 
@@ -71,3 +71,33 @@ A diagnostic is an object with these fields, followed by the fields of its code:
 | `SHARED_IOMMU_GROUP` | `throughput` | `group`, `endpoints` |
 
 A link is an object with `generation`, `lanes` and `gbps`. Bandwidth figures are unrounded.
+
+## `mblint lint`
+
+```sh
+mblint lint [--data-root <dir>] [--json] <board>
+```
+
+| Argument | Contents |
+| --- | --- |
+| `<board>` | Path of the board file, relative to the data root, such as `boards/msi/mag_x870e_tomahawk_wifi.toml` |
+| `--data-root <dir>` | The data root; the current directory if omitted |
+| `--json` | Print the report as JSON instead of text |
+
+The board is checked as [Board lint](lint.md) specifies. The exit status is that of `mblint check`, with "a pass reported an error" read as "lint reported an error", and a board that cannot be loaded is handled the same way.
+
+Without `--json`, the report is printed for people: its status and every diagnostic with its message. The layout of the text is unspecified.
+
+With `--json`, standard output is one JSON object with `status`, as for `mblint check`, and `diagnostics`, in the order lint specifies. A diagnostic is an object with `severity`, `code` and `message` as for `mblint check`, followed by the fields of its code:
+
+| `code` | Fields |
+| --- | --- |
+| `INVALID_NODE_ID` | `node` |
+| `UNKNOWN_PARENT` | `node`, `parent` |
+| `INVALID_PARENT` | `node`, `parent` |
+| `PARENT_CYCLE` | `nodes` |
+| `UNKNOWN_MODE_TARGET` | `mux`, `node` |
+| `FOREIGN_ALLOCATION` | `mux`, `node` |
+| `UNREACHABLE_SOCKET` | `node` |
+| `NO_MATCHING_MODE` | `mux`, `occupancy` |
+| `LANE_OVERCOMMIT` | `root`, `supplied`, `demanded`, `occupancy` |

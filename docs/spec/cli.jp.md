@@ -2,7 +2,7 @@
 
 [English](cli.md)
 
-`mblint` バイナリは、解決パスで rig を評価します。
+`mblint` バイナリは、解決パスで rig を評価し、ボードを lint します。
 
 ## `mblint check`
 
@@ -71,3 +71,33 @@ rig、そのボード、そのデバイスは、すべて rig が書くパスで
 | `SHARED_IOMMU_GROUP` | `throughput` | `group`、`endpoints` |
 
 リンクは `generation`、`lanes`、`gbps` を持つオブジェクトです。帯域の値は丸めません。
+
+## `mblint lint`
+
+```sh
+mblint lint [--data-root <dir>] [--json] <board>
+```
+
+| 引数 | 内容 |
+| --- | --- |
+| `<board>` | ボードのファイルの、データルートからの相対パス。`boards/msi/mag_x870e_tomahawk_wifi.toml` など |
+| `--data-root <dir>` | データルート。省略すると現在のディレクトリ |
+| `--json` | レポートをテキストではなく JSON で出力する |
+
+ボードは[ボードの lint](lint.jp.md) のとおりに検査します。終了ステータスは `mblint check` と同じで、「パスがエラーを報告した」を「lint がエラーを報告した」と読み替えます。読み込めないボードも同じように扱います。
+
+`--json` を付けないと、レポートを人向けに出力します。状態と、すべての診断とそのメッセージです。テキストのレイアウトは未規定です。
+
+`--json` を付けると、標準出力は一つの JSON オブジェクトになります。`mblint check` と同じ `status` と、lint が定める順の `diagnostics` を持ちます。診断は、`mblint check` と同じ `severity`、`code`、`message` と、コードごとのフィールドを持つオブジェクトです。
+
+| `code` | フィールド |
+| --- | --- |
+| `INVALID_NODE_ID` | `node` |
+| `UNKNOWN_PARENT` | `node`、`parent` |
+| `INVALID_PARENT` | `node`、`parent` |
+| `PARENT_CYCLE` | `nodes` |
+| `UNKNOWN_MODE_TARGET` | `mux`、`node` |
+| `FOREIGN_ALLOCATION` | `mux`、`node` |
+| `UNREACHABLE_SOCKET` | `node` |
+| `NO_MATCHING_MODE` | `mux`、`occupancy` |
+| `LANE_OVERCOMMIT` | `root`、`supplied`、`demanded`、`occupancy` |

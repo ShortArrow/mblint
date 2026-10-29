@@ -17,6 +17,7 @@ mblint は、PC を組み立てる前に、構成をマザーボードと突き�
 | [製品要求仕様](prd.jp.md) | mblint が満たすべきこと |
 | [データスキーマ](spec/schema.jp.md) | ボード、デバイス、rig のファイルのフィールド |
 | [解決パス](spec/passes.jp.md) | 各パスが何を検査し、何を報告するか |
+| [ボードの lint](spec/lint.jp.md) | lint がボードのファイルだけで何を検査するか |
 | [コマンドライン](spec/cli.jp.md) | `mblint` のコマンド、その出力と終了ステータス |
 | [未決事項](spec/open-issues.jp.md) | まだ決まっていないこと |
 | [コントリビューション](CONTRIBUTING.jp.md) | 言語、作業手順、何をどこに書くか |
