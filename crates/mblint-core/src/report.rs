@@ -1,4 +1,5 @@
-//! The report of an evaluation, shared by every front end so that each prints the same result.
+//! The reports of an evaluation and of a lint, shared by every front end so that each prints the
+//! same result.
 
 use std::collections::BTreeMap;
 
@@ -7,7 +8,7 @@ use serde::Serialize;
 use crate::evaluate::{Evaluation, PassOutcome};
 use crate::iommu::SharedIommuGroup;
 use crate::throughput::Link;
-use crate::{lanes, physical, throughput, tunnels};
+use crate::{lanes, lint, physical, throughput, tunnels};
 
 /// What `mblint check` prints, as `docs/spec/cli.md` specifies.
 #[derive(Debug, Clone, PartialEq, Serialize)]
@@ -182,12 +183,115 @@ fn state<T>(outcome: &PassOutcome<T>) -> PassState {
 }
 
 fn status(diagnostics: &[Finding]) -> Status {
-    if diagnostics.iter().any(|f| f.severity == Severity::Error) {
-        Status::Error
-    } else if diagnostics.is_empty() {
-        Status::Ok
-    } else {
-        Status::Warning
+    status_of(diagnostics.iter().map(|f| f.severity))
+}
+
+fn status_of(severities: impl Iterator<Item = Severity>) -> Status {
+    let mut status = Status::Ok;
+    for severity in severities {
+        match severity {
+            Severity::Error => return Status::Error,
+            Severity::Warning => status = Status::Warning,
+        }
+    }
+    status
+}
+
+/// What `mblint lint` prints, as `docs/spec/cli.md` specifies.
+#[derive(Debug, Clone, PartialEq, Serialize)]
+pub struct LintReport {
+    pub status: Status,
+    /// In the order lint reports them.
+    pub diagnostics: Vec<LintFinding>,
+}
+
+/// One lint diagnostic with its severity and an English message.
+#[derive(Debug, Clone, PartialEq, Serialize)]
+pub struct LintFinding {
+    pub severity: Severity,
+    /// Serialized as `code` and the diagnostic's fields.
+    #[serde(flatten)]
+    pub diagnostic: lint::Diagnostic,
+    pub message: String,
+}
+
+/// Every lint diagnostic as an error, and the status they amount to.
+pub fn lint_report(diagnostics: &[lint::Diagnostic]) -> LintReport {
+    let diagnostics: Vec<LintFinding> = diagnostics
+        .iter()
+        .map(|d| LintFinding {
+            severity: Severity::Error,
+            message: lint_message(d),
+            diagnostic: d.clone(),
+        })
+        .collect();
+    LintReport {
+        status: status_of(diagnostics.iter().map(|f| f.severity)),
+        diagnostics,
+    }
+}
+
+/// A sentence describing the lint diagnostic. Its wording is not part of the report's contract.
+fn lint_message(diagnostic: &lint::Diagnostic) -> String {
+    use lint::Diagnostic as L;
+    match diagnostic {
+        L::InvalidNodeId { node } => format!("The node id {node} contains a dot or is reserved."),
+        L::UnknownParent { node, parent } => {
+            format!("The parent of {node}, {parent}, names no node.")
+        }
+        L::InvalidParent { node, parent } => {
+            format!("The parent of {node}, {parent}, supplies no lanes.")
+        }
+        L::ParentCycle { nodes } => format!("The parents of {} form a cycle.", nodes.join(", ")),
+        L::UnknownModeTarget { mux, node } => {
+            format!("A mode of {mux} names {node}, which is missing or of the wrong kind.")
+        }
+        L::ForeignAllocation { mux, node } => {
+            format!("A mode of {mux} allocates lanes to {node}, which is not under it.")
+        }
+        L::UnreachableSocket { node } => {
+            format!("No mode of the mux above {node} allocates lanes to it.")
+        }
+        L::NoMatchingMode { mux, occupancy } => {
+            format!("No mode of {mux} holds when {}.", states(occupancy))
+        }
+        L::LaneOvercommit {
+            root,
+            supplied,
+            demanded,
+            occupancy,
+        } => format!(
+            "{root} supplies {supplied} lanes but {demanded} are demanded when {}.",
+            states(occupancy)
+        ),
+    }
+}
+
+/// An occupancy in words, such as `M2_1 runs sata and PCIE2 is empty`.
+fn states(occupancy: &BTreeMap<String, lint::Occupant>) -> String {
+    if occupancy.is_empty() {
+        return "every socket is empty".to_string();
+    }
+    occupancy
+        .iter()
+        .map(|(socket, occupant)| match occupant {
+            lint::Occupant::Empty => format!("{socket} is empty"),
+            lint::Occupant::Running(protocol) => {
+                format!("{socket} runs {}", protocol_name(*protocol))
+            }
+        })
+        .collect::<Vec<_>>()
+        .join(" and ")
+}
+
+fn protocol_name(protocol: crate::protocol::Protocol) -> &'static str {
+    use crate::protocol::Protocol::*;
+    match protocol {
+        Pcie => "pcie",
+        Sata => "sata",
+        Usb4 => "usb4",
+        Usb3Gen1x1 => "usb3_gen1x1",
+        Displayport => "displayport",
     }
 }
 

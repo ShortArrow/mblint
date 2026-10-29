@@ -61,10 +61,19 @@ impl fmt::Display for LoadError {
 
 impl std::error::Error for LoadError {}
 
+/// Reads the board at `path` through `read`, as [`load_rig`] reads a rig's board.
+pub fn load_board(
+    path: &str,
+    read: impl Fn(&str) -> Result<String, String>,
+) -> Result<Board, LoadError> {
+    parse_file(path, &read, Board::from_toml)
+}
+
 /// Reads the rig at `path`, then its board and bound devices, through `read`.
 ///
 /// `read` maps a data-root-relative path to the file's contents, or to a message saying why it
-/// cannot. `read` is only given paths that stay under the data root. Bindings are loaded in socket path order and the first failure is returned.
+/// cannot. `read` is only given paths that stay under the data root. Bindings are loaded in
+/// socket path order and the first failure is returned.
 pub fn load_rig(
     path: &str,
     read: impl Fn(&str) -> Result<String, String>,

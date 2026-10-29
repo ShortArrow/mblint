@@ -6,6 +6,7 @@ pub mod device;
 pub mod evaluate;
 pub mod iommu;
 pub mod lanes;
+pub mod lint;
 pub mod occupancy;
 pub mod parse;
 pub mod physical;

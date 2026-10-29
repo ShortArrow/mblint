@@ -1,7 +1,9 @@
 //! An evaluation turns into the report that `docs/spec/cli.md` specifies.
 
+use mblint_core::board::Board;
 use mblint_core::evaluate::evaluate;
-use mblint_core::report::{Status, report};
+use mblint_core::lint::lint;
+use mblint_core::report::{Status, lint_report, report};
 use mblint_core::rig::load_rig;
 use serde_json::{Value, json};
 
@@ -147,5 +149,94 @@ fn shared_iommu_group_lists_its_endpoints() {
             "endpoints": ["ONBOARD_SATA_CONTROLLER", "PCI_E2"],
             "message": "IOMMU group 14 is shared by ONBOARD_SATA_CONTROLLER, PCI_E2."
         })
+    );
+}
+
+#[test]
+fn lint_report_lists_each_diagnostic_as_an_error() {
+    let board = Board::from_toml(
+        r#"
+schema_version = "2.0.0"
+vendor = "Test"
+model = "Lint Board"
+
+[nodes.PCIE1]
+type = "socket"
+category = "pcie_slot"
+parent = "root_gpu"
+slot_index = 1
+physical_form_factor = "x16"
+"#,
+    )
+    .expect("board must parse");
+
+    assert_eq!(
+        serde_json::to_value(lint_report(&lint(&board))).expect("report must serialize"),
+        json!({
+            "status": "error",
+            "diagnostics": [{
+                "severity": "error",
+                "code": "UNKNOWN_PARENT",
+                "node": "PCIE1",
+                "parent": "root_gpu",
+                "message": "The parent of PCIE1, root_gpu, names no node."
+            }]
+        })
+    );
+}
+
+#[test]
+fn lint_report_writes_an_occupancy_as_states_by_socket() {
+    let board = Board::from_toml(
+        r#"
+schema_version = "2.0.0"
+vendor = "Test"
+model = "Lint Board"
+
+[nodes.root_cpu]
+type = "root"
+bus = "pcie"
+lanes = 4
+generation = 4
+
+[nodes.mux_m2]
+type = "mux"
+subtype = "exclusive"
+parent = "root_cpu"
+
+[[nodes.mux_m2.modes]]
+when = { socket = "M2_1", protocol = "sata" }
+allocate = { M2_1 = 8 }
+
+[[nodes.mux_m2.modes]]
+when = { socket = "M2_1", is = "empty" }
+
+[[nodes.mux_m2.modes]]
+when = { socket = "M2_1", is = "occupied" }
+allocate = { M2_1 = 4 }
+
+[nodes.M2_1]
+type = "socket"
+category = "m2_slot"
+parent = "mux_m2"
+key = "M"
+"#,
+    )
+    .expect("board must parse");
+
+    let report = serde_json::to_value(lint_report(&lint(&board))).expect("report must serialize");
+
+    assert_eq!(report["diagnostics"][0]["code"], "LANE_OVERCOMMIT");
+    assert_eq!(
+        report["diagnostics"][0]["occupancy"],
+        json!({ "M2_1": "sata" })
+    );
+}
+
+#[test]
+fn lint_report_without_diagnostics_is_ok() {
+    assert_eq!(
+        serde_json::to_value(lint_report(&[])).expect("report must serialize"),
+        json!({ "status": "ok", "diagnostics": [] })
     );
 }

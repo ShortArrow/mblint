@@ -3,7 +3,7 @@ use std::collections::BTreeMap;
 use mblint_core::evaluate::{PassOutcome, evaluate};
 use mblint_core::lanes::Diagnostic as LaneDiagnostic;
 use mblint_core::physical::Diagnostic as PhysicalDiagnostic;
-use mblint_core::rig::{LoadError, load_rig};
+use mblint_core::rig::{LoadError, load_board, load_rig};
 
 const BOARD: &str = r#"
 schema_version = "2.0.0"
@@ -225,4 +225,15 @@ fn rig_path_itself_follows_the_rule_for_paths() {
     let error = load_rig("../rigs/test.toml", reader(&files)).unwrap_err();
 
     assert!(matches!(error, LoadError::InvalidPath { path } if path == "../rigs/test.toml"));
+}
+
+#[test]
+fn board_loads_alone_by_the_rule_for_paths() {
+    let files = files(&rig(""));
+
+    let board = load_board("boards/test/rig_board.toml", reader(&files)).expect("board loads");
+    let error = load_board("../boards/test/rig_board.toml", reader(&files)).unwrap_err();
+
+    assert_eq!(board.model, "Rig Board");
+    assert!(matches!(error, LoadError::InvalidPath { .. }));
 }
