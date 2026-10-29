@@ -2,6 +2,8 @@
 
 use std::collections::BTreeMap;
 
+use serde::Serialize;
+
 use crate::board::{Board, Node, Socket};
 use crate::device::{Device, DeviceKind, DownstreamSocket, Interface};
 use crate::lanes::LaneResolution;
@@ -17,7 +19,7 @@ pub struct Throughput {
 }
 
 /// The link a device settles on in its socket.
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, Serialize)]
 pub struct Link {
     pub generation: u8,
     pub lanes: u32,
@@ -25,7 +27,8 @@ pub struct Link {
     pub gbps: f64,
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize)]
+#[serde(tag = "code", rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum Diagnostic {
     /// The device's link runs below the rate of its own interface.
     Bottleneck {

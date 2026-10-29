@@ -3,6 +3,8 @@
 
 use std::collections::BTreeMap;
 
+use serde::Serialize;
+
 use crate::board::{Board, DpAltLanes, Socket};
 use crate::device::{Device, DeviceKind, DisplaySpec};
 
@@ -20,7 +22,8 @@ pub struct Tunnelling {
     pub diagnostics: Vec<Diagnostic>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[serde(tag = "code", rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum Diagnostic {
     /// A display is in a Type-C port without DP Alt Mode.
     DpAltModeUnsupported { socket: String },

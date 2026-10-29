@@ -2,11 +2,14 @@
 
 use std::collections::BTreeMap;
 
+use serde::Serialize;
+
 use crate::board::{Board, Socket};
 use crate::connector::{M2Key, PcieWidth, UpstreamConnector};
 use crate::device::{Device, DeviceKind, DownstreamSocket};
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[serde(tag = "code", rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum Diagnostic {
     /// A device is bound to a socket path that leads to no board or adapter socket.
     UnknownSocket { socket: String },

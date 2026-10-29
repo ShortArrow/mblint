@@ -2,6 +2,8 @@
 
 use std::collections::{BTreeMap, BTreeSet};
 
+use serde::Serialize;
+
 use crate::board::{Board, Node};
 use crate::occupancy::Occupancy;
 
@@ -15,7 +17,8 @@ pub struct LaneResolution {
     pub diagnostics: Vec<Diagnostic>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[serde(tag = "code", rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum Diagnostic {
     /// The lanes demanded by a root's children exceed what the root supplies.
     LaneOvercommit {
