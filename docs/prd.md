@@ -13,7 +13,7 @@
 
 Instead of writing rules per connector, mblint models the hardware on a board as a single directed graph of Root Providers, Muxes / Switches, Bridges and Sockets.
 
-Hardware data is kept as declarative TOML under GitOps. The pure graph traversal and constraint resolution logic lives in a shared core library, `mblint-core`. From that one core, mblint serves both a fully static web wiring simulator for people and a fast CLI for LLM agents, without maintaining two implementations.
+Hardware data is kept as declarative TOML under GitOps. The pure graph traversal and constraint resolution logic lives in a shared core library, `mblint-core`. From that one core, mblint serves both a fully static web wiring simulator for people and a fast CLI / MCP endpoint for LLM agents, without maintaining two implementations.
 
 ---
 
@@ -80,7 +80,7 @@ Onboard controllers that have an IOMMU group of their own are nodes of kind `con
  │       (native CLI)        │  │       (static SPA)        │
  │ - Rich human output       │  │ - Static SPA (Pages)      │
  │ - AI output (--json)      │  │ - Client-side Wasm solver │
- │                           │  │ - Topology & slot visual  │
+ │ - MCP server (stdio)      │  │ - Topology & slot visual  │
  └───────────────────────────┘  └───────────────────────────┘
 ```
 
@@ -426,6 +426,8 @@ The engine runs four passes over the graph.
 
 2. **Lint a board (`mblint lint <board.toml>`)**
    * Static analysis of a board graph alone: lane overcommit, cycles, unreachable sockets.
+3. **MCP server (`mblint mcp`)**
+   * MCP tools over stdio with which LLM clients (Cursor, Claude Desktop and others) explore topologies and diagnose builds.
 
 ### 6.2 `mblint-web`
 
@@ -466,3 +468,5 @@ The engine runs four passes over the graph.
 * **Phase 4: GitOps and data**
   * GitHub Actions CI for pull requests
   * Definitions for major high-end boards and popular adapters and expansion cards
+* **Phase 5: MCP server**, once the web simulator has matured
+  * MCP server (LLM integration over stdio)

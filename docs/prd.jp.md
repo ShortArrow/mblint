@@ -13,7 +13,7 @@
 
 端子ごとに個別のルールを書くのではなく、基板上のハードウェアを「リソース供給源（Root Provider）」「マルチプレクサ / スイッチ（Mux / Switch）」「プロトコル変換ブリッジ（Bridge）」「物理ソケット（Socket）」から成る単一の有向グラフとしてモデル化する。
 
-ハードウェアのデータは宣言的な TOML として GitOps で管理する。純粋なグラフ探索・制約解決のロジックは共有コアライブラリ `mblint-core` に切り出す。この一つのコアから、人間向けの完全静的 Web 配線シミュレーターと、LLM エージェント向けの高速な CLIを、二重保守なしで提供する。
+ハードウェアのデータは宣言的な TOML として GitOps で管理する。純粋なグラフ探索・制約解決のロジックは共有コアライブラリ `mblint-core` に切り出す。この一つのコアから、人間向けの完全静的 Web 配線シミュレーターと、LLM エージェント向けの高速な CLI / MCP エンドポイントを、二重保守なしで提供する。
 
 ---
 
@@ -80,7 +80,7 @@
  │       (native CLI)        │  │       (static SPA)        │
  │ - Rich human output       │  │ - Static SPA (Pages)      │
  │ - AI output (--json)      │  │ - Client-side Wasm solver │
- │                           │  │ - Topology & slot visual  │
+ │ - MCP server (stdio)      │  │ - Topology & slot visual  │
  └───────────────────────────┘  └───────────────────────────┘
 ```
 
@@ -426,6 +426,8 @@ PORT_TYPEC_1 = "devices/peripherals/razer_core_x.toml"
 
 2. **ボードの静的検証 (`mblint lint <board.toml>`)**
    * ボードのグラフ定義単体を静的解析し、レーン超過、閉路、到達不能なソケットを検出する。
+3. **MCP サーバー (`mblint mcp`)**
+   * LLM クライアント（Cursor、Claude Desktop など）が stdio 経由でトポロジーの探索と構成の診断を行える MCP ツールを提供する。
 
 ### 6.2 `mblint-web`
 
@@ -466,3 +468,5 @@ PORT_TYPEC_1 = "devices/peripherals/razer_core_x.toml"
 * **Phase 4: GitOps 運用とデータ拡充**
   * プルリクエスト向けの GitHub Actions CI
   * 主要な上位マザーボード、人気のアダプタ・拡張カードの定義
+* **Phase 5: MCP サーバー**（Web シミュレーターが成熟してから）
+  * MCP サーバー（stdio 経由の LLM 連携）
