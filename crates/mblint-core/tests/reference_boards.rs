@@ -3,6 +3,7 @@
 use std::collections::BTreeMap;
 
 use mblint_core::board::Board;
+use mblint_core::connector::PcieWidth;
 use mblint_core::device::Device;
 use mblint_core::lanes::{LaneResolution, resolve_lanes};
 use mblint_core::occupancy::Occupancy;
@@ -28,6 +29,9 @@ const X870_TAICHI_CREATOR: &str =
     include_str!("../../../data/boards/asrock/x870_taichi_creator.toml");
 
 const Z890_AERO_G: &str = include_str!("../../../data/boards/gigabyte/z890_aero_g.toml");
+
+const Z890_STEEL_LEGEND_WIFI: &str =
+    include_str!("../../../data/boards/asrock/z890_steel_legend_wifi.toml");
 
 const CARD_GEN4_X16: &str = r#"
 schema_version = "2.0.0"
@@ -102,6 +106,10 @@ fn x870_taichi() -> Board {
 
 fn z890_aero_g() -> Board {
     Board::from_toml(Z890_AERO_G).expect("reference board must parse")
+}
+
+fn z890_steel_legend() -> Board {
+    Board::from_toml(Z890_STEEL_LEGEND_WIFI).expect("reference board must parse")
 }
 
 fn card_of_thickness(slots: u8) -> String {
@@ -511,5 +519,55 @@ fn z890_aero_g_thunderbolt_port_carries_displayport_of_unknown_lanes() {
     assert_eq!(
         monitor_on(&z890_aero_g(), "TBT_40G"),
         dp_lanes_unknown("TBT_40G")
+    );
+}
+
+#[test]
+fn z890_steel_legend_x16_card_does_not_fit_pcie3() {
+    let devices = installed(&[("PCIE3", CARD_GEN4_X16)]);
+
+    assert_eq!(
+        check_physical(&z890_steel_legend(), &devices),
+        vec![physical::Diagnostic::EdgeTooWide {
+            socket: "PCIE3".into(),
+            edge: PcieWidth::X16,
+            slot: PcieWidth::X4,
+        }]
+    );
+}
+
+#[test]
+fn z890_steel_legend_four_slot_card_covers_pcie2() {
+    let thick_card = card_of_thickness(4);
+    let devices = installed(&[("PCIE1", &thick_card), ("PCIE2", CARD_GEN4_X16)]);
+
+    assert_eq!(
+        check_physical(&z890_steel_legend(), &devices),
+        vec![physical::Diagnostic::Obstructed {
+            socket: "PCIE2".into(),
+            by: "PCIE1".into(),
+        }]
+    );
+}
+
+#[test]
+fn z890_steel_legend_gen5_ssd_in_m2_2_is_held_to_pcie_4_0() {
+    let (_, throughput) = resolve(&z890_steel_legend(), &[("M2_2", SSD_GEN5_X4)]);
+
+    assert_eq!(
+        throughput.diagnostics,
+        vec![Diagnostic::Bottleneck {
+            socket: "M2_2".into(),
+            required_gbps: lane(5) * 4.0,
+            actual_gbps: lane(4) * 4.0,
+        }]
+    );
+}
+
+#[test]
+fn z890_steel_legend_thunderbolt_ports_carry_displayport_of_unknown_lanes() {
+    assert_eq!(
+        monitor_on(&z890_steel_legend(), "TB_1"),
+        dp_lanes_unknown("TB_1")
     );
 }

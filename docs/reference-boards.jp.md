@@ -17,7 +17,7 @@ AM5 と LGA1851 のそれぞれについて、ASUS、ASRock、GIGABYTE、MSI か
 | LGA1851 | MSI | MAG Z890 TOMAHAWK WIFI | `data/boards/msi/mag_z890_tomahawk_wifi.toml` |
 | LGA1851 | ASUS | ROG STRIX Z890-F GAMING WIFI | `data/boards/asus/rog_strix_z890_f_gaming_wifi.toml` |
 | LGA1851 | GIGABYTE | Z890 AERO G | `data/boards/gigabyte/z890_aero_g.toml` |
-| LGA1851 | ASRock | Z890 Steel Legend WiFi | |
+| LGA1851 | ASRock | Z890 Steel Legend WiFi | `data/boards/asrock/z890_steel_legend_wifi.toml` |
 
 ## 出典
 

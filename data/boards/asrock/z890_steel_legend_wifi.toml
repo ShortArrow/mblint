@@ -1,0 +1,134 @@
+# Described for Intel Core Ultra Processors (Series 2). Page numbers are as printed in the manual.
+# Type-A ports are not described.
+schema_version = "2.0.0"
+vendor = "ASRock"
+model = "Z890 Steel Legend WiFi"
+source_manual = "https://download.asrock.com/Manual/Z890%20Steel%20Legend%20WiFi.pdf"
+source_page = 2
+
+[form_factor]
+standard = "ATX"
+total_slot_indices = 7
+
+# --- 1. Root providers ---
+
+# p.2, 4, 11: PCIE1 PCIe 5.0 x16, M2_1 PCIe 5.0 x4 and M2_2 PCIe 4.0 x4 from the CPU.
+[nodes.root_cpu]
+type = "root"
+bus = "pcie"
+lanes = 24
+generation = 5
+
+# p.11: PCIE2, PCIE3, M2_3 and M2_4, each PCIe 4.0 x4, and x1 each to the Wi-Fi module, the LAN
+# controller and the ASM3042 USB controller, from the Z890 chipset.
+[nodes.root_chipset]
+type = "root"
+bus = "pcie"
+lanes = 19
+generation = 4
+
+# --- 2. Physical sockets ---
+
+# p.2, 11, 26; position from the layout on p.7.
+[nodes.PCIE1]
+type = "socket"
+category = "pcie_slot"
+parent = "root_cpu"
+slot_index = 2
+physical_form_factor = "x16"
+max_electrical_lanes = 16
+
+# p.2, 11, 26; position from the layout on p.7.
+[nodes.PCIE2]
+type = "socket"
+category = "pcie_slot"
+parent = "root_chipset"
+slot_index = 5
+physical_form_factor = "x16"
+max_electrical_lanes = 4
+
+# p.2, 26: "PCIe 4.0 x4 Slot"; position from the layout on p.7.
+[nodes.PCIE3]
+type = "socket"
+category = "pcie_slot"
+parent = "root_chipset"
+slot_index = 6
+physical_form_factor = "x4"
+max_electrical_lanes = 4
+
+# p.4, 50
+[nodes.M2_1]
+type = "socket"
+category = "m2_slot"
+parent = "root_cpu"
+key = "M"
+supported_protocols = ["pcie"]
+max_lanes = 4
+
+# p.4, 53
+[nodes.M2_2]
+type = "socket"
+category = "m2_slot"
+parent = "root_cpu"
+key = "M"
+supported_protocols = ["pcie"]
+max_lanes = 4
+generation = 4
+
+# p.4, 55
+[nodes.M2_3]
+type = "socket"
+category = "m2_slot"
+parent = "root_chipset"
+key = "M"
+supported_protocols = ["pcie", "sata"]
+max_lanes = 4
+
+# p.4, 58
+[nodes.M2_4]
+type = "socket"
+category = "m2_slot"
+parent = "root_chipset"
+key = "M"
+supported_protocols = ["pcie"]
+max_lanes = 4
+
+# p.4, 11, 33: four SATA3 connectors from the chipset.
+[nodes.SATA3_0]
+type = "socket"
+category = "sata_port"
+parent = "root_chipset"
+
+[nodes.SATA3_1]
+type = "socket"
+category = "sata_port"
+parent = "root_chipset"
+
+[nodes.SATA3_2]
+type = "socket"
+category = "sata_port"
+parent = "root_chipset"
+
+[nodes.SATA3_3]
+type = "socket"
+category = "sata_port"
+parent = "root_chipset"
+
+# p.3-4, 11: Thunderbolt 4 from the CPU with DP Alt Mode; the manual gives no lane count.
+[nodes.TB_1]
+type = "socket"
+category = "usb_c"
+parent = "root_cpu"
+dp_alt_max_lanes = "unknown"
+
+[nodes.TB_2]
+type = "socket"
+category = "usb_c"
+parent = "root_cpu"
+dp_alt_max_lanes = "unknown"
+
+# p.4, 11, 36: USB 3.2 Gen2x2 Type-C front panel header, from the chipset.
+[nodes.USB32_TC2]
+type = "socket"
+category = "usb_c"
+parent = "root_chipset"
