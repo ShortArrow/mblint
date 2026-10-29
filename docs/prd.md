@@ -385,27 +385,42 @@ The engine runs four passes over the graph.
 
 1. **Check a rig (`mblint check <rig.toml>`)**
    * For people: PCIe / M.2 / USB state, effective bandwidth, fallback reasons and IOMMU groups as trees and tables.
-   * For AI and scripts (`--json`):
+   * For AI and scripts (`--json`), as for the rig in 4.3:
 
      ```json
      {
        "status": "warning",
-       "warnings": [
+       "passes": {
+         "physical": "ran",
+         "lanes": "ran",
+         "tunnels": "ran",
+         "throughput": "ran"
+       },
+       "diagnostics": [
          {
-           "code": "BANDWIDTH_TUNNELING_BOTTLENECK",
-           "endpoint": "PORT_TYPEC_1.EGPU_SLOT",
-           "device": "RTX 3060",
-           "message": "Device operates at PCIe Gen3 x4 equivalent (31.5 Gbps) limited by USB4 controller tunneling.",
-           "theoretical_max_gbps": 64.0,
-           "actual_gbps": 31.5
+           "pass": "throughput",
+           "severity": "warning",
+           "code": "BOTTLENECK",
+           "socket": "M2_2",
+           "required_gbps": 126.03076923076924,
+           "actual_gbps": 63.01538461538462,
+           "message": "M2_2 runs at 63.02 Gbps, below the 126.03 Gbps it requires."
          },
          {
-           "code": "VFIO_IOMMU_GROUP_SHARED",
-           "group_id": 14,
-           "endpoints": ["PCI_E2", "ONBOARD_SATA_CONTROLLER"],
-           "message": "PCI_E2 shares IOMMU Group with Onboard SATA. Isolating this card for VM passthrough requires passing through or detaching SATA controller."
+           "pass": "throughput",
+           "severity": "warning",
+           "code": "BOTTLENECK",
+           "socket": "PORT_TYPEC_1.EGPU_SLOT",
+           "required_gbps": 252.06153846153848,
+           "actual_gbps": 31.5,
+           "message": "PORT_TYPEC_1.EGPU_SLOT runs at 31.50 Gbps, below the 252.06 Gbps it requires."
          }
-       ]
+       ],
+       "links": {
+         "M2_2": { "generation": 4, "lanes": 4, "gbps": 63.01538461538462 },
+         "PCI_E1": { "generation": 4, "lanes": 16, "gbps": 252.06153846153848 },
+         "PORT_TYPEC_1.EGPU_SLOT": { "generation": 3, "lanes": 4, "gbps": 31.5 }
+       }
      }
      ```
 

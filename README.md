@@ -17,6 +17,7 @@ Early development, Phase 1 of the [roadmap](docs/prd.md#8-roadmap). The core lib
 | [Product requirements](docs/prd.md) | What mblint must do |
 | [Data schema](docs/spec/schema.md) | The fields of board, device and rig files |
 | [Resolution passes](docs/spec/passes.md) | What each pass checks and reports |
+| [Command line](docs/spec/cli.md) | The `mblint` commands, their output and exit status |
 | [Open issues](docs/spec/open-issues.md) | What is still undecided |
 | [Contributing](docs/CONTRIBUTING.md) | Language, workflow and where things are written |
 

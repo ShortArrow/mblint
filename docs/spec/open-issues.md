@@ -13,12 +13,6 @@ Ordered by impact.
 | 1 | 4.1 `modes[].when` | `when` holds a single condition. How to combine several conditions in one mode is undecided. |
 | 12 | 4.3 Rig | A board file describes the BIOS at its default settings. How a rig states a BIOS setting that moves lanes, such as giving M.2 slot lanes shared with a USB4 controller to the slot alone, is undecided. |
 
-## Inconsistent example data
-
-| # | Section | Problem |
-| --- | --- | --- |
-| 7 | 6.1 JSON | `theoretical_max_gbps = 64.0` for an RTX 3060 (PCIe Gen4 x16) matches neither Gen4 x16 (about 252 Gbps) nor Gen4 x8. `PCI_E2` is not used by the rig in 4.3. |
-
 ## Behaviour
 
 | # | Section | Undecided |
