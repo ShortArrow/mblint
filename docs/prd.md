@@ -13,7 +13,7 @@
 
 Instead of writing rules per connector, mblint models the hardware on a board as a single directed graph of Root Providers, Muxes / Switches, Bridges and Sockets.
 
-Hardware data is kept as declarative TOML under GitOps. The pure graph traversal and constraint resolution logic lives in a shared core library, `mblint-core`. From that one core, mblint serves both a fully static web wiring simulator for people and a fast CLI / MCP endpoint for LLM agents, without maintaining two implementations.
+Hardware data is kept as declarative TOML under GitOps. The pure graph traversal and constraint resolution logic lives in a shared core library, `mblint-core`. From that one core, mblint serves both a fully static web wiring simulator for people and a fast CLI for LLM agents, without maintaining two implementations.
 
 ---
 
@@ -80,7 +80,7 @@ Onboard controllers that have an IOMMU group of their own are nodes of kind `con
  │       (native CLI)        │  │       (static SPA)        │
  │ - Rich human output       │  │ - Static SPA (Pages)      │
  │ - AI output (--json)      │  │ - Client-side Wasm solver │
- │ - MCP server (stdio)      │  │ - Topology & slot visual  │
+ │                           │  │ - Topology & slot visual  │
  └───────────────────────────┘  └───────────────────────────┘
 ```
 
@@ -426,8 +426,6 @@ The engine runs four passes over the graph.
 
 2. **Lint a board (`mblint lint <board.toml>`)**
    * Static analysis of a board graph alone: lane overcommit, cycles, unreachable sockets.
-3. **MCP server (`mblint mcp`)**
-   * MCP tools over stdio with which LLM clients (Cursor, Claude Desktop and others) explore topologies and diagnose builds.
 
 ### 6.2 `mblint-web`
 
@@ -460,9 +458,8 @@ The engine runs four passes over the graph.
   * Directed graph model of Root, Mux, Bridge and Socket nodes
   * Four-pass pipeline (physical grid → mux exclusivity → bridges / tunnelling → IOMMU / throughput)
   * Unit tests on representative boards (X870E, Z890) and nested adapters (eGPU, USB-SATA)
-* **Phase 2: CLI and MCP server**
+* **Phase 2: CLI**
   * `mblint` CLI (`check`, `lint`, `--json`)
-  * MCP server (LLM integration over stdio)
 * **Phase 3: web simulator (Wasm)**
   * Wasm bindings for `mblint-core`
   * Static SPA with the graph tree and slot wiring visualizer
