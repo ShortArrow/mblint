@@ -16,7 +16,7 @@ One board from each of ASUS, ASRock, GIGABYTE and MSI for each of the sockets AM
 | AM5 | ASRock | X870 Taichi Creator | `data/boards/asrock/x870_taichi_creator.toml` |
 | LGA1851 | MSI | MAG Z890 TOMAHAWK WIFI | `data/boards/msi/mag_z890_tomahawk_wifi.toml` |
 | LGA1851 | ASUS | ROG STRIX Z890-F GAMING WIFI | `data/boards/asus/rog_strix_z890_f_gaming_wifi.toml` |
-| LGA1851 | GIGABYTE | Z890 AERO G | |
+| LGA1851 | GIGABYTE | Z890 AERO G | `data/boards/gigabyte/z890_aero_g.toml` |
 | LGA1851 | ASRock | Z890 Steel Legend WiFi | |
 
 ## Sources

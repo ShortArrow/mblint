@@ -1,0 +1,152 @@
+# Described for Intel Core Ultra Processors. Page numbers are as printed in the manual. Type-A
+# ports are not described.
+schema_version = "2.0.0"
+vendor = "GIGABYTE"
+model = "Z890 AERO G"
+source_manual = "https://download.gigabyte.com/FileList/Manual/mb_manual_z890-aero-g_1005_e.pdf"
+source_page = 9
+
+[form_factor]
+standard = "ATX"
+total_slot_indices = 7
+
+# --- 1. Root providers ---
+
+# p.5, 9: PCIEX16 and PCIEX8 share x16 and M2A_CPU x4, all PCIe 5.0, and M2B_CPU PCIe 4.0 x4,
+# from the CPU.
+[nodes.root_cpu]
+type = "root"
+bus = "pcie"
+lanes = 24
+generation = 5
+
+# p.5, 9: PCIEX4, M2Q_SB, M2P_SB and M2M_SB, each PCIe 4.0 x4, and x1 each to the two LAN
+# controllers and the Wi-Fi module, from the Z890 chipset.
+[nodes.root_chipset]
+type = "root"
+bus = "pcie"
+lanes = 19
+generation = 4
+
+# --- 2. Muxes ---
+
+# p.5, 9: "When the PCIEX8 slot is populated, the PCIEX16 slot operates at up to x8 mode."
+[nodes.mux_pciex16_pciex8]
+type = "mux"
+subtype = "bifurcation"
+parent = "root_cpu"
+
+[[nodes.mux_pciex16_pciex8.modes]]
+when = { socket = "PCIEX8", is = "occupied" }
+allocate = { PCIEX16 = 8, PCIEX8 = 8 }
+
+[[nodes.mux_pciex16_pciex8.modes]]
+when = { socket = "PCIEX8", is = "empty" }
+allocate = { PCIEX16 = 16 }
+
+# --- 3. Physical sockets ---
+
+# p.9; position from the layout on p.4.
+[nodes.PCIEX16]
+type = "socket"
+category = "pcie_slot"
+parent = "mux_pciex16_pciex8"
+slot_index = 1
+physical_form_factor = "x16"
+
+# p.9; position from the layout on p.4.
+[nodes.PCIEX8]
+type = "socket"
+category = "pcie_slot"
+parent = "mux_pciex16_pciex8"
+slot_index = 4
+physical_form_factor = "x16"
+
+# p.9; position from the layout on p.4.
+[nodes.PCIEX4]
+type = "socket"
+category = "pcie_slot"
+parent = "root_chipset"
+slot_index = 6
+physical_form_factor = "x16"
+max_electrical_lanes = 4
+
+# p.9, 26
+[nodes.M2A_CPU]
+type = "socket"
+category = "m2_slot"
+parent = "root_cpu"
+key = "M"
+supported_protocols = ["pcie"]
+max_lanes = 4
+
+# p.9, 26
+[nodes.M2B_CPU]
+type = "socket"
+category = "m2_slot"
+parent = "root_cpu"
+key = "M"
+supported_protocols = ["pcie"]
+max_lanes = 4
+generation = 4
+
+# p.9, 26
+[nodes.M2Q_SB]
+type = "socket"
+category = "m2_slot"
+parent = "root_chipset"
+key = "M"
+supported_protocols = ["pcie"]
+max_lanes = 4
+
+# p.9, 26
+[nodes.M2P_SB]
+type = "socket"
+category = "m2_slot"
+parent = "root_chipset"
+key = "M"
+supported_protocols = ["pcie"]
+max_lanes = 4
+
+# p.9, 26
+[nodes.M2M_SB]
+type = "socket"
+category = "m2_slot"
+parent = "root_chipset"
+key = "M"
+supported_protocols = ["pcie", "sata"]
+max_lanes = 4
+
+# p.5, 9: SATA3 4/5/6/7 from the chipset.
+[nodes.SATA3_4]
+type = "socket"
+category = "sata_port"
+parent = "root_chipset"
+
+[nodes.SATA3_5]
+type = "socket"
+category = "sata_port"
+parent = "root_chipset"
+
+[nodes.SATA3_6]
+type = "socket"
+category = "sata_port"
+parent = "root_chipset"
+
+[nodes.SATA3_7]
+type = "socket"
+category = "sata_port"
+parent = "root_chipset"
+
+# p.8-9, 17: Thunderbolt 4 from the CPU with DisplayPort outputs; the manual gives no lane count.
+[nodes.TBT_40G]
+type = "socket"
+category = "usb_c"
+parent = "root_cpu"
+dp_alt_max_lanes = "unknown"
+
+# p.9, 29: USB 3.2 Gen 2x2 Type-C header, from the chipset.
+[nodes.FU3C_20G]
+type = "socket"
+category = "usb_c"
+parent = "root_chipset"

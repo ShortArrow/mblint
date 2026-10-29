@@ -27,6 +27,8 @@ const B850M_D3HP: &str = include_str!("../../../data/boards/gigabyte/b850m_d3hp.
 const X870_TAICHI_CREATOR: &str =
     include_str!("../../../data/boards/asrock/x870_taichi_creator.toml");
 
+const Z890_AERO_G: &str = include_str!("../../../data/boards/gigabyte/z890_aero_g.toml");
+
 const CARD_GEN4_X16: &str = r#"
 schema_version = "2.0.0"
 id = "card"
@@ -96,6 +98,10 @@ fn b850m_d3hp() -> Board {
 
 fn x870_taichi() -> Board {
     Board::from_toml(X870_TAICHI_CREATOR).expect("reference board must parse")
+}
+
+fn z890_aero_g() -> Board {
+    Board::from_toml(Z890_AERO_G).expect("reference board must parse")
 }
 
 fn card_of_thickness(slots: u8) -> String {
@@ -447,5 +453,63 @@ fn x870_taichi_usb4_ports_carry_displayport_of_unknown_lanes() {
     assert_eq!(
         monitor_on(&x870_taichi(), "USB4_TC1"),
         dp_lanes_unknown("USB4_TC1")
+    );
+}
+
+#[test]
+fn z890_aero_g_two_cards_split_x8_x8() {
+    let (lanes, _) = resolve(
+        &z890_aero_g(),
+        &[("PCIEX16", CARD_GEN4_X16), ("PCIEX8", CARD_GEN4_X16)],
+    );
+
+    assert_eq!(lanes.allocations.get("PCIEX16"), Some(&8));
+    assert_eq!(lanes.allocations.get("PCIEX8"), Some(&8));
+    assert!(lanes.diagnostics.is_empty());
+}
+
+#[test]
+fn z890_aero_g_four_slot_card_covers_pciex8() {
+    let thick_card = card_of_thickness(4);
+    let devices = installed(&[("PCIEX16", &thick_card), ("PCIEX8", CARD_GEN4_X16)]);
+
+    assert_eq!(
+        check_physical(&z890_aero_g(), &devices),
+        vec![physical::Diagnostic::Obstructed {
+            socket: "PCIEX8".into(),
+            by: "PCIEX16".into(),
+        }]
+    );
+}
+
+#[test]
+fn z890_aero_g_gen5_ssd_in_m2b_cpu_is_held_to_pcie_4_0() {
+    let (_, throughput) = resolve(&z890_aero_g(), &[("M2B_CPU", SSD_GEN5_X4)]);
+
+    assert_eq!(
+        throughput.diagnostics,
+        vec![Diagnostic::Bottleneck {
+            socket: "M2B_CPU".into(),
+            required_gbps: lane(5) * 4.0,
+            actual_gbps: lane(4) * 4.0,
+        }]
+    );
+}
+
+#[test]
+fn z890_aero_g_pciex4_runs_at_x4() {
+    let (_, throughput) = resolve(&z890_aero_g(), &[("PCIEX4", CARD_GEN4_X16)]);
+
+    assert_eq!(
+        throughput.links.get("PCIEX4").map(|link| link.lanes),
+        Some(4)
+    );
+}
+
+#[test]
+fn z890_aero_g_thunderbolt_port_carries_displayport_of_unknown_lanes() {
+    assert_eq!(
+        monitor_on(&z890_aero_g(), "TBT_40G"),
+        dp_lanes_unknown("TBT_40G")
     );
 }
