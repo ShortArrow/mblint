@@ -13,7 +13,7 @@ AM5 と LGA1851 のそれぞれについて、ASUS、ASRock、GIGABYTE、MSI か
 | AM5 | MSI | MAG X870E TOMAHAWK WIFI | `data/boards/msi/mag_x870e_tomahawk_wifi.toml` |
 | AM5 | ASUS | ProArt X870E-CREATOR WIFI | `data/boards/asus/proart_x870e_creator_wifi.toml` |
 | AM5 | GIGABYTE | B850M D3HP | `data/boards/gigabyte/b850m_d3hp.toml` |
-| AM5 | ASRock | X870 Taichi Creator | |
+| AM5 | ASRock | X870 Taichi Creator | `data/boards/asrock/x870_taichi_creator.toml` |
 | LGA1851 | MSI | MAG Z890 TOMAHAWK WIFI | `data/boards/msi/mag_z890_tomahawk_wifi.toml` |
 | LGA1851 | ASUS | ROG STRIX Z890-F GAMING WIFI | `data/boards/asus/rog_strix_z890_f_gaming_wifi.toml` |
 | LGA1851 | GIGABYTE | Z890 AERO G | |

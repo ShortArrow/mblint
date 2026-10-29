@@ -1,0 +1,192 @@
+# Described for AMD Ryzen 9000 and 7000 Series processors. Page numbers are as printed in the
+# manual. Type-A ports are not described.
+schema_version = "2.0.0"
+vendor = "ASRock"
+model = "X870 Taichi Creator"
+source_manual = "https://download.asrock.com/Manual/X870%20Taichi%20Creator.pdf"
+source_page = 2
+
+[form_factor]
+standard = "ATX"
+total_slot_indices = 7
+
+# --- 1. Root providers ---
+
+# p.2, 4, 11: PCIE1 and PCIE2 share x16, M2_1 x4, and M2_2 shared with the USB4 controller x4,
+# all PCIe 5.0.
+[nodes.root_cpu]
+type = "root"
+bus = "pcie"
+lanes = 24
+generation = 5
+
+# p.11: M2_3 PCIe 4.0 x4, a PCIe 3.0 x4 switch for M2_4 and PCIE3, and PCIe 4.0 x1 each to the
+# Wi-Fi module, the two LAN controllers and the ASM1164 SATA controller, from the X870 chipset.
+[nodes.root_chipset]
+type = "root"
+bus = "pcie"
+lanes = 12
+generation = 4
+
+# --- 2. Muxes ---
+
+# p.2, 11: x16 or x8/x8.
+[nodes.mux_pcie1_pcie2]
+type = "mux"
+subtype = "bifurcation"
+parent = "root_cpu"
+
+[[nodes.mux_pcie1_pcie2.modes]]
+when = { socket = "PCIE2", is = "occupied" }
+allocate = { PCIE1 = 8, PCIE2 = 8 }
+
+[[nodes.mux_pcie1_pcie2.modes]]
+when = { socket = "PCIE2", is = "empty" }
+allocate = { PCIE1 = 16 }
+
+# p.5, 11: "If M2_2 is occupied, both rear USB4 Type-C Ports and M2_2 will downgrade to x2 mode."
+[nodes.mux_m2_2_usb4]
+type = "mux"
+subtype = "bifurcation"
+parent = "root_cpu"
+
+[[nodes.mux_m2_2_usb4.modes]]
+when = { socket = "M2_2", is = "empty" }
+allocate = { bridge_asm4242 = 4 }
+
+[[nodes.mux_m2_2_usb4.modes]]
+when = { socket = "M2_2", is = "occupied" }
+allocate = { M2_2 = 2, bridge_asm4242 = 2 }
+
+# p.5, 11: "If M2_4 is occupied, both PCIE3 and M2_4 will downgrade to x2 mode."
+[nodes.mux_m2_4_pcie3]
+type = "mux"
+subtype = "bifurcation"
+parent = "root_chipset"
+
+[[nodes.mux_m2_4_pcie3.modes]]
+when = { socket = "M2_4", is = "occupied" }
+allocate = { M2_4 = 2, PCIE3 = 2 }
+
+[[nodes.mux_m2_4_pcie3.modes]]
+when = { socket = "M2_4", is = "empty" }
+allocate = { PCIE3 = 4 }
+
+# --- 3. Protocol bridges ---
+
+# p.3, 11: the ASM4242 USB4 host controller for the two rear USB4 Type-C ports.
+[nodes.bridge_asm4242]
+type = "bridge"
+parent = "mux_m2_2_usb4"
+upstream_lanes = 4
+
+# p.4, 11: the ASM1164 SATA controller.
+[nodes.bridge_asm1164]
+type = "bridge"
+parent = "root_chipset"
+upstream_lanes = 1
+
+# --- 4. Physical sockets ---
+
+# p.2, 34; position from the layout on p.7.
+[nodes.PCIE1]
+type = "socket"
+category = "pcie_slot"
+parent = "mux_pcie1_pcie2"
+slot_index = 2
+physical_form_factor = "x16"
+
+# p.2, 34; position from the layout on p.7.
+[nodes.PCIE2]
+type = "socket"
+category = "pcie_slot"
+parent = "mux_pcie1_pcie2"
+slot_index = 6
+physical_form_factor = "x16"
+
+# p.2, 34; position from the layout on p.7.
+[nodes.PCIE3]
+type = "socket"
+category = "pcie_slot"
+parent = "mux_m2_4_pcie3"
+slot_index = 7
+physical_form_factor = "x16"
+generation = 3
+
+# p.4, 64
+[nodes.M2_1]
+type = "socket"
+category = "m2_slot"
+parent = "root_cpu"
+key = "M"
+supported_protocols = ["pcie"]
+max_lanes = 4
+
+# p.4-5, 67
+[nodes.M2_2]
+type = "socket"
+category = "m2_slot"
+parent = "mux_m2_2_usb4"
+key = "M"
+supported_protocols = ["pcie"]
+max_lanes = 4
+
+# p.4, 67
+[nodes.M2_3]
+type = "socket"
+category = "m2_slot"
+parent = "root_chipset"
+key = "M"
+supported_protocols = ["pcie"]
+max_lanes = 4
+
+# p.4-5, 67
+[nodes.M2_4]
+type = "socket"
+category = "m2_slot"
+parent = "mux_m2_4_pcie3"
+key = "M"
+supported_protocols = ["pcie"]
+max_lanes = 4
+generation = 3
+
+# p.4, 11, 41
+[nodes.SATA3_A1]
+type = "socket"
+category = "sata_port"
+parent = "bridge_asm1164"
+
+[nodes.SATA3_A2]
+type = "socket"
+category = "sata_port"
+parent = "bridge_asm1164"
+
+[nodes.SATA3_A3]
+type = "socket"
+category = "sata_port"
+parent = "bridge_asm1164"
+
+[nodes.SATA3_A4]
+type = "socket"
+category = "sata_port"
+parent = "bridge_asm1164"
+
+# p.3, 9: USB4 with display output from the CPU's integrated graphics; the manual gives no lane
+# count.
+[nodes.USB4_TC1]
+type = "socket"
+category = "usb_c"
+parent = "bridge_asm4242"
+dp_alt_max_lanes = "unknown"
+
+[nodes.USB4_TC2]
+type = "socket"
+category = "usb_c"
+parent = "bridge_asm4242"
+dp_alt_max_lanes = "unknown"
+
+# p.4, 11, 44: USB 3.2 Gen2x2 Type-C front panel header, from the chipset.
+[nodes.USB32_TC1]
+type = "socket"
+category = "usb_c"
+parent = "root_chipset"

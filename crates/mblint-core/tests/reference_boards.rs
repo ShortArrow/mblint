@@ -24,6 +24,9 @@ const ROG_STRIX_Z890_F_GAMING_WIFI: &str =
 
 const B850M_D3HP: &str = include_str!("../../../data/boards/gigabyte/b850m_d3hp.toml");
 
+const X870_TAICHI_CREATOR: &str =
+    include_str!("../../../data/boards/asrock/x870_taichi_creator.toml");
+
 const CARD_GEN4_X16: &str = r#"
 schema_version = "2.0.0"
 id = "card"
@@ -89,6 +92,10 @@ fn strix_z890_f() -> Board {
 
 fn b850m_d3hp() -> Board {
     Board::from_toml(B850M_D3HP).expect("reference board must parse")
+}
+
+fn x870_taichi() -> Board {
+    Board::from_toml(X870_TAICHI_CREATOR).expect("reference board must parse")
 }
 
 fn card_of_thickness(slots: u8) -> String {
@@ -396,4 +403,49 @@ fn b850m_d3hp_three_slot_card_leaves_pciex4_free() {
     let devices = installed(&[("PCIEX16", &thick_card), ("PCIEX4", CARD_GEN4_X16)]);
 
     assert!(check_physical(&b850m_d3hp(), &devices).is_empty());
+}
+
+#[test]
+fn x870_taichi_two_cards_split_x8_x8_and_a_four_slot_card_leaves_pcie2_free() {
+    let thick_card = card_of_thickness(4);
+    let devices = [("PCIE1", thick_card.as_str()), ("PCIE2", CARD_GEN4_X16)];
+    let (lanes, _) = resolve(&x870_taichi(), &devices);
+
+    assert_eq!(lanes.allocations.get("PCIE1"), Some(&8));
+    assert_eq!(lanes.allocations.get("PCIE2"), Some(&8));
+    assert!(lanes.diagnostics.is_empty());
+    assert!(check_physical(&x870_taichi(), &installed(&devices)).is_empty());
+}
+
+#[test]
+fn x870_taichi_ssd_in_m2_2_halves_the_usb4_controller() {
+    let (lanes, _) = resolve(&x870_taichi(), &[("M2_2", SSD_GEN5_X4)]);
+
+    assert_eq!(lanes.allocations.get("bridge_asm4242"), Some(&2));
+    assert_eq!(lanes.allocations.get("M2_2"), Some(&2));
+}
+
+#[test]
+fn x870_taichi_ssd_in_m2_4_leaves_pcie3_pcie_3_0_x2() {
+    let (_, throughput) = resolve(
+        &x870_taichi(),
+        &[("PCIE3", CARD_GEN4_X16), ("M2_4", SSD_GEN5_X4)],
+    );
+
+    assert_eq!(
+        throughput.links.get("PCIE3"),
+        Some(&Link {
+            generation: 3,
+            lanes: 2,
+            gbps: lane(3) * 2.0,
+        })
+    );
+}
+
+#[test]
+fn x870_taichi_usb4_ports_carry_displayport_of_unknown_lanes() {
+    assert_eq!(
+        monitor_on(&x870_taichi(), "USB4_TC1"),
+        dp_lanes_unknown("USB4_TC1")
+    );
 }
