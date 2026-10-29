@@ -1,0 +1,10 @@
+schema_version = "2.0.0"
+vendor = "Test"
+model = "Orphan Board"
+
+[nodes.PCIE1]
+type = "socket"
+category = "pcie_slot"
+parent = "root_gpu"
+slot_index = 1
+physical_form_factor = "x16"
