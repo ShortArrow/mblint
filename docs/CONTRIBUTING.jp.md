@@ -63,17 +63,20 @@ ADR には日付を書きません。いつ採用されたか、その後どう�
 
 構造の変更（rename、移動、抽出）と振る舞いの変更は、別のコミットにしてください。
 
-プルリクエストを出す前に、次を実行してください。
+プルリクエストを出す前に、CI がすべてのプルリクエストで実行する次の検査を実行してください。
 
 ```sh
+cargo fmt --check
+cargo clippy --all-targets -- -D warnings
 cargo test
-cargo clippy --all-targets
+for board in data/boards/*/*.toml; do cargo run -q -p mblint -- lint --data-root data "${board#data/}"; done
 ```
 
 ## リポジトリ構成
 
 | パス | 内容 |
 | --- | --- |
+| `.github/workflows` | CI。上の検査と、漏れたシークレットの走査を実行する |
 | `crates/mblint` | `mblint` コマンドライン。コアのレポートを出力する |
 | `crates/mblint-core` | トポロジーモデルと解決パス。CLI と Wasm ビルドで共有する |
 | `data/` | 基準ボードを収めるデータルート |

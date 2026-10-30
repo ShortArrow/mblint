@@ -63,17 +63,20 @@ Changes follow the Red-Green-Refactor cycle:
 
 Keep structural changes (renames, moves, extractions) and behavioural changes in separate commits.
 
-Before opening a pull request, run:
+Before opening a pull request, run the checks that CI runs on every pull request:
 
 ```sh
+cargo fmt --check
+cargo clippy --all-targets -- -D warnings
 cargo test
-cargo clippy --all-targets
+for board in data/boards/*/*.toml; do cargo run -q -p mblint -- lint --data-root data "${board#data/}"; done
 ```
 
 ## Repository layout
 
 | Path | Contents |
 | --- | --- |
+| `.github/workflows` | CI, which runs the checks above and a scan for leaked secrets |
 | `crates/mblint` | The `mblint` command line, which prints the core's report |
 | `crates/mblint-core` | Topology model and resolution passes, shared by the CLI and the Wasm build |
 | `data/` | Data root holding the reference boards |
