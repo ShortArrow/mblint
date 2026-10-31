@@ -25,8 +25,18 @@ describe("bracket", () => {
     USB_C1: socket("unknown"),
   };
 
-  it("roots each tree at a root, in id order, without controllers", () => {
+  it("roots each tree at a root, without controllers", () => {
     expect(bracket(layout).roots.map((tree) => tree.id)).toEqual(["root_a", "root_b"]);
+  });
+
+  it("orders roots by generation, then by lanes supplied, highest first, then by id", () => {
+    const roots: Record<string, LayoutNode> = {
+      root_a: { kind: "root", parent: null, generation: 4, supplied: 24, demanded: 0 },
+      root_cpu: { kind: "root", parent: null, generation: 5, supplied: 20, demanded: 0 },
+      root_b: { kind: "root", parent: null, generation: 4, supplied: 8, demanded: 0 },
+      root_c: { kind: "root", parent: null, generation: 4, supplied: 8, demanded: 0 },
+    };
+    expect(bracket(roots).roots.map((tree) => tree.id)).toEqual(["root_cpu", "root_a", "root_b", "root_c"]);
   });
 
   it("orders children by slot position, then id, with sockets of unknown parent apart", () => {
