@@ -29,6 +29,7 @@ mblint は [MIT](../LICENSE-MIT) と [Apache-2.0](../LICENSE-APACHE) のいず�
 | データファイルに何を書き、パスがそれをどう評価するか | [`docs/spec/schema.md`](spec/schema.md)、[`docs/spec/passes.md`](spec/passes.md) |
 | 設計判断をなぜ下したか | `docs/adr/NNNN-<title>.md`。書き方は[設計判断の記録](#設計判断の記録)のとおり |
 | どの実在のボードを記述し、その値をどこから取るか | [`docs/reference-boards.md`](reference-boards.md) |
+| どの実在のデバイスを記述し、その値をどこから取るか | [`docs/reference-devices.md`](reference-devices.md) |
 | まだ決まっていないこと | [`docs/spec/open-issues.md`](spec/open-issues.md) |
 | インターフェースが何を保証するか | 型や関数の docstring |
 | 個々の変更をなぜ行ったか | コミットメッセージに 1〜2 文で |

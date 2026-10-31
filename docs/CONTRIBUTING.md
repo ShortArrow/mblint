@@ -29,6 +29,7 @@ Unless you explicitly state otherwise, any contribution intentionally submitted 
 | What the data files contain and how the passes evaluate them | [`docs/spec/schema.md`](spec/schema.md), [`docs/spec/passes.md`](spec/passes.md) |
 | Why a design decision was made | `docs/adr/NNNN-<title>.md`, written as in [Architecture decision records](#architecture-decision-records) |
 | Which real boards are described, and where their values come from | [`docs/reference-boards.md`](reference-boards.md) |
+| Which real devices are described, and where their values come from | [`docs/reference-devices.md`](reference-devices.md) |
 | What is still undecided | [`docs/spec/open-issues.md`](spec/open-issues.md) |
 | What an interface guarantees | The docstring of the type or function |
 | Why a single change was made | The commit message, in one or two sentences |
