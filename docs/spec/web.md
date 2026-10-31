@@ -17,6 +17,10 @@ Files are read only by the paths the rig or the call names, as the CLI reads the
 
 When a file cannot be loaded, the function throws an `Error` whose message names the file and why, the message the CLI prints to standard error after `mblint: `. No report is returned.
 
+## Page
+
+The page carries every file under `data/` as `files`, keyed by its path under `data/`. It lists the boards among them, and shows the lint report of the board chosen: its status and the message of each diagnostic.
+
 ## Build
 
 The Wasm module is `mblint-wasm` built for `wasm32-unknown-unknown`, then wrapped as an ES module with its TypeScript declarations by the `wasm-bindgen` command line. The command line must be the version of the `wasm-bindgen` crate in `Cargo.lock`.

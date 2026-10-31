@@ -71,7 +71,10 @@ cargo clippy --all-targets -- -D warnings
 cargo test
 cargo test -p mblint-core --features ts export_bindings && test -z "$(git status --porcelain web/src/report)"
 for board in data/boards/*/*.toml; do cargo run -q -p mblint -- lint --data-root data "${board#data/}"; done
+(cd web && npm ci && npm run build:wasm && npm test && npm run build)
 ```
+
+The last line needs the `wasm32-unknown-unknown` target (`rustup target add wasm32-unknown-unknown`), the `wasm-bindgen` command line of the version in `Cargo.lock` (`cargo install wasm-bindgen-cli --version <version>`), and Node.js 26.
 
 ## Repository layout
 
@@ -84,4 +87,5 @@ for board in data/boards/*/*.toml; do cargo run -q -p mblint -- lint --data-root
 | `crates/mblint-wasm` | The core as Wasm for the web simulator, which returns the core's report |
 | `data/` | Data root holding the reference boards |
 | `docs/` | Requirements, specifications, ADRs and open issues |
+| `web/` | The web simulator page, in TypeScript |
 | `web/src/report` | The report types for TypeScript, generated from the core |

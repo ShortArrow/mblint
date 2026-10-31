@@ -1,0 +1,18 @@
+{
+  "name": "mblint-web",
+  "private": true,
+  "type": "module",
+  "license": "MIT OR Apache-2.0",
+  "scripts": {
+    "build:wasm": "cargo build -p mblint-wasm --target wasm32-unknown-unknown --release && wasm-bindgen --target web --out-dir src/wasm ../target/wasm32-unknown-unknown/release/mblint_wasm.wasm",
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "test": "tsc --noEmit && vitest run"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.5",
+    "vitest": "^5.0.5"
+  }
+}

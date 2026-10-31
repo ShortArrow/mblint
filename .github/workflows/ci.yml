@@ -30,6 +30,31 @@ jobs:
             cargo run -q -p mblint -- lint --data-root data "${board#data/}"
           done
 
+  web:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+      - uses: Swatinem/rust-cache@v2
+      - name: Read the wasm-bindgen version from Cargo.lock
+        id: bindgen
+        run: echo "version=$(grep -A1 '^name = "wasm-bindgen"$' ../Cargo.lock | sed -n 's/^version = "\(.*\)"/\1/p')" >> "$GITHUB_OUTPUT"
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: wasm-bindgen@${{ steps.bindgen.outputs.version }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 26
+      - run: npm ci
+      - run: npm run build:wasm
+      - run: npm test
+      - run: npm run build
+
   secrets:
     runs-on: ubuntu-latest
     steps:
