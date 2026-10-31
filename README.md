@@ -19,6 +19,7 @@ Early development, with Phases 1 and 2 of the [roadmap](docs/prd.md#8-roadmap) i
 | [Resolution passes](docs/spec/passes.md) | What each pass checks and reports |
 | [Board lint](docs/spec/lint.md) | What lint checks in a board file on its own |
 | [Command line](docs/spec/cli.md) | The `mblint` commands, their output and exit status |
+| [Web simulator](docs/spec/web.md) | The Wasm interface the web page calls |
 | [Open issues](docs/spec/open-issues.md) | What is still undecided |
 | [Contributing](docs/CONTRIBUTING.md) | Language, workflow and where things are written |
 
