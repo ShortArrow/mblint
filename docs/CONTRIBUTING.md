@@ -79,5 +79,6 @@ for board in data/boards/*/*.toml; do cargo run -q -p mblint -- lint --data-root
 | `.github/workflows` | CI, which runs the checks above and a scan for leaked secrets |
 | `crates/mblint` | The `mblint` command line, which prints the core's report |
 | `crates/mblint-core` | Topology model and resolution passes, shared by the CLI and the Wasm build |
+| `crates/mblint-wasm` | The core as Wasm for the web simulator, which returns the core's report |
 | `data/` | Data root holding the reference boards |
 | `docs/` | Requirements, specifications, ADRs and open issues |

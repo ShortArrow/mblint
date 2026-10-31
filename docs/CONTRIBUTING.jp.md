@@ -79,5 +79,6 @@ for board in data/boards/*/*.toml; do cargo run -q -p mblint -- lint --data-root
 | `.github/workflows` | CI。上の検査と、漏れたシークレットの走査を実行する |
 | `crates/mblint` | `mblint` コマンドライン。コアのレポートを出力する |
 | `crates/mblint-core` | トポロジーモデルと解決パス。CLI と Wasm ビルドで共有する |
+| `crates/mblint-wasm` | Web シミュレーター向けの、コアの Wasm ビルド。コアのレポートを返す |
 | `data/` | 基準ボードを収めるデータルート |
 | `docs/` | 要求仕様、仕様書、ADR、未決事項 |

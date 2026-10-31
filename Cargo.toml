@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["crates/mblint", "crates/mblint-core"]
+members = ["crates/mblint", "crates/mblint-core", "crates/mblint-wasm"]
 
 [workspace.package]
 edition = "2024"
