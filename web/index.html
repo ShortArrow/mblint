@@ -4,11 +4,50 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>mblint</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
   </head>
   <body>
-    <h1>mblint</h1>
-    <label>Board <select id="board"></select></label>
-    <pre id="report"></pre>
+    <header>
+      <h1>mblint <span>web simulator</span></h1>
+      <select id="board" aria-label="Board"></select>
+      <span class="spacer"></span>
+      <span id="status" class="status"></span>
+      <label class="button" title="Load board, device or rig TOML files">
+        Load TOML<input id="file" type="file" accept=".toml" multiple hidden />
+      </label>
+      <button id="clear" type="button">Clear</button>
+      <button id="theme" class="theme-toggle" type="button" aria-label="Toggle theme">
+        <svg class="sun" width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+          <path d="M8 12a4 4 0 1 1 0-8 4 4 0 0 1 0 8Zm0-1.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Zm5.66-8.16a.75.75 0 0 1 0 1.06l-1.06 1.06a.75.75 0 0 1-1.06-1.06l1.06-1.06a.75.75 0 0 1 1.06 0ZM16 8a.75.75 0 0 1-.75.75h-1.5a.75.75 0 0 1 0-1.5h1.5A.75.75 0 0 1 16 8Zm-2.34 5.66a.75.75 0 0 1-1.06 0l-1.06-1.06a.75.75 0 0 1 1.06-1.06l1.06 1.06a.75.75 0 0 1 0 1.06ZM8 16a.75.75 0 0 1-.75-.75v-1.5a.75.75 0 0 1 1.5 0v1.5A.75.75 0 0 1 8 16Zm-5.66-2.34a.75.75 0 0 1 0-1.06l1.06-1.06a.75.75 0 0 1 1.06 1.06l-1.06 1.06a.75.75 0 0 1-1.06 0ZM0 8a.75.75 0 0 1 .75-.75h1.5a.75.75 0 0 1 0 1.5H.75A.75.75 0 0 1 0 8Zm2.34-5.66a.75.75 0 0 1 1.06 0l1.06 1.06a.75.75 0 0 1-1.06 1.06L2.34 3.4a.75.75 0 0 1 0-1.06ZM8 0a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 1-1.5 0V.75A.75.75 0 0 1 8 0Z" />
+        </svg>
+        <svg class="moon" width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+          <path d="M9.6 1.2a.75.75 0 0 1 .84-.17 7.25 7.25 0 1 1-9.4 9.4.75.75 0 0 1 1-.98 5.75 5.75 0 0 0 7.56-7.56.75.75 0 0 1 0-.69Zm1.66 1.56a7.25 7.25 0 0 1-8.5 8.5 5.75 5.75 0 1 0 8.5-8.5Z" />
+        </svg>
+      </button>
+    </header>
+    <div id="notices" class="notices" role="status"></div>
+    <main>
+      <section class="panel">
+        <h2>Parts</h2>
+        <div id="parts" class="parts"></div>
+      </section>
+      <section class="panel">
+        <h2>Lane bracket</h2>
+        <div id="bracket" class="bracket"></div>
+        <p class="hint">Select a part, then a highlighted socket, or drag the part onto one. Drop TOML files anywhere to load them.</p>
+      </section>
+      <section class="panel">
+        <h2>Report</h2>
+        <div id="report"></div>
+        <h2>Links</h2>
+        <div id="links" class="links"></div>
+      </section>
+    </main>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
