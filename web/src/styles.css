@@ -1,34 +1,23 @@
 :root {
-  --bg: #f4f5f7;
-  --panel: #ffffff;
-  --panel-2: #f9fafb;
-  --line: #d9dde3;
-  --ink: #14171c;
-  --muted: #667085;
-  --accent: #2f6bff;
-  --ok: #12a150;
-  --warn: #b07800;
-  --err: #d92d20;
-  --empty: #e7eaee;
-  --supply: #5b6b80;
-  --shadow: 0 1px 2px rgba(16, 24, 40, 0.06), 0 1px 3px rgba(16, 24, 40, 0.08);
   color-scheme: light;
+  --bg: light-dark(#f4f5f7, #0d1014);
+  --panel: light-dark(#ffffff, #151a21);
+  --panel-2: light-dark(#f9fafb, #1b212a);
+  --line: light-dark(#d9dde3, #2a323d);
+  --ink: light-dark(#14171c, #e8ecf1);
+  --muted: light-dark(#667085, #8b95a3);
+  --accent: light-dark(#2f6bff, #6e9bff);
+  --ok: light-dark(#12a150, #3ccf7f);
+  --warn: light-dark(#b07800, #f0b429);
+  --err: light-dark(#d92d20, #ff6b5e);
+  --empty: light-dark(#e7eaee, #232b35);
+  --supply: light-dark(#5b6b80, #8796ab);
+  --shadow-tint: light-dark(rgba(16, 24, 40, 0.07), transparent);
+  --shadow: 0 1px 2px var(--shadow-tint), 0 1px 3px var(--shadow-tint);
+  --header-h: 56px;
+  --pane-h: calc(100vh - var(--header-h) - 32px);
 }
-
 :root[data-theme="dark"] {
-  --bg: #0d1014;
-  --panel: #151a21;
-  --panel-2: #1b212a;
-  --line: #2a323d;
-  --ink: #e8ecf1;
-  --muted: #8b95a3;
-  --accent: #6e9bff;
-  --ok: #3ccf7f;
-  --warn: #f0b429;
-  --err: #ff6b5e;
-  --empty: #232b35;
-  --supply: #8796ab;
-  --shadow: none;
   color-scheme: dark;
 }
 
@@ -67,7 +56,7 @@ body {
   margin: 0;
   background: var(--bg);
   color: var(--ink);
-  font: 14px/1.45 Inter, system-ui, sans-serif;
+  font: 14px/20px Inter, system-ui, sans-serif;
 }
 
 .mono,
@@ -79,8 +68,8 @@ header {
   display: flex;
   align-items: center;
   gap: 12px;
-  flex-wrap: wrap;
-  padding: 12px 24px;
+  height: var(--header-h);
+  padding: 0 24px;
   border-bottom: 1px solid var(--line);
   background: var(--panel);
   position: sticky;
@@ -95,6 +84,15 @@ header h1 {
 header h1 span {
   color: var(--muted);
   font-weight: 500;
+}
+@media (max-width: 640px) {
+  header {
+    padding: 0 16px;
+    gap: 6px;
+  }
+  header h1 span {
+    display: none;
+  }
 }
 .spacer {
   flex: 1;
@@ -115,9 +113,35 @@ button,
 .button {
   cursor: pointer;
 }
-.theme-toggle {
+.tool {
   display: inline-flex;
   align-items: center;
+  gap: 6px;
+  height: 32px;
+  min-width: 32px;
+  justify-content: center;
+  padding: 0 8px;
+}
+.tool svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  flex: none;
+}
+.tool .label {
+  display: none;
+}
+:root[data-labels="on"] .tool .label {
+  display: inline;
+}
+:root[data-labels="on"] #labels,
+:root[data-report="on"] #report-toggle {
+  color: var(--accent);
+  border-color: var(--accent);
 }
 :root[data-theme="dark"] .theme-toggle .moon,
 :root:not([data-theme="dark"]) .theme-toggle .sun {
@@ -165,15 +189,58 @@ button,
 
 main {
   display: grid;
-  grid-template-columns: minmax(200px, 250px) minmax(0, 1fr) minmax(240px, 320px);
+  grid-template-columns: 250px minmax(0, 1fr) 320px;
   gap: 16px;
   padding: 16px 24px;
   align-items: start;
+}
+:root[data-report="off"] main {
+  grid-template-columns: 250px minmax(0, 1fr);
+}
+:root[data-report="off"] .report-panel {
+  display: none;
+}
+.sidebar {
+  position: sticky;
+  top: calc(var(--header-h) + 16px);
+  height: var(--pane-h);
+  overflow-y: auto;
+}
+.sidebar.picker {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.picker > .list {
+  flex: 0 1 auto;
+  max-height: 45%;
+  overflow-y: auto;
+}
+.picker > .parts {
+  flex: 1 1 0;
+  overflow-y: auto;
+}
+.stage {
+  min-height: var(--pane-h);
 }
 @media (max-width: 1100px) {
   main {
     grid-template-columns: minmax(0, 1fr);
     padding: 16px;
+  }
+  .sidebar {
+    position: static;
+    height: auto;
+  }
+  .picker > .list,
+  .picker > .parts {
+    max-height: 320px;
+  }
+  .stage {
+    min-height: 0;
+  }
+  :root[data-report="off"] main {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
@@ -183,6 +250,9 @@ main {
   border-radius: 12px;
   box-shadow: var(--shadow);
   min-width: 0;
+}
+.panel > h2:not(:first-child) {
+  border-top: 1px solid var(--line);
 }
 .panel > h2 {
   font-size: 12px;
@@ -205,6 +275,29 @@ main {
   margin: 0;
 }
 
+.list {
+  padding: 10px;
+  display: grid;
+  gap: 4px;
+}
+.board-item {
+  display: grid;
+  text-align: left;
+  width: 100%;
+  padding: 6px 10px;
+  border-radius: 10px;
+}
+.board-item small {
+  color: var(--muted);
+}
+.board-item b {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.board-item.selected {
+  outline: 2px solid var(--accent);
+  outline-offset: -1px;
+}
 .parts {
   padding: 10px;
   display: grid;
@@ -280,10 +373,10 @@ main {
   border-right: 2px solid var(--line);
 }
 .kids > .branch:first-child::before {
-  top: 50%;
+  top: calc(50% - 1px);
 }
 .kids > .branch:last-child::before {
-  bottom: 50%;
+  bottom: calc(50% - 1px);
 }
 .kids > .branch:only-child::before {
   display: none;
@@ -293,7 +386,7 @@ main {
   position: absolute;
   right: -22px;
   width: 22px;
-  top: 50%;
+  top: calc(50% - 1px);
   border-top: 2px solid var(--line);
 }
 .kids > .branch::after {
@@ -301,15 +394,18 @@ main {
   position: absolute;
   right: -22px;
   width: 22px;
-  top: 50%;
+  top: calc(50% - 1px);
   border-top: 2px solid var(--line);
 }
 .wire {
   flex: 1 0 0;
   align-self: center;
-  border-top: 2px solid var(--line);
+  height: 2px;
+  background: var(--line);
 }
-.branch.live > .wire,
+.branch.live > .wire {
+  background: var(--accent);
+}
 .kids > .branch.live::after {
   border-color: var(--accent);
 }
@@ -324,11 +420,11 @@ main {
   border-radius: 10px;
   background: var(--panel-2);
   padding: 8px 10px;
-  min-width: 190px;
+  min-width: 150px;
   flex: none;
 }
 .node.root {
-  min-width: 260px;
+  min-width: 200px;
 }
 .node.mux {
   border-style: dashed;
@@ -345,10 +441,11 @@ main {
 .meta {
   color: var(--muted);
   font-size: 12px;
+  line-height: 16px;
 }
 .node.socket {
   cursor: pointer;
-  min-width: 300px;
+  min-width: 250px;
 }
 .node.socket.target {
   outline: 2px dashed var(--accent);
@@ -391,7 +488,7 @@ main {
 
 .bars {
   display: grid;
-  gap: 3px;
+  gap: 4px;
   margin-top: 6px;
 }
 .bar-row {
@@ -402,12 +499,14 @@ main {
 }
 .bar-label {
   font-size: 11px;
+  line-height: 16px;
   color: var(--muted);
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
 .bar-text {
   font-size: 11px;
+  line-height: 16px;
   color: var(--muted);
   white-space: nowrap;
 }

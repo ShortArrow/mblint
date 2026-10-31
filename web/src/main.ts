@@ -9,12 +9,15 @@ import type { LayoutNode } from "./report/LayoutNode";
 import type { LinkWidth } from "./report/LinkWidth";
 import type { Report } from "./report/Report";
 import { rigToml } from "./rig";
+import { flag, flagValue, readPref, writePref } from "./prefs";
 import { applyTheme, coverRadius, resolveTheme, storedTheme, toggleTheme } from "./theme";
 import { bracket, type TreeNode } from "./tree";
 
 const RIG_PATH = "local/rig.toml";
 const PX_PER_GBPS = 0.75;
 const PX_PER_LANE = 11;
+const LABELS_KEY = "mblint-labels";
+const REPORT_KEY = "mblint-report";
 
 type Device = Extract<CatalogEntry, { kind: "device" }>;
 type Socket = Extract<LayoutNode, { kind: "socket" }>;
@@ -168,8 +171,10 @@ function render(): void {
   if (board !== null && entries[board]?.kind !== "board") board = null;
   board ??= boards()[0]?.[0] ?? null;
 
-  $("board").innerHTML = boards()
-    .map(([path, entry]) => `<option value="${escape(path)}" ${path === board ? "selected" : ""}>${escape(`${entry.vendor} ${entry.model}`)}${path.startsWith("local/") ? " (loaded)" : ""}</option>`)
+  $("boards").innerHTML = boards()
+    .map(([path, entry]) => `<button type="button" class="board-item ${path === board ? "selected" : ""}" data-board="${escape(path)}">
+          <small>${escape(entry.vendor)}${path.startsWith("local/") ? " · loaded" : ""}</small><b>${escape(entry.model)}</b>
+        </button>`)
     .join("");
 
   const parts = devices();
@@ -231,6 +236,21 @@ async function load(fileList: FileList | File[]): Promise<void> {
   render();
 }
 
+function chooseBoard(path: string): void {
+  if (path === board) return;
+  board = path;
+  bindings = {};
+  notices = [];
+  render();
+}
+
+/** Flips the flag that the document attribute `data-<name>` shows and stores it under `key`. */
+function toggleFlag(name: "labels" | "report", key: string): void {
+  const on = document.documentElement.dataset[name] !== "on";
+  document.documentElement.dataset[name] = flagValue(on);
+  writePref(key, flagValue(on));
+}
+
 function switchTheme(button: HTMLElement): void {
   const apply = () => applyTheme(toggleTheme(resolveTheme(document.documentElement.dataset.theme ?? null, false)));
   const start = (document as Document & { startViewTransition?: (cb: () => void) => { ready: Promise<void> } })
@@ -252,6 +272,8 @@ function switchTheme(button: HTMLElement): void {
 }
 
 document.documentElement.dataset.theme = resolveTheme(storedTheme(), matchMedia("(prefers-color-scheme: dark)").matches);
+document.documentElement.dataset.labels = flagValue(flag(readPref(LABELS_KEY), false));
+document.documentElement.dataset.report = flagValue(flag(readPref(REPORT_KEY), true));
 
 document.addEventListener("click", (event) => {
   const target = event.target as HTMLElement;
@@ -260,6 +282,11 @@ document.addEventListener("click", (event) => {
     const { [remove.dataset.remove!]: _, ...rest } = bindings;
     bindings = rest;
     render();
+    return;
+  }
+  const choice = target.closest<HTMLElement>("[data-board]");
+  if (choice) {
+    chooseBoard(choice.dataset.board!);
     return;
   }
   const part = target.closest<HTMLElement>("[data-part]");
@@ -305,12 +332,6 @@ document.addEventListener("drop", (event) => {
   if (socket && part) install(socket.dataset.socket!, part);
 });
 
-$<HTMLSelectElement>("board").addEventListener("change", (event) => {
-  board = (event.target as HTMLSelectElement).value;
-  bindings = {};
-  notices = [];
-  render();
-});
 $<HTMLInputElement>("file").addEventListener("change", (event) => {
   const input = event.target as HTMLInputElement;
   if (input.files) void load(input.files).then(() => (input.value = ""));
@@ -320,6 +341,8 @@ $("clear").addEventListener("click", () => {
   notices = [];
   render();
 });
+$("labels").addEventListener("click", () => toggleFlag("labels", LABELS_KEY));
+$("report-toggle").addEventListener("click", () => toggleFlag("report", REPORT_KEY));
 $("theme").addEventListener("click", (event) => switchTheme(event.currentTarget as HTMLElement));
 
 await init();
