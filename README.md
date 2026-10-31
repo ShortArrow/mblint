@@ -2,7 +2,7 @@
 
 [日本語](docs/README.jp.md)
 
-> [!NOTE]
+> [!WARNING]
 > mblint is experimental. Until 1.0, the data schema, the reports and the command line may change in ways that break existing files and scripts.
 
 mblint checks a PC build against its motherboard before it is assembled. It models the board as one directed graph of lane providers, muxes, protocol bridges and sockets, and reports what a combination of cards and peripherals actually gets: slots that collide, lanes that are split or disabled, bandwidth lost to tunnelling, and devices that cannot be passed through to a VM alone because they share an IOMMU group.
