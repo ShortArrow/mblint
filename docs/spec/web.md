@@ -13,6 +13,7 @@ The module exports these functions. Each takes the files it may read as an objec
 | `check(files, rig)` | `files`, and `rig`, the path of the rig file | The report of `mblint check --json` in [the command line](cli.md) |
 | `lint(files, board)` | `files`, and `board`, the path of the board file | The report of `mblint lint --json` |
 | `catalog(files)` | `files` | What each file is, as in [Catalog](#catalog) |
+| `layout(files, rig)` | `files`, and `rig`, the path of the rig file | The rig's board as the page draws it, as in [Layout](#layout) |
 
 Files are read only by the paths the rig or the call names, as the CLI reads them under its data root. A path absent from `files` cannot be read.
 
@@ -45,6 +46,32 @@ When a file cannot be loaded, the function throws an `Error` whose message names
 | `invalid` | `message`, which says why the file is not a board, why not a device and why not a rig |
 
 `socket_category` is `pcie_slot` for a card, `m2_slot` for an M.2 module, `usb_c` for a display, and `usb_c` or `usb_a` for an adapter, after its upstream connector.
+
+## Layout
+
+`layout(files, rig)` returns every node of the rig's board, keyed by node id, with what the devices the rig installs make of it. It is computed from the rig alone, whether or not a pass reports an error, so that a rig with errors can still be drawn.
+
+```json
+{
+  "root_cpu": { "kind": "root", "parent": null, "generation": 5, "supplied": 20, "demanded": 16 },
+  "mux_cpu_x16": { "kind": "mux", "parent": "root_cpu", "mode": 1 },
+  "PCIEX16(G5)_1": {
+    "kind": "socket", "parent": "mux_cpu_x16", "category": "pcie_slot", "slot_index": 2,
+    "device": "devices/rtx_a400.toml", "disabled": false,
+    "offers": { "generation": 5, "lanes": 8 }, "needs": { "generation": 4, "lanes": 8 }
+  }
+}
+```
+
+| `kind` | Fields besides `parent` |
+| --- | --- |
+| `root` | `generation`; `supplied`, the lanes it supplies; `demanded`, the lanes its children demand, counted as Pass 2 counts them |
+| `mux` | `mode`, the position from 0 of the selected mode in the order the modes are declared, or `null` when no mode holds |
+| `bridge` | `lanes`, the upstream lanes it demands of its parent |
+| `controller` | none |
+| `socket` | `category`; `slot_index`, or `null` for a socket other than a PCIe slot; `device`, the path of the device file the rig installs in it, or `null`; `disabled`, whether the selected mode of a mux disables it; `offers`, the generation and lanes the socket offers, as Pass 4 rates a link, or `null` when it states no lane count; `needs`, the generation and lanes of the installed device's PCIe link, or `null` when the socket is empty or the device does not run PCIe |
+
+`parent` is the node's parent id, or `null` for a root or a controller. Sockets inside adapters are not in the layout.
 
 ## Page
 

@@ -13,6 +13,7 @@ Web シミュレーターは、コアをブラウザで Wasm として動かす�
 | `check(files, rig)` | `files` と、rig ファイルのパス `rig` | [コマンドライン](cli.jp.md)にある `mblint check --json` のレポート |
 | `lint(files, board)` | `files` と、ボードファイルのパス `board` | `mblint lint --json` のレポート |
 | `catalog(files)` | `files` | 各ファイルが何であるか。[カタログ](#カタログ)のとおり |
+| `layout(files, rig)` | `files` と、rig ファイルのパス `rig` | ページが描く形での rig のボード。[レイアウト](#レイアウト)のとおり |
 
 ファイルは、CLI がデータルートの下から読むのと同じく、rig か呼び出しが名指すパスでだけ読む。`files` に無いパスは読めない。
 
@@ -45,6 +46,32 @@ Web シミュレーターは、コアをブラウザで Wasm として動かす�
 | `invalid` | ボードでない理由、デバイスでない理由、rig でない理由を述べる `message` |
 
 `socket_category` は、カードなら `pcie_slot`、M.2 モジュールなら `m2_slot`、ディスプレイなら `usb_c`、アダプタなら上流のコネクタに応じて `usb_c` か `usb_a` である。
+
+## レイアウト
+
+`layout(files, rig)` は、rig のボードのすべてのノードを、ノード ID をキーとして返す。各ノードには、rig が装着するデバイスによってそのノードがどうなるかを付ける。パスがエラーを報告するかどうかにかかわらず rig だけから求めるので、エラーのある rig も描ける。
+
+```json
+{
+  "root_cpu": { "kind": "root", "parent": null, "generation": 5, "supplied": 20, "demanded": 16 },
+  "mux_cpu_x16": { "kind": "mux", "parent": "root_cpu", "mode": 1 },
+  "PCIEX16(G5)_1": {
+    "kind": "socket", "parent": "mux_cpu_x16", "category": "pcie_slot", "slot_index": 2,
+    "device": "devices/rtx_a400.toml", "disabled": false,
+    "offers": { "generation": 5, "lanes": 8 }, "needs": { "generation": 4, "lanes": 8 }
+  }
+}
+```
+
+| `kind` | `parent` 以外のフィールド |
+| --- | --- |
+| `root` | `generation`。供給するレーン数 `supplied`。子が要求するレーン数を Pass 2 と同じ数え方で数えた `demanded` |
+| `mux` | 選ばれたモードの、宣言順で 0 から数えた位置 `mode`。どのモードも成り立たないときは `null` |
+| `bridge` | 親に要求する上流のレーン数 `lanes` |
+| `controller` | なし |
+| `socket` | `category`。`slot_index`（PCIe スロット以外のソケットでは `null`）。rig がそこに装着するデバイスファイルのパス `device`（無ければ `null`）。Mux の選ばれたモードがそれを無効にするかどうか `disabled`。Pass 4 がリンクを評価するときと同じく求めた、ソケットが出せる世代とレーン数 `offers`（レーン数を述べないソケットでは `null`）。装着したデバイスの PCIe リンクの世代とレーン数 `needs`（ソケットが空か、デバイスが PCIe を使わないときは `null`） |
+
+`parent` はノードの親の ID で、ルートとコントローラでは `null` である。アダプタの中のソケットはレイアウトに含めない。
 
 ## ページ
 
