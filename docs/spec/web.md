@@ -113,7 +113,7 @@ The page shows the status of the report, each diagnostic with its severity, mess
 
 ### Appearance
 
-The boards and the parts are listed in a sidebar on the left, the bracket takes the middle, and the report is in a sidebar on the right. A control at the foot of each sidebar collapses it to a narrow rail of icons, and the rail opens it again; the browser remembers whether each sidebar is open. On a narrow screen the three are stacked in that order, and a collapsed sidebar is one row of its icons.
+The boards and the parts are listed in a sidebar along the left edge of the page, the report is in a sidebar along the right edge, and the bracket takes the space between them. Both sidebars run from the header to the bottom of the window. A control at the foot of each sidebar collapses it to a narrow rail of icons, and the rail opens it again; the browser remembers whether each sidebar is open. On a narrow screen the three are stacked in that order, and a collapsed sidebar is one row of its icons.
 
 The controls in the header are icons, each named in its tooltip: loading files, clearing the rig, switching between the light and the dark theme, and a cog that opens the settings.
 
