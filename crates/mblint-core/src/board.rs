@@ -79,7 +79,15 @@ pub struct Mux {
 impl Mux {
     /// The first mode, in declaration order, whose condition holds; `None` if no mode applies.
     pub fn select_mode(&self, occupancy: &Occupancy) -> Option<&Mode> {
-        self.modes.iter().find(|mode| mode.when.holds(occupancy))
+        self.selected_position(occupancy)
+            .map(|position| &self.modes[position])
+    }
+
+    /// The position from 0 of the mode [`Mux::select_mode`] selects; `None` if no mode applies.
+    pub fn selected_position(&self, occupancy: &Occupancy) -> Option<usize> {
+        self.modes
+            .iter()
+            .position(|mode| mode.when.holds(occupancy))
     }
 }
 

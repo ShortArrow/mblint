@@ -87,9 +87,9 @@ pub fn rate_links(
 
 /// The generation and lane count a socket offers.
 #[derive(Debug, Clone, Copy)]
-struct Capacity {
-    generation: u8,
-    lanes: u32,
+pub(crate) struct Capacity {
+    pub(crate) generation: u8,
+    pub(crate) lanes: u32,
 }
 
 fn pcie_interface(device: &Device) -> Option<&Interface> {
@@ -119,7 +119,7 @@ fn settle(interface: &Interface, socket: Capacity, cap: Option<f64>) -> Option<L
 /// A board socket has the smaller of its own `generation` and its root's, and the lanes a mux
 /// allocates to it, or else its `max_lanes` or `max_electrical_lanes`. A socket inside an adapter
 /// states both itself.
-fn socket_capacity(
+pub(crate) fn socket_capacity(
     board: &Board,
     installed: &BTreeMap<String, Device>,
     lanes: &LaneResolution,
