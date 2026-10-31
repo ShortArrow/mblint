@@ -113,11 +113,11 @@ The page shows the status of the report, each diagnostic with its severity, mess
 
 ### Appearance
 
-The boards and the parts are listed in a sidebar on the left, the bracket takes the middle, and the report is in a sidebar on the right. The report sidebar opens and closes, and the browser remembers whether it is open. On a narrow screen the three are stacked in that order.
+The boards and the parts are listed in a sidebar on the left, the bracket takes the middle, and the report is in a sidebar on the right. A control at the foot of each sidebar collapses it to a narrow rail of icons, and the rail opens it again; the browser remembers whether each sidebar is open. On a narrow screen the three are stacked in that order, and a collapsed sidebar is one row of its icons.
 
-The controls in the header are icons, each named in its tooltip. A control there shows or hides their names beside the icons, and the browser remembers the choice.
+The controls in the header are icons, each named in its tooltip: loading files, clearing the rig, and a cog that opens the settings.
 
-The page follows the system's light or dark theme until the user switches it, and remembers the choice in the browser. Switching reveals the new theme in a circle growing from the switch, or at once when the system asks for reduced motion. The page is drawn in its theme from the first paint, and the sidebars and the bracket hold their places while the module loads, so that loading the page neither flashes another theme nor rearranges it. The page does not scroll sideways; a part of it that must scroll has a thin scrollbar in the theme's colours.
+The settings choose the theme, which is the system's light or dark theme, light, or dark, and whether the header shows the names of its controls beside their icons. The browser remembers both. Choosing a theme reveals it in a circle growing from the choice, or at once when the system asks for reduced motion. The page is drawn in its theme from the first paint, and the sidebars and the bracket hold their places while the module loads, so that loading the page neither flashes another theme nor rearranges it. The page does not scroll sideways; a part of it that must scroll has a thin scrollbar in the theme's colours.
 
 ## Build
 
