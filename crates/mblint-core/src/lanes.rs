@@ -14,6 +14,8 @@ pub struct LaneResolution {
     pub allocations: BTreeMap<String, u32>,
     /// Sockets disabled by a selected mux mode, whether or not a device is installed in them.
     pub disabled: BTreeSet<String>,
+    /// Lanes the children of each root demand, keyed by root id.
+    pub demanded: BTreeMap<String, u32>,
     pub diagnostics: Vec<Diagnostic>,
 }
 
@@ -74,9 +76,11 @@ pub fn resolve_lanes(board: &Board, occupancy: &Occupancy) -> LaneResolution {
         }
     }
 
+    let mut demanded_by_root = BTreeMap::new();
     for (id, node) in &board.nodes {
         if let Node::Root(root) = node {
             let demanded = demand.get(id.as_str()).copied().unwrap_or(0);
+            demanded_by_root.insert(id.clone(), demanded);
             if demanded > root.lanes {
                 diagnostics.push(Diagnostic::LaneOvercommit {
                     root: id.clone(),
@@ -90,6 +94,7 @@ pub fn resolve_lanes(board: &Board, occupancy: &Occupancy) -> LaneResolution {
     LaneResolution {
         allocations,
         disabled: disabled_by.into_keys().collect(),
+        demanded: demanded_by_root,
         diagnostics,
     }
 }

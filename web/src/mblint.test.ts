@@ -2,7 +2,7 @@ import { readdirSync, readFileSync } from "node:fs";
 import { join, relative } from "node:path";
 import { beforeAll, describe, expect, it } from "vitest";
 import { initSync } from "./wasm/mblint_wasm";
-import { catalog, check, lint, type Files } from "./mblint";
+import { catalog, check, layout, lint, type Files } from "./mblint";
 import { boardPaths } from "./files";
 
 const repo = join(import.meta.dirname, "../..");
@@ -58,5 +58,17 @@ describe("catalog", () => {
     expect(entries["boards/test/board.toml"]?.kind).toBe("board");
     expect(entries["devices/card.toml"]?.kind).toBe("device");
     expect(entries["rigs/warning.toml"]?.kind).toBe("rig");
+  });
+});
+
+describe("layout", () => {
+  it("lays out the board of a rig", () => {
+    const files = readTree(join(repo, "crates/mblint/tests/data"));
+
+    const nodes = layout(files, "rigs/warning.toml");
+    const slot = nodes["PCIE1"];
+
+    expect(slot?.kind).toBe("socket");
+    expect(slot?.kind === "socket" && slot.device).toBe("devices/card.toml");
   });
 });

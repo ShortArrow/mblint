@@ -6,7 +6,7 @@ use std::path::Path;
 
 use mblint_core::report::Status;
 use mblint_core::rig::LoadError;
-use mblint_wasm::{Files, catalog_files, check_files, lint_files};
+use mblint_wasm::{Files, catalog_files, check_files, layout_files, lint_files};
 
 /// Every file under the CLI's test data root, keyed by its data-root-relative path.
 fn files() -> Files {
@@ -87,4 +87,20 @@ fn catalog_lists_every_file_by_its_contents() {
     assert_eq!(catalog["boards/test/board.toml"]["kind"], "board");
     assert_eq!(catalog["devices/card.toml"]["kind"], "device");
     assert_eq!(catalog["rigs/warning.toml"]["kind"], "rig");
+}
+
+#[test]
+fn layout_lays_out_the_rig_board() {
+    let layout =
+        serde_json::to_value(layout_files(&files(), "rigs/warning.toml").unwrap()).unwrap();
+
+    assert_eq!(layout["PCIE1"]["kind"], "socket");
+    assert_eq!(layout["PCIE1"]["device"], "devices/card.toml");
+}
+
+#[test]
+fn layout_of_a_rig_naming_an_absent_file_fails_naming_it() {
+    let error = layout_files(&files(), "rigs/missing_device.toml").unwrap_err();
+
+    assert!(matches!(error, LoadError::Read { ref path, .. } if path == "devices/none.toml"));
 }

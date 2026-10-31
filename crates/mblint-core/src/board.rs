@@ -214,6 +214,16 @@ impl Socket {
         }
     }
 
+    pub fn category(&self) -> SocketCategory {
+        match self {
+            Socket::PcieSlot(_) => SocketCategory::PcieSlot,
+            Socket::M2Slot(_) => SocketCategory::M2Slot,
+            Socket::SataPort(_) => SocketCategory::SataPort,
+            Socket::UsbC(_) => SocketCategory::UsbC,
+            Socket::UsbA(_) => SocketCategory::UsbA,
+        }
+    }
+
     pub fn parent(&self) -> &str {
         match self {
             Socket::PcieSlot(slot) => &slot.parent,

@@ -1,5 +1,6 @@
 import * as wasm from "./wasm/mblint_wasm";
 import type { CatalogEntry } from "./report/CatalogEntry";
+import type { LayoutNode } from "./report/LayoutNode";
 import type { LintReport } from "./report/LintReport";
 import type { Report } from "./report/Report";
 
@@ -19,4 +20,9 @@ export function lint(files: Files, board: string): LintReport {
 /** What each file in `files` is, keyed by its path, as `docs/spec/web.md` specifies. */
 export function catalog(files: Files): Record<string, CatalogEntry> {
   return wasm.catalog(files) as Record<string, CatalogEntry>;
+}
+
+/** The rig's board as the page draws it, keyed by node id; throws an `Error` naming a file that cannot be loaded. */
+export function layout(files: Files, rig: string): Record<string, LayoutNode> {
+  return wasm.layout(files, rig) as Record<string, LayoutNode>;
 }
