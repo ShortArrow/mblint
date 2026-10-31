@@ -1,6 +1,6 @@
 import "./styles.css";
 import init from "./wasm/mblint_wasm";
-import { type Block, rootBars, socketBars } from "./bars";
+import { type Block, linkGbps, rootBars, scaleFor, socketBars } from "./bars";
 import { dataFiles } from "./files";
 import { addLoaded, type Loaded, resolveRig } from "./load";
 import { catalog, check, type Files, layout } from "./mblint";
@@ -14,8 +14,7 @@ import { applyTheme, coverRadius, resolveTheme, storedTheme, toggleTheme } from 
 import { bracket, type TreeNode } from "./tree";
 
 const RIG_PATH = "local/rig.toml";
-const PX_PER_GBPS = 0.75;
-const PX_PER_LANE = 11;
+const BAR_PX = 112;
 const LABELS_KEY = "mblint-labels";
 const REPORT_KEY = "mblint-report";
 
@@ -31,6 +30,7 @@ let board: string | null = null;
 let bindings: Record<string, string> = {};
 let selected: string | null = null;
 let notices: string[] = [];
+let scale = { gbps: 0, lane: 0 };
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 
@@ -62,9 +62,9 @@ function interfaceText(device: Device): string {
   return device.interface ? `${device.interface.protocol.toUpperCase()} ${linkText(device.interface)}` : device.type;
 }
 
-function blocks(row: Block[], scale: number, colourOf: (block: Block) => string): string {
+function blocks(row: Block[], px: number, colourOf: (block: Block) => string): string {
   return row
-    .map((block) => `<span class="blk ${block.mark ?? ""}" style="width:${block.width * scale}px;background:${colourOf(block)}"></span>`)
+    .map((block) => `<span class="blk ${block.mark ?? ""}" style="width:${block.width * px}px;background:${colourOf(block)}"></span>`)
     .join("");
 }
 
@@ -78,8 +78,8 @@ function socketHtml(id: string, socket: Socket, report: Report | null): string {
   const tint = socket.device === null ? "var(--supply)" : colour(socket.device);
   const bars = socketBars(socket.needs, socket.offers);
   const rows = [
-    bars.needs ? barRow("needs", blocks(bars.needs, PX_PER_GBPS, () => tint), linkText(socket.needs!)) : "",
-    bars.offers ? barRow("offers", blocks(bars.offers, PX_PER_GBPS, () => "var(--supply)"), linkText(socket.offers!)) : "",
+    bars.needs ? barRow("needs", blocks(bars.needs, scale.gbps, () => tint), linkText(socket.needs!)) : "",
+    bars.offers ? barRow("offers", blocks(bars.offers, scale.gbps, () => "var(--supply)"), linkText(socket.offers!)) : "",
   ].join("");
   const finding = report?.diagnostics.find((d) => "socket" in d && d.socket === id);
   const link = report?.links[id];
@@ -106,8 +106,8 @@ function nodeHtml(tree: TreeNode, report: Report | null): string {
       const bars = rootBars(node.demanded, node.supplied);
       return `<div class="node root"><div class="title"><b class="mono">${escape(id)}</b><span class="meta">Gen${node.generation}</span></div>
         <div class="bars">
-          ${barRow("needs", blocks(bars.needs, PX_PER_LANE, () => "var(--accent)"), `${node.demanded} lanes`)}
-          ${barRow("gives", blocks(bars.gives, PX_PER_LANE, () => "var(--supply)"), `${node.supplied} lanes`)}
+          ${barRow("needs", blocks(bars.needs, scale.lane, () => "var(--accent)"), `${node.demanded} lanes`)}
+          ${barRow("gives", blocks(bars.gives, scale.lane, () => "var(--supply)"), `${node.supplied} lanes`)}
         </div></div>`;
     }
     case "mux":
@@ -129,12 +129,23 @@ function branchHtml(tree: TreeNode, report: Report | null): string {
   return `<div class="branch ${live ? "live" : ""}"><span class="wire"></span>${nodeHtml(tree, report)}${kids}</div>`;
 }
 
+/** Pixels per Gbps and per lane that draw the longest socket bar and the longest root bar `BAR_PX` wide. */
+function boardScale(nodes: LayoutNode[]): { gbps: number; lane: number } {
+  const links = nodes.flatMap((node) => (node.kind === "socket" ? [node.needs, node.offers] : []));
+  const roots = nodes.flatMap((node) => (node.kind === "root" ? [node.demanded, node.supplied] : []));
+  return {
+    gbps: scaleFor(links.flatMap((link) => (link === null ? [] : [linkGbps(link)])), BAR_PX),
+    lane: scaleFor(roots, BAR_PX),
+  };
+}
+
 function renderBracket(nodes: Record<string, LayoutNode> | null, report: Report | null): void {
   if (nodes === null) {
     $("bracket").innerHTML = `<p class="empty">Load a board to start.</p>`;
     return;
   }
   const { roots, unknown } = bracket(nodes);
+  scale = boardScale(Object.values(nodes));
   const groups = roots.map(
     (root) => `<div class="group"><div class="tree">${nodeHtml(root, report)}${
       root.children.length ? `<div class="kids">${root.children.map((c) => branchHtml(c, report)).join("")}</div>` : ""

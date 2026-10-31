@@ -21,9 +21,9 @@ export function socketBars(
   offers: LinkWidth | null,
 ): { needs: Block[] | null; offers: Block[] | null } {
   if (offers === null) return { needs: null, offers: null };
-  const needed = needs === null ? 0 : rate(needs);
+  const needed = needs === null ? 0 : linkGbps(needs);
   return {
-    needs: needs === null ? null : lanes(needs, rate(offers), "short"),
+    needs: needs === null ? null : lanes(needs, linkGbps(offers), "short"),
     offers: lanes(offers, needed, "spare"),
   };
 }
@@ -35,8 +35,15 @@ export function rootBars(demanded: number, supplied: number): { needs: Block[]; 
   return { needs: unit(demanded, supplied, "over"), gives: unit(supplied, demanded, "spare") };
 }
 
-function rate(link: LinkWidth): number {
+/** The data rate of a link in Gbps: its lanes at the rate of a lane of its generation. */
+export function linkGbps(link: LinkWidth): number {
   return (LANE_GBPS[link.generation] ?? 0) * link.lanes;
+}
+
+/** Pixels per unit that draw the longest of `lengths` `width` pixels wide, or 0 when none is longer than 0. */
+export function scaleFor(lengths: number[], width: number): number {
+  const longest = Math.max(0, ...lengths);
+  return longest > 0 ? width / longest : 0;
 }
 
 function lanes(link: LinkWidth, other: number, mark: Block["mark"]): Block[] {
