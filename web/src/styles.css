@@ -196,11 +196,9 @@ main {
 .panel.sidebar {
   position: sticky;
   top: var(--header-h);
-  height: calc(100vh - var(--header-h));
-  border: none;
-  border-radius: 0;
+  height: calc(100vh - var(--header-h) - 8px);
+  background: var(--bg);
   box-shadow: none;
-  background: transparent;
   display: flex;
   flex-direction: column;
 }
@@ -212,6 +210,12 @@ main {
   cursor: col-resize;
   touch-action: none;
   z-index: 2;
+}
+.panel.sidebar.picker {
+  margin: 0 0 8px 8px;
+}
+.panel.sidebar.report-panel {
+  margin: 0 8px 8px 0;
 }
 .picker > .resizer {
   right: -8px;
@@ -310,9 +314,12 @@ body.resizing {
   main {
     grid-template-columns: minmax(0, 1fr);
   }
-  .panel.sidebar {
+  .panel.sidebar,
+  .panel.sidebar.picker,
+  .panel.sidebar.report-panel {
     position: static;
     height: auto;
+    margin: 0 8px 8px;
   }
   .resizer {
     display: none;
@@ -331,7 +338,7 @@ body.resizing {
   }
   .panel.stage {
     min-height: 0;
-    margin: 8px;
+    margin: 0 8px 8px;
   }
 }
 

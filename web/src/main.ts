@@ -291,7 +291,7 @@ function resizable(handle: HTMLElement): void {
   const side = handle.dataset.resize as Side;
   handle.addEventListener("pointerdown", (down) => {
     down.preventDefault();
-    const start = handle.parentElement!.getBoundingClientRect().width;
+    const start = storedWidth(readPref(widthKey(side)), DEFAULT_WIDTH[side]);
     let width = start;
     const move = (event: PointerEvent) => {
       width = dragWidth(side, start, down.clientX, event.clientX);
