@@ -2,7 +2,7 @@
 
 [English](0018-web-simulator-is-typescript-over-a-thin-wasm-core.md)
 
-- 状態: 採用
+- 状態: ADR-0019 により置き換え
 
 ## 文脈
 

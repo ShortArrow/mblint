@@ -1,0 +1,8 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "mblint",
+  "compatibility_date": "2026-10-01",
+  "assets": { "directory": "./dist" },
+  "preview_urls": true,
+  "routes": [{ "pattern": "mblint.shortarrow.jp", "zone_name": "shortarrow.jp", "custom_domain": true }],
+}

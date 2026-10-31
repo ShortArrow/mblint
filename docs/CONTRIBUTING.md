@@ -63,6 +63,8 @@ Changes follow the Red-Green-Refactor cycle:
 
 Keep structural changes (renames, moves, extractions) and behavioural changes in separate commits.
 
+`main` changes only through pull requests whose CI passes, because each commit on `main` is published at mblint.shortarrow.jp.
+
 Before opening a pull request, run the checks that CI runs on every pull request:
 
 ```sh
@@ -87,5 +89,5 @@ The last line needs the `wasm32-unknown-unknown` target (`rustup target add wasm
 | `crates/mblint-wasm` | The core as Wasm for the web simulator, which returns the core's report |
 | `data/` | Data root holding the reference boards |
 | `docs/` | Requirements, specifications, ADRs and open issues |
-| `web/` | The web simulator page, in TypeScript |
+| `web/` | The web simulator page, in TypeScript, and its Cloudflare Workers configuration |
 | `web/src/report` | The report types for TypeScript, generated from the core |

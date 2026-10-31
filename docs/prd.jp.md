@@ -78,7 +78,7 @@
  ┌───────────────────────────┐  ┌───────────────────────────┐
  │          mblint           │  │        mblint-web         │
  │       (native CLI)        │  │       (static SPA)        │
- │ - Rich human output       │  │ - Static SPA (Pages)      │
+ │ - Rich human output       │  │ - Static SPA (Workers)    │
  │ - AI output (--json)      │  │ - Client-side Wasm solver │
  │ - MCP server (stdio)      │  │ - Topology & slot visual  │
  └───────────────────────────┘  └───────────────────────────┘
@@ -432,7 +432,7 @@ PORT_TYPEC_1 = "devices/peripherals/razer_core_x.toml"
 ### 6.2 `mblint-web`
 
 1. **完全静的ホスティング**
-   * バックエンドを持たない（GitHub Pages / Cloudflare Pages）。
+   * バックエンドを持たず、Cloudflare Workers が静的アセットとして mblint.shortarrow.jp で配る。
    * `mblint-core` を Wasm としてブラウザ内で実行する。
 2. **対話型トポロジービジュアライザ**
    * 基板レイアウト（スロット、I/O パネル）と、その裏のバス配線グラフを切り替えて表示する。

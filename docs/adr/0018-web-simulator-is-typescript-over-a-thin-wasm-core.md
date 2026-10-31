@@ -2,7 +2,7 @@
 
 [日本語](0018-web-simulator-is-typescript-over-a-thin-wasm-core.jp.md)
 
-- Status: Accepted
+- Status: Superseded by ADR-0019
 
 ## Context
 

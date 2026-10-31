@@ -63,6 +63,8 @@ ADR には日付を書きません。いつ採用されたか、その後どう�
 
 構造の変更（rename、移動、抽出）と振る舞いの変更は、別のコミットにしてください。
 
+`main` の各コミットは mblint.shortarrow.jp に公開されるので、`main` は CI が通るプルリクエストでしか変えません。
+
 プルリクエストを出す前に、CI がすべてのプルリクエストで実行する次の検査を実行してください。
 
 ```sh
@@ -87,5 +89,5 @@ for board in data/boards/*/*.toml; do cargo run -q -p mblint -- lint --data-root
 | `crates/mblint-wasm` | Web シミュレーター向けの、コアの Wasm ビルド。コアのレポートを返す |
 | `data/` | 基準ボードを収めるデータルート |
 | `docs/` | 要求仕様、仕様書、ADR、未決事項 |
-| `web/` | Web シミュレーターのページ。TypeScript で書く |
+| `web/` | Web シミュレーターのページ。TypeScript で書く。Cloudflare Workers の設定も置く |
 | `web/src/report` | コアから生成した、TypeScript 向けのレポートの型 |

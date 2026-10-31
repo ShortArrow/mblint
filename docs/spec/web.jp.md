@@ -25,4 +25,6 @@ Web シミュレーターは、コアをブラウザで Wasm として動かす�
 
 Wasm モジュールは、`mblint-wasm` を `wasm32-unknown-unknown` 向けにビルドし、`wasm-bindgen` コマンドラインで TypeScript の宣言付きの ES モジュールにしたものである。コマンドラインは、`Cargo.lock` にある `wasm-bindgen` クレートと同じ版でなければならない。
 
+ページは、`web/dist` の静的アセットを配る Cloudflare Worker として mblint.shortarrow.jp に公開する。設定は `web/wrangler.jsonc` にある。Cloudflare Workers Builds は `main` を公開し、ほかのブランチを preview としてビルドする。そのとき `web/scripts/cloudflare-build.sh` を実行し、ページをビルドする前に Rust と `wasm-bindgen` コマンドラインを入れる。
+
 レポートの TypeScript の型は、コアの Rust の型から ts-rs で、型ごとに一つのファイルとして `web/src/report/` に生成する。`cargo test -p mblint-core --features ts` がこれを書き出し、そこにコミットされたファイルが書き出したものと異なるとき、CI は失敗する。各パスの診断の型は、パスの名前を冠して `PhysicalDiagnostic`、`LanesDiagnostic`、`TunnelsDiagnostic`、`ThroughputDiagnostic` と呼ぶ。

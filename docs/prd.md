@@ -78,7 +78,7 @@ Onboard controllers that have an IOMMU group of their own are nodes of kind `con
  ┌───────────────────────────┐  ┌───────────────────────────┐
  │          mblint           │  │        mblint-web         │
  │       (native CLI)        │  │       (static SPA)        │
- │ - Rich human output       │  │ - Static SPA (Pages)      │
+ │ - Rich human output       │  │ - Static SPA (Workers)    │
  │ - AI output (--json)      │  │ - Client-side Wasm solver │
  │ - MCP server (stdio)      │  │ - Topology & slot visual  │
  └───────────────────────────┘  └───────────────────────────┘
@@ -432,7 +432,7 @@ The engine runs four passes over the graph.
 ### 6.2 `mblint-web`
 
 1. **Fully static hosting**
-   * No backend (GitHub Pages / Cloudflare Pages).
+   * No backend: static assets served by Cloudflare Workers at mblint.shortarrow.jp.
    * `mblint-core` runs locally in the browser as Wasm.
 2. **Interactive topology visualizer**
    * Switches between the board layout (slots, I/O panel) and the bus wiring graph behind it.
