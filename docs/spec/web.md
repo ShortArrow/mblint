@@ -15,6 +15,6 @@ The module exports two functions. Each takes the files it may read as an object 
 
 Files are read only by the paths the rig or the call names, as the CLI reads them under its data root. A path absent from `files` cannot be read.
 
-When a file cannot be loaded, the function throws an `Error` whose message names the file and why, the message the CLI prints to standard error. No report is returned.
+When a file cannot be loaded, the function throws an `Error` whose message names the file and why, the message the CLI prints to standard error after `mblint: `. No report is returned.
 
 The page's TypeScript types for the reports are generated from the core's Rust types.
