@@ -103,9 +103,9 @@ The parts are the devices in `files`, each shown with its name and its interface
 
 Each root is drawn as a bracket: its sockets at the leaves on the left, joined through muxes and bridges to the root on the right. Roots are drawn in order of generation, then of the lanes they supply, highest first, then of id. A line runs from each child to the join of its siblings, and from the join to their parent. The lines are one width and meet at their centres, so a line continues straight through a join. A mux shows the position, counted from 1, of its selected mode, or that no mode holds; a bridge shows the lanes it demands. Sockets whose parent is `unknown` are drawn together apart from the roots. Controllers are not drawn.
 
-A socket shows its id, the device in it and two bars on one scale of Gbps: what the device needs above what the socket offers. Each bar has one block per lane, as wide as the rate of a lane of its generation, so that the bars compare both lane count and generation. The part of the upper bar beyond the lower is marked as a shortfall, and the part of the lower bar beyond the upper is drawn faded. An empty socket shows only what it offers, and a socket that offers nothing shows no bars. A socket a mux disables is drawn struck out.
+A socket shows its id, the device in it and two bars on one scale of Gbps: what the device needs above what the socket offers. Each bar has one block per lane, as wide as the rate of a lane of its generation, so that the bars compare both lane count and generation. The scale is the board's: the longest socket bar on the board is drawn at one fixed width, whatever the board. The part of the upper bar beyond the lower is marked as a shortfall, and the part of the lower bar beyond the upper is drawn faded. An empty socket shows only what it offers, and a socket that offers nothing shows no bars. A socket a mux disables is drawn struck out.
 
-A root shows two bars in lanes, one block per lane: the lanes its children demand above the lanes it supplies. Demanded lanes beyond the supply are marked as an overcommit.
+A root shows two bars in lanes, one block per lane: the lanes its children demand above the lanes it supplies. The longest root bar on the board is drawn at the same fixed width. Demanded lanes beyond the supply are marked as an overcommit.
 
 ### The report
 
