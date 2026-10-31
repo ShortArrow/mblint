@@ -15,3 +15,15 @@ export function writePref(key: string, value: string): void {
     return;
   }
 }
+
+/** The flag stored as `stored` by `flagValue`, or `fallback` when nothing valid is stored. */
+export function flag(stored: string | null, fallback: boolean): boolean {
+  if (stored === "on") return true;
+  if (stored === "off") return false;
+  return fallback;
+}
+
+/** The stored form of a flag, read back by `flag`. */
+export function flagValue(on: boolean): string {
+  return on ? "on" : "off";
+}
