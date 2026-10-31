@@ -327,6 +327,10 @@ body.resizing {
   .resizer {
     display: none;
   }
+  .sidebar > .full,
+  .picker .parts {
+    flex: none;
+  }
   .picker .list,
   .picker .parts {
     max-height: 320px;
@@ -338,6 +342,14 @@ body.resizing {
   :root[data-left="off"] .picker,
   :root[data-report="off"] .report-panel {
     flex-direction: row;
+  }
+  .picker .chevron,
+  :root[data-report="off"] .report-panel .chevron {
+    transform: rotate(90deg);
+  }
+  .report-panel .chevron,
+  :root[data-left="off"] .picker .chevron {
+    transform: rotate(-90deg);
   }
   .panel.stage {
     min-height: 0;
@@ -753,5 +765,11 @@ dialog input {
   .sidebar.report-panel {
     border-left: none;
     border-right: none;
+  }
+}
+
+@media (max-width: 640px) {
+  :root[data-labels="on"] .tool .label {
+    display: none;
   }
 }
