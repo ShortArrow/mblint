@@ -123,7 +123,7 @@ function branchHtml(tree: TreeNode, report: Report | null): string {
   const kids = tree.children.length
     ? `<div class="kids">${tree.children.map((child) => branchHtml(child, report)).join("")}</div>`
     : "";
-  return `<div class="branch ${live ? "live" : ""}">${nodeHtml(tree, report)}${kids}</div>`;
+  return `<div class="branch ${live ? "live" : ""}"><span class="wire"></span>${nodeHtml(tree, report)}${kids}</div>`;
 }
 
 function renderBracket(nodes: Record<string, LayoutNode> | null, report: Report | null): void {
@@ -145,11 +145,6 @@ function renderBracket(nodes: Record<string, LayoutNode> | null, report: Report 
     );
   }
   $("bracket").innerHTML = groups.join("");
-  for (const kids of document.querySelectorAll<HTMLElement>(".kids")) {
-    const items = [...kids.children] as HTMLElement[];
-    kids.style.setProperty("--top", `${items[0]!.offsetHeight / 2}px`);
-    kids.style.setProperty("--bottom", `${items[items.length - 1]!.offsetHeight / 2}px`);
-  }
 }
 
 function renderReport(report: Report | null): void {
@@ -326,7 +321,6 @@ $("clear").addEventListener("click", () => {
   render();
 });
 $("theme").addEventListener("click", (event) => switchTheme(event.currentTarget as HTMLElement));
-addEventListener("resize", () => render());
 
 await init();
 render();

@@ -264,18 +264,29 @@ main {
 .kids {
   display: flex;
   flex-direction: column;
-  gap: 8px;
   position: relative;
   padding-right: 22px;
   margin-right: 22px;
 }
-.kids::after {
+.kids > .branch {
+  padding: 4px 0;
+}
+.kids > .branch::before {
   content: "";
   position: absolute;
-  right: 0;
-  top: var(--top, 50%);
-  bottom: var(--bottom, 50%);
+  right: -22px;
+  top: 0;
+  bottom: 0;
   border-right: 2px solid var(--line);
+}
+.kids > .branch:first-child::before {
+  top: 50%;
+}
+.kids > .branch:last-child::before {
+  bottom: 50%;
+}
+.kids > .branch:only-child::before {
+  display: none;
 }
 .kids::before {
   content: "";
@@ -293,6 +304,12 @@ main {
   top: 50%;
   border-top: 2px solid var(--line);
 }
+.wire {
+  flex: 1 0 0;
+  align-self: center;
+  border-top: 2px solid var(--line);
+}
+.branch.live > .wire,
 .kids > .branch.live::after {
   border-color: var(--accent);
 }
@@ -308,6 +325,7 @@ main {
   background: var(--panel-2);
   padding: 8px 10px;
   min-width: 190px;
+  flex: none;
 }
 .node.root {
   min-width: 260px;
