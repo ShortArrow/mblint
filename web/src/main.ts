@@ -9,7 +9,8 @@ import type { LayoutNode } from "./report/LayoutNode";
 import type { LinkWidth } from "./report/LinkWidth";
 import type { Report } from "./report/Report";
 import { rigToml } from "./rig";
-import { flag, flagValue, readPref, writePref } from "./prefs";
+import { flag, flagValue, readPref, removePref, writePref } from "./prefs";
+import { dragWidth, type Side, storedWidth } from "./resize";
 import {
   applyTheme,
   coverRadius,
@@ -28,6 +29,7 @@ const BAR_PX = 112;
 const LABELS_KEY = "mblint-labels";
 const LEFT_KEY = "mblint-left";
 const REPORT_KEY = "mblint-report";
+const DEFAULT_WIDTH: Record<Side, number> = { left: 230, right: 280 };
 
 type Device = Extract<CatalogEntry, { kind: "device" }>;
 type Socket = Extract<LayoutNode, { kind: "socket" }>;
@@ -276,6 +278,53 @@ function setFlag(name: Flag, on: boolean): void {
   writePref(FLAG_KEYS[name], flagValue(on));
 }
 
+const widthKey = (side: Side) => `mblint-${side}-width`;
+
+/** Draws the sidebar on `side` `width` pixels wide, and stores the width when `store` is set. */
+function setWidth(side: Side, width: number, store: boolean): void {
+  document.documentElement.style.setProperty(`--${side}-w`, `${width}px`);
+  if (store) writePref(widthKey(side), String(width));
+}
+
+/** Lets the handle `handle` resize its sidebar by dragging, by the arrow keys, and back to the default by a double click. */
+function resizable(handle: HTMLElement): void {
+  const side = handle.dataset.resize as Side;
+  handle.addEventListener("pointerdown", (down) => {
+    down.preventDefault();
+    const start = storedWidth(readPref(widthKey(side)), DEFAULT_WIDTH[side]);
+    let width = start;
+    const move = (event: PointerEvent) => {
+      width = dragWidth(side, start, down.clientX, event.clientX);
+      setWidth(side, width, false);
+    };
+    handle.setPointerCapture(down.pointerId);
+    handle.classList.add("active");
+    document.body.classList.add("resizing");
+    handle.addEventListener("pointermove", move);
+    handle.addEventListener(
+      "lostpointercapture",
+      () => {
+        handle.removeEventListener("pointermove", move);
+        handle.classList.remove("active");
+        document.body.classList.remove("resizing");
+        setWidth(side, width, true);
+      },
+      { once: true },
+    );
+  });
+  handle.addEventListener("keydown", (event) => {
+    const step = event.key === "ArrowLeft" ? -16 : event.key === "ArrowRight" ? 16 : 0;
+    if (step === 0) return;
+    event.preventDefault();
+    const width = storedWidth(readPref(widthKey(side)), DEFAULT_WIDTH[side]);
+    setWidth(side, dragWidth(side, width, 0, step), true);
+  });
+  handle.addEventListener("dblclick", () => {
+    removePref(widthKey(side));
+    document.documentElement.style.removeProperty(`--${side}-w`);
+  });
+}
+
 /** Applies `choice`, revealing the new theme in a circle growing from `origin` when it changes. */
 function switchTheme(choice: ThemeChoice, origin: HTMLElement): void {
   const apply = () => applyTheme(choice);
@@ -302,6 +351,11 @@ document.documentElement.dataset.theme = resolveTheme(storedTheme(), prefersDark
 document.documentElement.dataset.labels = flagValue(flag(readPref(LABELS_KEY), false));
 document.documentElement.dataset.left = flagValue(flag(readPref(LEFT_KEY), true));
 document.documentElement.dataset.report = flagValue(flag(readPref(REPORT_KEY), true));
+for (const side of ["left", "right"] as const) {
+  const stored = readPref(widthKey(side));
+  if (stored !== null) setWidth(side, storedWidth(stored, DEFAULT_WIDTH[side]), false);
+}
+document.querySelectorAll<HTMLElement>("[data-resize]").forEach(resizable);
 matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {
   if (themeChoice(storedTheme()) === "system") applyTheme("system");
 });

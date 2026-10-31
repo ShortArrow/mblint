@@ -15,7 +15,6 @@
   --shadow-tint: light-dark(rgba(16, 24, 40, 0.07), transparent);
   --shadow: 0 1px 2px var(--shadow-tint), 0 1px 3px var(--shadow-tint);
   --header-h: 56px;
-  --pane-h: calc(100vh - var(--header-h) - 32px);
 }
 :root[data-theme="dark"] {
   color-scheme: dark;
@@ -30,6 +29,9 @@
 * {
   box-sizing: border-box;
   scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
+*:hover {
   scrollbar-color: var(--line) transparent;
 }
 
@@ -54,7 +56,7 @@ html {
 
 body {
   margin: 0;
-  background: var(--bg);
+  background: var(--panel);
   color: var(--ink);
   font: 14px/20px Inter, system-ui, sans-serif;
 }
@@ -70,7 +72,6 @@ header {
   gap: 12px;
   height: var(--header-h);
   padding: 0 24px;
-  border-bottom: 1px solid var(--line);
   background: var(--panel);
   position: sticky;
   top: 0;
@@ -183,28 +184,72 @@ button,
 }
 
 main {
-  --left-w: 230px;
-  --right-w: 280px;
+  --left-col: var(--left-w, 230px);
+  --right-col: var(--right-w, 280px);
   display: grid;
-  grid-template-columns: var(--left-w) minmax(0, 1fr) var(--right-w);
+  grid-template-columns: var(--left-col) minmax(0, 1fr) var(--right-col);
   align-items: start;
 }
 :root[data-left="off"] main {
-  --left-w: 48px;
+  --left-col: 48px;
 }
 :root[data-report="off"] main {
-  --right-w: 48px;
+  --right-col: 48px;
 }
-.sidebar {
+.panel.sidebar {
   position: sticky;
   top: var(--header-h);
-  height: calc(100vh - var(--header-h));
-  border: none;
-  border-radius: 0;
+  height: calc(100vh - var(--header-h) - 8px);
+  background: var(--bg);
   box-shadow: none;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+}
+.resizer {
+  position: absolute;
+  top: 0;
+  bottom: 8px;
+  width: 8px;
+  cursor: col-resize;
+  touch-action: none;
+  z-index: 2;
+}
+.panel.sidebar.picker {
+  margin: 0 0 8px 8px;
+}
+.panel.sidebar.report-panel {
+  margin: 0 8px 8px 0;
+}
+.picker > .resizer {
+  right: -8px;
+}
+.report-panel > .resizer {
+  left: -8px;
+}
+.resizer::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 3px;
+  width: 2px;
+  border-radius: 1px;
+}
+.resizer:hover::after,
+.resizer:focus-visible::after,
+body.resizing .resizer.active::after {
+  background: var(--accent);
+}
+.resizer:focus-visible {
+  outline: none;
+}
+body.resizing {
+  cursor: col-resize;
+  user-select: none;
+}
+:root[data-left="off"] .picker > .resizer,
+:root[data-report="off"] .report-panel > .resizer {
+  display: none;
 }
 .sidebar > .full {
   flex: 1 1 0;
@@ -262,18 +307,39 @@ main {
   flex: 1 1 0;
   overflow-y: auto;
 }
-.stage {
-  min-height: var(--pane-h);
-  margin: 16px;
+.panel.stage {
+  position: sticky;
+  top: var(--header-h);
+  height: calc(100vh - var(--header-h) - 8px);
+  margin: 0 8px 8px;
+  background: var(--bg);
+  box-shadow: none;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.stage > .bracket {
+  flex: 1 1 0;
+  min-height: 0;
+  overflow: auto;
 }
 @media (max-width: 1100px) {
   main {
     grid-template-columns: minmax(0, 1fr);
   }
-  .sidebar {
+  .panel.sidebar,
+  .panel.sidebar.picker,
+  .panel.sidebar.report-panel {
     position: static;
     height: auto;
-    border-bottom: 1px solid var(--line);
+    margin: 0 8px 8px;
+  }
+  .resizer {
+    display: none;
+  }
+  .sidebar > .full,
+  .picker .parts {
+    flex: none;
   }
   .picker .list,
   .picker .parts {
@@ -287,15 +353,29 @@ main {
   :root[data-report="off"] .report-panel {
     flex-direction: row;
   }
-  .stage {
-    min-height: 0;
+  .picker .chevron,
+  :root[data-report="off"] .report-panel .chevron {
+    transform: rotate(90deg);
+  }
+  .report-panel .chevron,
+  :root[data-left="off"] .picker .chevron {
+    transform: rotate(-90deg);
+  }
+  .panel.stage {
+    position: static;
+    height: auto;
+    margin: 0 8px 8px;
+    display: block;
+  }
+  .stage > .bracket {
+    overflow-y: hidden;
   }
 }
 
 .panel {
   background: var(--panel);
   border: 1px solid var(--line);
-  border-radius: 12px;
+  border-radius: 8px;
   box-shadow: var(--shadow);
   min-width: 0;
 }
@@ -333,7 +413,7 @@ main {
   text-align: left;
   width: 100%;
   padding: 6px 10px;
-  border-radius: 10px;
+  border-radius: 6px;
 }
 .board-item small {
   color: var(--muted);
@@ -358,7 +438,7 @@ main {
   align-items: center;
   padding: 10px;
   border: 1px solid var(--line);
-  border-radius: 10px;
+  border-radius: 6px;
   cursor: grab;
   background: var(--panel-2);
   text-align: left;
@@ -465,7 +545,7 @@ main {
 
 .node {
   border: 1px solid var(--line);
-  border-radius: 10px;
+  border-radius: 6px;
   background: var(--panel-2);
   padding: 8px 10px;
   min-width: 150px;
@@ -700,5 +780,11 @@ dialog input {
   .sidebar.report-panel {
     border-left: none;
     border-right: none;
+  }
+}
+
+@media (max-width: 640px) {
+  :root[data-labels="on"] .tool .label {
+    display: none;
   }
 }
