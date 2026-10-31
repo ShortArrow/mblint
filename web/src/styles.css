@@ -195,7 +195,7 @@ main {
 :root[data-report="off"] main {
   --right-w: 48px;
 }
-.sidebar {
+.panel.sidebar {
   position: sticky;
   top: var(--header-h);
   height: calc(100vh - var(--header-h));
@@ -270,7 +270,7 @@ main {
   main {
     grid-template-columns: minmax(0, 1fr);
   }
-  .sidebar {
+  .panel.sidebar {
     position: static;
     height: auto;
     border-bottom: 1px solid var(--line);
@@ -689,15 +689,15 @@ dialog input {
   margin: 0;
 }
 
-.sidebar.picker {
+.panel.sidebar.picker {
   border-right: 1px solid var(--line);
 }
-.sidebar.report-panel {
+.panel.sidebar.report-panel {
   border-left: 1px solid var(--line);
 }
 @media (max-width: 1100px) {
-  .sidebar.picker,
-  .sidebar.report-panel {
+  .panel.sidebar.picker,
+  .panel.sidebar.report-panel {
     border-left: none;
     border-right: none;
   }
