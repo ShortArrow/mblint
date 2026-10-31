@@ -101,7 +101,7 @@ The parts are the devices in `files`, each shown with its name and its interface
 
 ### The bracket
 
-Each root is drawn as a bracket: its sockets at the leaves on the left, joined through muxes and bridges to the root on the right. A line runs from each child to the join of its siblings, and from the join to their parent. A mux shows the position, counted from 1, of its selected mode, or that no mode holds; a bridge shows the lanes it demands. Sockets whose parent is `unknown` are drawn together apart from the roots. Controllers are not drawn.
+Each root is drawn as a bracket: its sockets at the leaves on the left, joined through muxes and bridges to the root on the right. A line runs from each child to the join of its siblings, and from the join to their parent. The lines are one width and meet at their centres, so a line continues straight through a join. A mux shows the position, counted from 1, of its selected mode, or that no mode holds; a bridge shows the lanes it demands. Sockets whose parent is `unknown` are drawn together apart from the roots. Controllers are not drawn.
 
 A socket shows its id, the device in it and two bars on one scale of Gbps: what the device needs above what the socket offers. Each bar has one block per lane, as wide as the rate of a lane of its generation, so that the bars compare both lane count and generation. The part of the upper bar beyond the lower is marked as a shortfall, and the part of the lower bar beyond the upper is drawn faded. An empty socket shows only what it offers, and a socket that offers nothing shows no bars. A socket a mux disables is drawn struck out.
 
@@ -109,11 +109,13 @@ A root shows two bars in lanes, one block per lane: the lanes its children deman
 
 ### The report
 
-Beside the bracket the page shows the status of the report, each diagnostic with its severity, message and code, and the link of each rated device.
+The page shows the status of the report, each diagnostic with its severity, message and code, and the link of each rated device.
 
 ### Appearance
 
-The page follows the system's light or dark theme until the user switches it, and remembers the choice in the browser. Switching reveals the new theme in a circle growing from the switch, or at once when the system asks for reduced motion. The page does not scroll sideways; a part of it that must scroll has a thin scrollbar in the theme's colours.
+The boards and the parts are listed in a sidebar on the left, the bracket takes the middle, and the report is in a sidebar on the right. The report sidebar opens and closes, and the browser remembers whether it is open. On a narrow screen the three are stacked in that order.
+
+The page follows the system's light or dark theme until the user switches it, and remembers the choice in the browser. Switching reveals the new theme in a circle growing from the switch, or at once when the system asks for reduced motion. The page is drawn in its theme from the first paint, and the sidebars and the bracket hold their places while the module loads, so that loading the page neither flashes another theme nor rearranges it. The page does not scroll sideways; a part of it that must scroll has a thin scrollbar in the theme's colours.
 
 ## Build
 
