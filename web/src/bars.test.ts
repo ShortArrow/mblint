@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { LANE_GBPS, rootBars, socketBars } from "./bars";
+import { LANE_GBPS, linkGbps, rootBars, scaleFor, socketBars } from "./bars";
 
 const widths = (blocks: { width: number }[]) => blocks.map((b) => b.width);
 const marks = (blocks: { mark: string | null }[]) => blocks.map((b) => b.mark);
@@ -47,5 +47,20 @@ describe("rootBars", () => {
     expect(marks(over.gives)).toEqual([null, null, null, null]);
     expect(marks(under.gives)).toEqual([null, null, "spare", "spare"]);
     expect(widths(under.needs)).toEqual([1, 1]);
+  });
+});
+
+describe("scaleFor", () => {
+  it("rates a link as its lanes at the rate of a lane of its generation", () => {
+    expect(linkGbps({ generation: 5, lanes: 16 })).toBe(LANE_GBPS[5]! * 16);
+  });
+
+  it("scales the longest length to the width", () => {
+    expect(scaleFor([10, 40, 20], 200)).toBe(5);
+  });
+
+  it("is zero when there is nothing to draw", () => {
+    expect(scaleFor([], 200)).toBe(0);
+    expect(scaleFor([0], 200)).toBe(0);
   });
 });
