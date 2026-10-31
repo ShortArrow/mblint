@@ -13,6 +13,11 @@ export function resolveTheme(stored: string | null, prefersDark: boolean): Theme
   return prefersDark ? "dark" : "light";
 }
 
+/** The other of the two themes. */
+export function toggleTheme(theme: Theme): Theme {
+  return theme === "dark" ? "light" : "dark";
+}
+
 /** The choice that `stored` records: light or dark when stored, the system's theme otherwise. */
 export function themeChoice(stored: string | null): ThemeChoice {
   return stored === "light" || stored === "dark" ? stored : "system";

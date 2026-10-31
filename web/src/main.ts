@@ -10,7 +10,17 @@ import type { LinkWidth } from "./report/LinkWidth";
 import type { Report } from "./report/Report";
 import { rigToml } from "./rig";
 import { flag, flagValue, readPref, writePref } from "./prefs";
-import { applyTheme, coverRadius, prefersDark, resolveTheme, storedTheme, type ThemeChoice, themeChoice } from "./theme";
+import {
+  applyTheme,
+  coverRadius,
+  prefersDark,
+  resolveTheme,
+  storedTheme,
+  type Theme,
+  type ThemeChoice,
+  themeChoice,
+  toggleTheme,
+} from "./theme";
 import { bracket, type TreeNode } from "./tree";
 
 const RIG_PATH = "local/rig.toml";
@@ -368,6 +378,9 @@ $("clear").addEventListener("click", () => {
   notices = [];
   render();
 });
+$("theme").addEventListener("click", (event) =>
+  switchTheme(toggleTheme(document.documentElement.dataset.theme as Theme), event.currentTarget as HTMLElement),
+);
 const settings = $<HTMLDialogElement>("settings");
 $("settings-open").addEventListener("click", () => {
   const choice = themeChoice(storedTheme());

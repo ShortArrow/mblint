@@ -138,6 +138,10 @@ button,
 :root[data-labels="on"] .tool .label {
   display: inline;
 }
+:root[data-theme="dark"] .theme-toggle .moon,
+:root:not([data-theme="dark"]) .theme-toggle .sun {
+  display: none;
+}
 
 .status {
   display: inline-flex;

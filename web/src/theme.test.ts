@@ -1,11 +1,16 @@
 import { describe, expect, it } from "vitest";
-import { coverRadius, resolveTheme, themeChoice } from "./theme";
+import { coverRadius, resolveTheme, themeChoice, toggleTheme } from "./theme";
 
 describe("theme", () => {
   it("uses a stored theme, else the system's", () => {
     expect(resolveTheme("light", true)).toBe("light");
     expect(resolveTheme(null, true)).toBe("dark");
     expect(resolveTheme("bogus", false)).toBe("light");
+  });
+
+  it("toggles between light and dark", () => {
+    expect(toggleTheme("light")).toBe("dark");
+    expect(toggleTheme("dark")).toBe("light");
   });
 
   it("reads the stored choice, which is the system's theme unless light or dark is stored", () => {
