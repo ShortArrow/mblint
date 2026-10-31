@@ -159,10 +159,15 @@ fn display_has_no_interface_and_goes_in_a_usb_c_port() {
 }
 
 #[test]
-fn rig_is_listed_with_its_name_and_board() {
+fn rig_is_listed_with_its_name_board_and_bindings() {
     assert_eq!(
         entry(RIG),
-        json!({ "kind": "rig", "name": "workstation", "board": "boards/test/board.toml" })
+        json!({
+            "kind": "rig",
+            "name": "workstation",
+            "board": "boards/test/board.toml",
+            "bindings": { "PCIE1": "devices/card.toml" }
+        })
     );
 }
 

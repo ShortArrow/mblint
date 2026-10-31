@@ -28,6 +28,8 @@ pub enum Entry {
     Rig {
         name: String,
         board: String,
+        /// Device path installed in each socket path.
+        bindings: BTreeMap<String, String>,
     },
     /// Says why the file is not a board, why not a device and why not a rig.
     Invalid {
@@ -69,6 +71,7 @@ fn entry(source: &str) -> Entry {
         Ok(rig) => Entry::Rig {
             name: rig.name,
             board: rig.board,
+            bindings: rig.bindings,
         },
         Err(rig) => Entry::Invalid {
             message: format!("not a board: {board}; not a device: {device}; not a rig: {rig}"),

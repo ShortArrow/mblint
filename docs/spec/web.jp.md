@@ -33,7 +33,10 @@ Web シミュレーターは、コアをブラウザで Wasm として動かす�
     "interface": { "protocol": "pcie", "generation": 4, "lanes": 8 },
     "socket_category": "pcie_slot"
   },
-  "rigs/workstation.toml": { "kind": "rig", "name": "workstation", "board": "boards/asus/proart_x870e_creator_wifi.toml" },
+  "rigs/workstation.toml": {
+    "kind": "rig", "name": "workstation", "board": "boards/asus/proart_x870e_creator_wifi.toml",
+    "bindings": { "PCIEX16(G5)_1": "devices/rtx_a400.toml" }
+  },
   "notes.toml": { "kind": "invalid", "message": "not a board: …; not a device: …; not a rig: …" }
 }
 ```
@@ -42,7 +45,7 @@ Web シミュレーターは、コアをブラウザで Wasm として動かす�
 | --- | --- |
 | `board` | ボードの `vendor` と `model` |
 | `device` | デバイスの `name` と `type`。デバイス自身のリンク `interface`（アダプタとディスプレイでは `null`）。装着するボードのソケットのカテゴリ `socket_category` |
-| `rig` | rig の `name` と、そのボードのパス `board` |
+| `rig` | rig の `name`、そのボードのパス `board`、各ソケットのパスに装着するデバイスのパス `bindings` |
 | `invalid` | ボードでない理由、デバイスでない理由、rig でない理由を述べる `message` |
 
 `socket_category` は、カードなら `pcie_slot`、M.2 モジュールなら `m2_slot`、ディスプレイなら `usb_c`、アダプタなら上流のコネクタに応じて `usb_c` か `usb_a` である。

@@ -6,4 +6,8 @@ import type { SocketCategory } from "./SocketCategory";
 /**
  * What one file is.
  */
-export type CatalogEntry = { "kind": "board", vendor: string, model: string, } | { "kind": "device", name: string, type: DeviceType, interface: Interface | null, socket_category: SocketCategory, } | { "kind": "rig", name: string, board: string, } | { "kind": "invalid", message: string, };
+export type CatalogEntry = { "kind": "board", vendor: string, model: string, } | { "kind": "device", name: string, type: DeviceType, interface: Interface | null, socket_category: SocketCategory, } | { "kind": "rig", name: string, board: string, 
+/**
+ * Device path installed in each socket path.
+ */
+bindings: { [key in string]: string }, } | { "kind": "invalid", message: string, };

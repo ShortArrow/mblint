@@ -33,7 +33,10 @@ When a file cannot be loaded, the function throws an `Error` whose message names
     "interface": { "protocol": "pcie", "generation": 4, "lanes": 8 },
     "socket_category": "pcie_slot"
   },
-  "rigs/workstation.toml": { "kind": "rig", "name": "workstation", "board": "boards/asus/proart_x870e_creator_wifi.toml" },
+  "rigs/workstation.toml": {
+    "kind": "rig", "name": "workstation", "board": "boards/asus/proart_x870e_creator_wifi.toml",
+    "bindings": { "PCIEX16(G5)_1": "devices/rtx_a400.toml" }
+  },
   "notes.toml": { "kind": "invalid", "message": "not a board: …; not a device: …; not a rig: …" }
 }
 ```
@@ -42,7 +45,7 @@ When a file cannot be loaded, the function throws an `Error` whose message names
 | --- | --- |
 | `board` | `vendor` and `model` of the board |
 | `device` | `name` and `type` of the device; `interface`, the device's own link, or `null` for an adapter or a display; `socket_category`, the category of the board socket it is installed in |
-| `rig` | `name` of the rig, and `board`, the path of its board |
+| `rig` | `name` of the rig, `board`, the path of its board, and `bindings`, the device path installed in each socket path |
 | `invalid` | `message`, which says why the file is not a board, why not a device and why not a rig |
 
 `socket_category` is `pcie_slot` for a card, `m2_slot` for an M.2 module, `usb_c` for a display, and `usb_c` or `usb_a` for an adapter, after its upstream connector.
