@@ -6,16 +6,45 @@ The web simulator runs the core in the browser as Wasm. The page is TypeScript u
 
 ## Wasm interface
 
-The module exports two functions. Each takes the files it may read as an object mapping a path, by the rule for paths in [the data schema](schema.md), to the file's contents.
+The module exports these functions. Each takes the files it may read as an object mapping a path, by the rule for paths in [the data schema](schema.md), to the file's contents.
 
 | Function | Arguments | Returns |
 | --- | --- | --- |
 | `check(files, rig)` | `files`, and `rig`, the path of the rig file | The report of `mblint check --json` in [the command line](cli.md) |
 | `lint(files, board)` | `files`, and `board`, the path of the board file | The report of `mblint lint --json` |
+| `catalog(files)` | `files` | What each file is, as in [Catalog](#catalog) |
 
 Files are read only by the paths the rig or the call names, as the CLI reads them under its data root. A path absent from `files` cannot be read.
 
 When a file cannot be loaded, the function throws an `Error` whose message names the file and why, the message the CLI prints to standard error after `mblint: `. No report is returned.
+
+## Catalog
+
+`catalog(files)` returns an object keyed by every path in `files`, saying what the file there is. A file's kind is decided by its contents, not its path: it is a board if it parses as a board, a device if it parses as a device, and a rig if it parses as a rig. The required fields of the three do not overlap, so at most one applies.
+
+```json
+{
+  "boards/asus/proart_x870e_creator_wifi.toml": {
+    "kind": "board", "vendor": "ASUS", "model": "ProArt X870E-CREATOR WIFI"
+  },
+  "devices/rtx_a400.toml": {
+    "kind": "device", "name": "NVIDIA RTX A400 4GB", "type": "card",
+    "interface": { "protocol": "pcie", "generation": 4, "lanes": 8 },
+    "socket_category": "pcie_slot"
+  },
+  "rigs/workstation.toml": { "kind": "rig", "name": "workstation", "board": "boards/asus/proart_x870e_creator_wifi.toml" },
+  "notes.toml": { "kind": "invalid", "message": "not a board: …; not a device: …; not a rig: …" }
+}
+```
+
+| `kind` | Fields |
+| --- | --- |
+| `board` | `vendor` and `model` of the board |
+| `device` | `name` and `type` of the device; `interface`, the device's own link, or `null` for an adapter or a display; `socket_category`, the category of the board socket it is installed in |
+| `rig` | `name` of the rig, and `board`, the path of its board |
+| `invalid` | `message`, which says why the file is not a board, why not a device and why not a rig |
+
+`socket_category` is `pcie_slot` for a card, `m2_slot` for an M.2 module, `usb_c` for a display, and `usb_c` or `usb_a` for an adapter, after its upstream connector.
 
 ## Page
 
