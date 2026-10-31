@@ -10,12 +10,23 @@ import type { LinkWidth } from "./report/LinkWidth";
 import type { Report } from "./report/Report";
 import { rigToml } from "./rig";
 import { flag, flagValue, readPref, writePref } from "./prefs";
-import { applyTheme, coverRadius, resolveTheme, storedTheme, toggleTheme } from "./theme";
+import {
+  applyTheme,
+  coverRadius,
+  prefersDark,
+  resolveTheme,
+  storedTheme,
+  type Theme,
+  type ThemeChoice,
+  themeChoice,
+  toggleTheme,
+} from "./theme";
 import { bracket, type TreeNode } from "./tree";
 
 const RIG_PATH = "local/rig.toml";
 const BAR_PX = 112;
 const LABELS_KEY = "mblint-labels";
+const LEFT_KEY = "mblint-left";
 const REPORT_KEY = "mblint-report";
 
 type Device = Extract<CatalogEntry, { kind: "device" }>;
@@ -255,22 +266,27 @@ function chooseBoard(path: string): void {
   render();
 }
 
-/** Flips the flag that the document attribute `data-<name>` shows and stores it under `key`. */
-function toggleFlag(name: "labels" | "report", key: string): void {
-  const on = document.documentElement.dataset[name] !== "on";
+type Flag = "labels" | "left" | "report";
+
+const FLAG_KEYS: Record<Flag, string> = { labels: LABELS_KEY, left: LEFT_KEY, report: REPORT_KEY };
+
+/** Sets the flag that the document attribute `data-<name>` shows, and stores it. */
+function setFlag(name: Flag, on: boolean): void {
   document.documentElement.dataset[name] = flagValue(on);
-  writePref(key, flagValue(on));
+  writePref(FLAG_KEYS[name], flagValue(on));
 }
 
-function switchTheme(button: HTMLElement): void {
-  const apply = () => applyTheme(toggleTheme(resolveTheme(document.documentElement.dataset.theme ?? null, false)));
+/** Applies `choice`, revealing the new theme in a circle growing from `origin` when it changes. */
+function switchTheme(choice: ThemeChoice, origin: HTMLElement): void {
+  const apply = () => applyTheme(choice);
+  const next = resolveTheme(choice === "system" ? null : choice, prefersDark());
   const start = (document as Document & { startViewTransition?: (cb: () => void) => { ready: Promise<void> } })
     .startViewTransition;
-  if (!start || matchMedia("(prefers-reduced-motion: reduce)").matches) {
+  if (!start || next === document.documentElement.dataset.theme || matchMedia("(prefers-reduced-motion: reduce)").matches) {
     apply();
     return;
   }
-  const rect = button.getBoundingClientRect();
+  const rect = origin.getBoundingClientRect();
   const x = rect.left + rect.width / 2;
   const y = rect.top + rect.height / 2;
   const radius = coverRadius(x, y, innerWidth, innerHeight);
@@ -282,9 +298,13 @@ function switchTheme(button: HTMLElement): void {
   });
 }
 
-document.documentElement.dataset.theme = resolveTheme(storedTheme(), matchMedia("(prefers-color-scheme: dark)").matches);
+document.documentElement.dataset.theme = resolveTheme(storedTheme(), prefersDark());
 document.documentElement.dataset.labels = flagValue(flag(readPref(LABELS_KEY), false));
+document.documentElement.dataset.left = flagValue(flag(readPref(LEFT_KEY), true));
 document.documentElement.dataset.report = flagValue(flag(readPref(REPORT_KEY), true));
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {
+  if (themeChoice(storedTheme()) === "system") applyTheme("system");
+});
 
 document.addEventListener("click", (event) => {
   const target = event.target as HTMLElement;
@@ -293,6 +313,12 @@ document.addEventListener("click", (event) => {
     const { [remove.dataset.remove!]: _, ...rest } = bindings;
     bindings = rest;
     render();
+    return;
+  }
+  const toggle = target.closest<HTMLElement>("[data-toggle]");
+  if (toggle) {
+    const name = toggle.dataset.toggle as Flag;
+    setFlag(name, document.documentElement.dataset[name] !== "on");
     return;
   }
   const choice = target.closest<HTMLElement>("[data-board]");
@@ -352,9 +378,24 @@ $("clear").addEventListener("click", () => {
   notices = [];
   render();
 });
-$("labels").addEventListener("click", () => toggleFlag("labels", LABELS_KEY));
-$("report-toggle").addEventListener("click", () => toggleFlag("report", REPORT_KEY));
-$("theme").addEventListener("click", (event) => switchTheme(event.currentTarget as HTMLElement));
+$("theme").addEventListener("click", (event) =>
+  switchTheme(toggleTheme(document.documentElement.dataset.theme as Theme), event.currentTarget as HTMLElement),
+);
+const settings = $<HTMLDialogElement>("settings");
+$("settings-open").addEventListener("click", () => {
+  const choice = themeChoice(storedTheme());
+  settings.querySelectorAll<HTMLInputElement>("input[name=theme]").forEach((input) => (input.checked = input.value === choice));
+  $<HTMLInputElement>("labels").checked = document.documentElement.dataset.labels === "on";
+  settings.showModal();
+});
+settings.addEventListener("click", (event) => {
+  if (event.target === settings) settings.close();
+});
+settings.addEventListener("change", (event) => {
+  const input = event.target as HTMLInputElement;
+  if (input.name === "theme") switchTheme(input.value as ThemeChoice, input);
+  else if (input.id === "labels") setFlag("labels", input.checked);
+});
 
 await init();
 render();

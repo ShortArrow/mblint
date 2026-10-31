@@ -11,6 +11,7 @@
         root.dataset.theme =
           theme === "light" || theme === "dark" ? theme : matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
         root.dataset.labels = localStorage.getItem("mblint-labels") === "on" ? "on" : "off";
+        root.dataset.left = localStorage.getItem("mblint-left") === "off" ? "off" : "on";
         root.dataset.report = localStorage.getItem("mblint-report") === "off" ? "off" : "on";
       } catch {}
     </script>
@@ -35,40 +36,82 @@
         <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 4.5h11M6.5 4.5v-2h3v2M4 4.5l.7 9h6.6l.7-9M6.8 7v4M9.2 7v4" /></svg>
         <span class="label">Clear</span>
       </button>
-      <button id="report-toggle" class="tool" type="button" title="Show or hide the report">
-        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 2.5h11v11h-11zM10 2.5v11" /></svg>
-        <span class="label">Report</span>
-      </button>
-      <button id="labels" class="tool" type="button" title="Show or hide the names of these controls">
-        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 4h11M2.5 8h7M2.5 12h9" /></svg>
-        <span class="label">Names</span>
-      </button>
       <button id="theme" class="tool theme-toggle" type="button" title="Switch between light and dark">
         <svg class="sun" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="3" /><path d="M8 1v1.5M8 13.5V15M1 8h1.5M13.5 8H15M3 3l1 1M12 12l1 1M3 13l1-1M12 4l1-1" /></svg>
         <svg class="moon" viewBox="0 0 16 16" aria-hidden="true"><path d="M13.5 9.5A5.5 5.5 0 1 1 6.5 2.5a4.5 4.5 0 0 0 7 7Z" /></svg>
         <span class="label">Theme</span>
       </button>
+      <button id="settings-open" class="tool" type="button" title="Settings">
+        <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="2.2" /><path d="M8 1.5v1.8M8 12.7v1.8M1.5 8h1.8M12.7 8h1.8M3.4 3.4l1.3 1.3M11.3 11.3l1.3 1.3M3.4 12.6l1.3-1.3M11.3 4.7l1.3-1.3" /><circle cx="8" cy="8" r="4.6" /></svg>
+        <span class="label">Settings</span>
+      </button>
     </header>
     <div id="notices" class="notices" role="status"></div>
     <main>
-      <aside class="panel sidebar picker">
-        <h2>Boards</h2>
-        <div id="boards" class="list"><p class="empty">Loading…</p></div>
-        <h2>Parts</h2>
-        <div id="parts" class="parts"></div>
+      <aside class="panel sidebar picker" aria-label="Boards and parts">
+        <div class="full">
+          <h2>Boards</h2>
+          <div id="boards" class="list"><p class="empty">Loading…</p></div>
+          <h2>Parts</h2>
+          <div id="parts" class="parts"></div>
+        </div>
+        <div class="rail">
+          <button class="tool" type="button" data-toggle="left" title="Boards">
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 2.5h11v11h-11zM5 5h2.5v2.5H5zM9.5 5H11M9.5 7.5H11M5 10h6" /></svg>
+          </button>
+          <button class="tool" type="button" data-toggle="left" title="Parts">
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M1.5 4.5h13v6h-13zM4 10.5v2M7 10.5v2M10 10.5v2M4 7h5" /></svg>
+          </button>
+        </div>
+        <button class="tool foot" type="button" data-toggle="left" title="Collapse or expand the sidebar">
+          <svg class="chevron" viewBox="0 0 16 16" aria-hidden="true"><path d="M9.5 4 5.5 8l4 4" /></svg>
+        </button>
       </aside>
       <section class="panel stage">
         <h2>Lane bracket</h2>
         <div id="bracket" class="bracket"></div>
         <p class="hint">Select a part, then a highlighted socket, or drag the part onto one. Drop TOML files anywhere to load them.</p>
       </section>
-      <aside class="panel sidebar report-panel">
-        <h2>Report</h2>
-        <div id="report"></div>
-        <h2>Links</h2>
-        <div id="links" class="links"></div>
+      <aside class="panel sidebar report-panel" aria-label="Report">
+        <div class="full">
+          <h2>Report</h2>
+          <div id="report"></div>
+          <h2>Links</h2>
+          <div id="links" class="links"></div>
+        </div>
+        <div class="rail">
+          <button class="tool" type="button" data-toggle="report" title="Report">
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 1.5h9v13h-9zM5.5 5h5M5.5 8h5M5.5 11h3" /></svg>
+          </button>
+          <button class="tool" type="button" data-toggle="report" title="Links">
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.5 9.5l3-3M7 4.5l1.2-1.2a2.5 2.5 0 0 1 3.5 3.5L10.5 8M9 11.5l-1.2 1.2a2.5 2.5 0 0 1-3.5-3.5L5.5 8" /></svg>
+          </button>
+        </div>
+        <button class="tool foot" type="button" data-toggle="report" title="Collapse or expand the sidebar">
+          <svg class="chevron" viewBox="0 0 16 16" aria-hidden="true"><path d="M6.5 4l4 4-4 4" /></svg>
+        </button>
       </aside>
     </main>
+    <dialog id="settings" aria-labelledby="settings-title">
+      <form method="dialog">
+        <div class="dialog-head">
+          <h2 id="settings-title">Settings</h2>
+          <button class="tool" value="close" title="Close">
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" /></svg>
+          </button>
+        </div>
+        <fieldset>
+          <legend>Theme</legend>
+          <label><input type="radio" name="theme" value="system" /> System</label>
+          <label><input type="radio" name="theme" value="light" /> Light</label>
+          <label><input type="radio" name="theme" value="dark" /> Dark</label>
+        </fieldset>
+        <fieldset>
+          <legend>Header</legend>
+          <label><input id="labels" type="checkbox" /> Show the names of the controls</label>
+        </fieldset>
+      </form>
+    </dialog>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

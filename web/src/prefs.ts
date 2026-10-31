@@ -27,3 +27,12 @@ export function flag(stored: string | null, fallback: boolean): boolean {
 export function flagValue(on: boolean): string {
   return on ? "on" : "off";
 }
+
+/** Removes what is stored under `key`, doing nothing when storage is unavailable. */
+export function removePref(key: string): void {
+  try {
+    localStorage.removeItem(key);
+  } catch {
+    return;
+  }
+}

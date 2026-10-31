@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { coverRadius, resolveTheme, toggleTheme } from "./theme";
+import { coverRadius, resolveTheme, themeChoice, toggleTheme } from "./theme";
 
 describe("theme", () => {
   it("uses a stored theme, else the system's", () => {
@@ -11,6 +11,13 @@ describe("theme", () => {
   it("toggles between light and dark", () => {
     expect(toggleTheme("light")).toBe("dark");
     expect(toggleTheme("dark")).toBe("light");
+  });
+
+  it("reads the stored choice, which is the system's theme unless light or dark is stored", () => {
+    expect(themeChoice("dark")).toBe("dark");
+    expect(themeChoice("light")).toBe("light");
+    expect(themeChoice(null)).toBe("system");
+    expect(themeChoice("bogus")).toBe("system");
   });
 
   it("covers the whole area from the point the circle grows from", () => {
