@@ -10,6 +10,7 @@ use crate::occupancy::Occupancy;
 use crate::protocol::Protocol;
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[cfg_attr(feature = "ts", derive(ts_rs::TS))]
 #[serde(tag = "code", rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum Diagnostic {
     /// The node id contains `.` or is `unknown`.
@@ -42,6 +43,7 @@ pub enum Diagnostic {
 
 /// The state of a condition socket in an occupancy, serialized as `"empty"` or the protocol.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+#[cfg_attr(feature = "ts", derive(ts_rs::TS))]
 #[serde(rename_all = "snake_case")]
 pub enum Occupant {
     Empty,

@@ -69,6 +69,7 @@ Before opening a pull request, run the checks that CI runs on every pull request
 cargo fmt --check
 cargo clippy --all-targets -- -D warnings
 cargo test
+cargo test -p mblint-core --features ts export_bindings && test -z "$(git status --porcelain web/src/report)"
 for board in data/boards/*/*.toml; do cargo run -q -p mblint -- lint --data-root data "${board#data/}"; done
 ```
 
@@ -76,9 +77,11 @@ for board in data/boards/*/*.toml; do cargo run -q -p mblint -- lint --data-root
 
 | Path | Contents |
 | --- | --- |
+| `.cargo` | Cargo settings, including where ts-rs writes the report types |
 | `.github/workflows` | CI, which runs the checks above and a scan for leaked secrets |
 | `crates/mblint` | The `mblint` command line, which prints the core's report |
 | `crates/mblint-core` | Topology model and resolution passes, shared by the CLI and the Wasm build |
 | `crates/mblint-wasm` | The core as Wasm for the web simulator, which returns the core's report |
 | `data/` | Data root holding the reference boards |
 | `docs/` | Requirements, specifications, ADRs and open issues |
+| `web/src/report` | The report types for TypeScript, generated from the core |

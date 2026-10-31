@@ -69,6 +69,7 @@ ADR には日付を書きません。いつ採用されたか、その後どう�
 cargo fmt --check
 cargo clippy --all-targets -- -D warnings
 cargo test
+cargo test -p mblint-core --features ts export_bindings && test -z "$(git status --porcelain web/src/report)"
 for board in data/boards/*/*.toml; do cargo run -q -p mblint -- lint --data-root data "${board#data/}"; done
 ```
 
@@ -76,9 +77,11 @@ for board in data/boards/*/*.toml; do cargo run -q -p mblint -- lint --data-root
 
 | パス | 内容 |
 | --- | --- |
+| `.cargo` | Cargo の設定。ts-rs がレポートの型を書き出す場所も決める |
 | `.github/workflows` | CI。上の検査と、漏れたシークレットの走査を実行する |
 | `crates/mblint` | `mblint` コマンドライン。コアのレポートを出力する |
 | `crates/mblint-core` | トポロジーモデルと解決パス。CLI と Wasm ビルドで共有する |
 | `crates/mblint-wasm` | Web シミュレーター向けの、コアの Wasm ビルド。コアのレポートを返す |
 | `data/` | 基準ボードを収めるデータルート |
 | `docs/` | 要求仕様、仕様書、ADR、未決事項 |
+| `web/src/report` | コアから生成した、TypeScript 向けのレポートの型 |

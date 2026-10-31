@@ -18,6 +18,8 @@ pub struct LaneResolution {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[cfg_attr(feature = "ts", derive(ts_rs::TS))]
+#[cfg_attr(feature = "ts", ts(rename = "LanesDiagnostic"))]
 #[serde(tag = "code", rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum Diagnostic {
     /// The lanes demanded by a root's children exceed what the root supplies.

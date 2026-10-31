@@ -23,6 +23,8 @@ pub struct Tunnelling {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[cfg_attr(feature = "ts", derive(ts_rs::TS))]
+#[cfg_attr(feature = "ts", ts(rename = "TunnelsDiagnostic"))]
 #[serde(tag = "code", rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum Diagnostic {
     /// A display is in a Type-C port without DP Alt Mode.

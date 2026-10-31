@@ -12,6 +12,8 @@ use crate::{lanes, lint, physical, throughput, tunnels};
 
 /// What `mblint check` prints, as `docs/spec/cli.md` specifies.
 #[derive(Debug, Clone, PartialEq, Serialize)]
+#[cfg_attr(feature = "ts", derive(ts_rs::TS))]
+#[cfg_attr(feature = "ts", ts(export))]
 pub struct Report {
     pub status: Status,
     pub passes: Passes,
@@ -22,6 +24,7 @@ pub struct Report {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+#[cfg_attr(feature = "ts", derive(ts_rs::TS))]
 #[serde(rename_all = "snake_case")]
 pub enum Status {
     Ok,
@@ -31,6 +34,7 @@ pub enum Status {
 
 /// Whether each pass ran.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+#[cfg_attr(feature = "ts", derive(ts_rs::TS))]
 pub struct Passes {
     pub physical: PassState,
     pub lanes: PassState,
@@ -39,6 +43,7 @@ pub struct Passes {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+#[cfg_attr(feature = "ts", derive(ts_rs::TS))]
 #[serde(rename_all = "snake_case")]
 pub enum PassState {
     Ran,
@@ -46,6 +51,7 @@ pub enum PassState {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+#[cfg_attr(feature = "ts", derive(ts_rs::TS))]
 #[serde(rename_all = "snake_case")]
 pub enum Pass {
     Physical,
@@ -55,6 +61,7 @@ pub enum Pass {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+#[cfg_attr(feature = "ts", derive(ts_rs::TS))]
 #[serde(rename_all = "snake_case")]
 pub enum Severity {
     Error,
@@ -63,6 +70,7 @@ pub enum Severity {
 
 /// One diagnostic with the pass that reported it, its severity and an English message.
 #[derive(Debug, Clone, PartialEq, Serialize)]
+#[cfg_attr(feature = "ts", derive(ts_rs::TS))]
 pub struct Finding {
     pub pass: Pass,
     pub severity: Severity,
@@ -74,6 +82,7 @@ pub struct Finding {
 
 /// A diagnostic of any pass.
 #[derive(Debug, Clone, PartialEq, Serialize)]
+#[cfg_attr(feature = "ts", derive(ts_rs::TS))]
 #[serde(untagged)]
 pub enum Diagnostic {
     Physical(physical::Diagnostic),
@@ -84,6 +93,7 @@ pub enum Diagnostic {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[cfg_attr(feature = "ts", derive(ts_rs::TS))]
 #[serde(tag = "code", rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum IommuDiagnostic {
     /// Node ids in order.
@@ -199,6 +209,8 @@ fn status_of(severities: impl Iterator<Item = Severity>) -> Status {
 
 /// What `mblint lint` prints, as `docs/spec/cli.md` specifies.
 #[derive(Debug, Clone, PartialEq, Serialize)]
+#[cfg_attr(feature = "ts", derive(ts_rs::TS))]
+#[cfg_attr(feature = "ts", ts(export))]
 pub struct LintReport {
     pub status: Status,
     /// In the order lint reports them.
@@ -207,6 +219,7 @@ pub struct LintReport {
 
 /// One lint diagnostic with its severity and an English message.
 #[derive(Debug, Clone, PartialEq, Serialize)]
+#[cfg_attr(feature = "ts", derive(ts_rs::TS))]
 pub struct LintFinding {
     pub severity: Severity,
     /// Serialized as `code` and the diagnostic's fields.

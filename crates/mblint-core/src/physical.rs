@@ -9,6 +9,8 @@ use crate::connector::{M2Key, PcieWidth, UpstreamConnector};
 use crate::device::{Device, DeviceKind, DownstreamSocket};
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[cfg_attr(feature = "ts", derive(ts_rs::TS))]
+#[cfg_attr(feature = "ts", ts(rename = "PhysicalDiagnostic"))]
 #[serde(tag = "code", rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum Diagnostic {
     /// A device is bound to a socket path that leads to no board or adapter socket.
