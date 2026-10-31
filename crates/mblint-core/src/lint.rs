@@ -2,7 +2,7 @@
 
 use std::collections::{BTreeMap, BTreeSet};
 
-use serde::{Serialize, Serializer};
+use serde::Serialize;
 
 use crate::board::{Board, Condition, Mux, Node, Socket};
 use crate::lanes::{self, resolve_lanes};
@@ -41,19 +41,12 @@ pub enum Diagnostic {
 }
 
 /// The state of a condition socket in an occupancy, serialized as `"empty"` or the protocol.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "snake_case")]
 pub enum Occupant {
     Empty,
+    #[serde(untagged)]
     Running(Protocol),
-}
-
-impl Serialize for Occupant {
-    fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
-        match self {
-            Occupant::Empty => serializer.serialize_str("empty"),
-            Occupant::Running(protocol) => protocol.serialize(serializer),
-        }
-    }
 }
 
 /// Every lint diagnostic of `board`, grouped by kind in the specification's order.

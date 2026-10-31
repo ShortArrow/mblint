@@ -2,7 +2,8 @@
 
 use mblint_core::board::Board;
 use mblint_core::evaluate::evaluate;
-use mblint_core::lint::lint;
+use mblint_core::lint::{Occupant, lint};
+use mblint_core::protocol::Protocol;
 use mblint_core::report::{Status, lint_report, report};
 use mblint_core::rig::load_rig;
 use serde_json::{Value, json};
@@ -238,5 +239,17 @@ fn lint_report_without_diagnostics_is_ok() {
     assert_eq!(
         serde_json::to_value(lint_report(&[])).expect("report must serialize"),
         json!({ "status": "ok", "diagnostics": [] })
+    );
+}
+
+#[test]
+fn occupant_serializes_as_empty_or_its_protocol() {
+    assert_eq!(
+        serde_json::to_value(Occupant::Empty).unwrap(),
+        json!("empty")
+    );
+    assert_eq!(
+        serde_json::to_value(Occupant::Running(Protocol::Usb3Gen1x1)).unwrap(),
+        json!("usb3_gen1x1")
     );
 }
