@@ -29,6 +29,9 @@
 * {
   box-sizing: border-box;
   scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
+*:hover {
   scrollbar-color: var(--line) transparent;
 }
 
