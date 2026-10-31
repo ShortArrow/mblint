@@ -2,6 +2,7 @@
 
 use std::collections::BTreeMap;
 
+use mblint_core::catalog::{self, Entry};
 use mblint_core::evaluate::evaluate;
 use mblint_core::lint::lint;
 use mblint_core::report::{LintReport, Report, lint_report, report};
@@ -20,6 +21,11 @@ pub fn check_files(files: &Files, rig: &str) -> Result<Report, LoadError> {
 /// Lints the board at `board`, reading only from `files`.
 pub fn lint_files(files: &Files, board: &str) -> Result<LintReport, LoadError> {
     load_board(board, reader(files)).map(|board| lint_report(&lint(&board)))
+}
+
+/// What each file in `files` is, keyed by its path.
+pub fn catalog_files(files: &Files) -> BTreeMap<String, Entry> {
+    catalog::catalog(files)
 }
 
 fn reader(files: &Files) -> impl Fn(&str) -> Result<String, String> + '_ {
@@ -45,6 +51,12 @@ pub fn check(files: JsValue, rig: &str) -> Result<JsValue, JsError> {
 pub fn lint_board(files: JsValue, board: &str) -> Result<JsValue, JsError> {
     let report = lint_files(&from_js(files)?, board).map_err(|e| JsError::new(&e.to_string()))?;
     to_js(&report)
+}
+
+/// `catalog(files)`: what each file is, keyed by its path.
+#[wasm_bindgen]
+pub fn catalog(files: JsValue) -> Result<JsValue, JsError> {
+    to_js(&catalog_files(&from_js(files)?))
 }
 
 fn from_js(files: JsValue) -> Result<Files, JsError> {

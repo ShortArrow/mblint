@@ -6,7 +6,7 @@ use std::path::Path;
 
 use mblint_core::report::Status;
 use mblint_core::rig::LoadError;
-use mblint_wasm::{Files, check_files, lint_files};
+use mblint_wasm::{Files, catalog_files, check_files, lint_files};
 
 /// Every file under the CLI's test data root, keyed by its data-root-relative path.
 fn files() -> Files {
@@ -78,4 +78,13 @@ fn board_with_a_lint_error_reports_its_code() {
 
     assert_eq!(json["status"], "error");
     assert!(json["diagnostics"][0]["code"].is_string());
+}
+
+#[test]
+fn catalog_lists_every_file_by_its_contents() {
+    let catalog = serde_json::to_value(catalog_files(&files())).unwrap();
+
+    assert_eq!(catalog["boards/test/board.toml"]["kind"], "board");
+    assert_eq!(catalog["devices/card.toml"]["kind"], "device");
+    assert_eq!(catalog["rigs/warning.toml"]["kind"], "rig");
 }

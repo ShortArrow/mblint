@@ -1,4 +1,5 @@
 import * as wasm from "./wasm/mblint_wasm";
+import type { CatalogEntry } from "./report/CatalogEntry";
 import type { LintReport } from "./report/LintReport";
 import type { Report } from "./report/Report";
 
@@ -13,4 +14,9 @@ export function check(files: Files, rig: string): Report {
 /** The report of `mblint lint --json` for `board`; throws an `Error` naming a file that cannot be loaded. */
 export function lint(files: Files, board: string): LintReport {
   return wasm.lint(files, board) as LintReport;
+}
+
+/** What each file in `files` is, keyed by its path, as `docs/spec/web.md` specifies. */
+export function catalog(files: Files): Record<string, CatalogEntry> {
+  return wasm.catalog(files) as Record<string, CatalogEntry>;
 }

@@ -2,7 +2,7 @@
 
 use std::collections::BTreeMap;
 
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 use crate::connector::{M2Key, PcieWidth};
 use crate::occupancy::Occupancy;
@@ -161,6 +161,18 @@ pub struct Bridge {
 #[derive(Debug, Clone, Deserialize)]
 pub struct Controller {
     pub iommu_group: u32,
+}
+
+/// The `category` of a socket.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+#[cfg_attr(feature = "ts", derive(ts_rs::TS))]
+#[serde(rename_all = "snake_case")]
+pub enum SocketCategory {
+    PcieSlot,
+    M2Slot,
+    SataPort,
+    UsbC,
+    UsbA,
 }
 
 /// A physical socket that devices are installed into, with the attributes of its category.

@@ -3,8 +3,9 @@
 use std::collections::BTreeMap;
 use std::num::NonZeroU8;
 
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
+use crate::board::SocketCategory;
 use crate::connector::{M2Key, PcieWidth, UpstreamConnector};
 use crate::parse::ParseError;
 use crate::protocol::Protocol;
@@ -34,6 +35,50 @@ impl Device {
             DeviceKind::Display { .. } => Protocol::Displayport,
         }
     }
+
+    /// The `type` the device is declared with.
+    pub fn device_type(&self) -> DeviceType {
+        match &self.kind {
+            DeviceKind::Card { .. } => DeviceType::Card,
+            DeviceKind::M2Module { .. } => DeviceType::M2Module,
+            DeviceKind::Adapter { .. } => DeviceType::Adapter,
+            DeviceKind::Display { .. } => DeviceType::Display,
+        }
+    }
+
+    /// The device's own link; `None` for an adapter or a display, which declare none.
+    pub fn interface(&self) -> Option<&Interface> {
+        match &self.kind {
+            DeviceKind::Card { interface, .. } | DeviceKind::M2Module { interface, .. } => {
+                Some(interface)
+            }
+            DeviceKind::Adapter { .. } | DeviceKind::Display { .. } => None,
+        }
+    }
+
+    /// The category of board socket the device is installed in.
+    pub fn socket_category(&self) -> SocketCategory {
+        match &self.kind {
+            DeviceKind::Card { .. } => SocketCategory::PcieSlot,
+            DeviceKind::M2Module { .. } => SocketCategory::M2Slot,
+            DeviceKind::Display { .. } => SocketCategory::UsbC,
+            DeviceKind::Adapter { upstream, .. } => match upstream.connector {
+                UpstreamConnector::TypeC => SocketCategory::UsbC,
+                UpstreamConnector::TypeA => SocketCategory::UsbA,
+            },
+        }
+    }
+}
+
+/// The `type` of a device file.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+#[cfg_attr(feature = "ts", derive(ts_rs::TS))]
+#[serde(rename_all = "snake_case")]
+pub enum DeviceType {
+    Card,
+    M2Module,
+    Adapter,
+    Display,
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -60,7 +105,8 @@ pub enum DeviceKind {
 }
 
 /// The link a device runs: protocol, generation and electrical lane count.
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]
+#[cfg_attr(feature = "ts", derive(ts_rs::TS))]
 #[serde(deny_unknown_fields)]
 pub struct Interface {
     pub protocol: Protocol,

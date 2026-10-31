@@ -1,6 +1,7 @@
 //! Deterministic topology model and resolution engine for mblint.
 
 pub mod board;
+pub mod catalog;
 pub mod connector;
 pub mod device;
 pub mod evaluate;

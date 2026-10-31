@@ -2,7 +2,7 @@ import { readdirSync, readFileSync } from "node:fs";
 import { join, relative } from "node:path";
 import { beforeAll, describe, expect, it } from "vitest";
 import { initSync } from "./wasm/mblint_wasm";
-import { check, lint, type Files } from "./mblint";
+import { catalog, check, lint, type Files } from "./mblint";
 import { boardPaths } from "./files";
 
 const repo = join(import.meta.dirname, "../..");
@@ -46,5 +46,17 @@ describe("check", () => {
 
   it("throws an Error naming a file absent from files", () => {
     expect(() => check(files, "rigs/missing_device.toml")).toThrow(/devices\/none\.toml/);
+  });
+});
+
+describe("catalog", () => {
+  it("says what each file is by its contents", () => {
+    const files = readTree(join(repo, "crates/mblint/tests/data"));
+
+    const entries = catalog(files);
+
+    expect(entries["boards/test/board.toml"]?.kind).toBe("board");
+    expect(entries["devices/card.toml"]?.kind).toBe("device");
+    expect(entries["rigs/warning.toml"]?.kind).toBe("rig");
   });
 });
