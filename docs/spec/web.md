@@ -75,7 +75,42 @@ When a file cannot be loaded, the function throws an `Error` whose message names
 
 ## Page
 
-The page carries every file under `data/` as `files`, keyed by its path under `data/`. It lists the boards among them, and shows the lint report of the board chosen: its status and the message of each diagnostic.
+The page builds a rig on a board and shows what the board makes of it.
+
+### Files
+
+The page carries every file under `data/` as `files`, keyed by its path under `data/`. Files the user loads are added under `local/<file name>`, replacing a loaded file of the same name. Loaded files stay in the browser and are sent nowhere.
+
+One control loads TOML files, chosen from disk or dropped anywhere on the page. `catalog` decides what each file is:
+
+| Kind | Effect |
+| --- | --- |
+| Board | Added to the boards and chosen |
+| Device | Added to the parts |
+| Rig | Its board is chosen and its bindings installed. A path it names that is not in `files` is taken from a file loaded with it whose name is the path's last segment; a path neither supplies is reported by name |
+| Invalid | Its message is reported with the file name |
+
+### The rig
+
+The page keeps the rig being built as a rig file at `local/rig.toml` in `files`, on the board chosen, and evaluates it with `check` and `layout` on every change. Choosing another board empties the rig.
+
+The parts are the devices in `files`, each shown with its name and its interface. A part is placed by selecting it and then a socket, or by dragging it onto a socket. Only a socket whose category is the part's `socket_category` takes it; such sockets are marked while a part is selected. A part placed in an occupied socket replaces the device there. A device is removed from its socket by a control on the socket.
+
+### The bracket
+
+Each root is drawn as a bracket: its sockets at the leaves on the left, joined through muxes and bridges to the root on the right. A line runs from each child to the join of its siblings, and from the join to their parent. A mux shows the position, counted from 1, of its selected mode, or that no mode holds; a bridge shows the lanes it demands. Sockets whose parent is `unknown` are drawn together apart from the roots. Controllers are not drawn.
+
+A socket shows its id, the device in it and two bars on one scale of Gbps: what the device needs above what the socket offers. Each bar has one block per lane, as wide as the rate of a lane of its generation, so that the bars compare both lane count and generation. The part of the upper bar beyond the lower is marked as a shortfall, and the part of the lower bar beyond the upper is drawn faded. An empty socket shows only what it offers, and a socket that offers nothing shows no bars. A socket a mux disables is drawn struck out.
+
+A root shows two bars in lanes, one block per lane: the lanes its children demand above the lanes it supplies. Demanded lanes beyond the supply are marked as an overcommit.
+
+### The report
+
+Beside the bracket the page shows the status of the report, each diagnostic with its severity, message and code, and the link of each rated device.
+
+### Appearance
+
+The page follows the system's light or dark theme until the user switches it, and remembers the choice in the browser. Switching reveals the new theme in a circle growing from the switch, or at once when the system asks for reduced motion. The page does not scroll sideways; a part of it that must scroll has a thin scrollbar in the theme's colours.
 
 ## Build
 
