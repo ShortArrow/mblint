@@ -1,3 +1,5 @@
+import { readPref, writePref } from "./prefs";
+
 export type Theme = "light" | "dark";
 
 const STORAGE_KEY = "mblint-theme";
@@ -19,19 +21,11 @@ export function coverRadius(x: number, y: number, w: number, h: number): number 
 
 /** The theme stored in the browser, or `null` when none is or storage is unavailable. */
 export function storedTheme(): string | null {
-  try {
-    return localStorage.getItem(STORAGE_KEY);
-  } catch {
-    return null;
-  }
+  return readPref(STORAGE_KEY);
 }
 
 /** Applies `theme` to the document and stores it; the document changes even when storage fails. */
 export function applyTheme(theme: Theme): void {
   document.documentElement.dataset.theme = theme;
-  try {
-    localStorage.setItem(STORAGE_KEY, theme);
-  } catch {
-    return;
-  }
+  writePref(STORAGE_KEY, theme);
 }
