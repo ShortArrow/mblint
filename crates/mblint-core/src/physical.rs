@@ -25,6 +25,12 @@ pub enum Diagnostic {
     },
     /// The slot's key is not among the module's notches.
     KeyMismatch { socket: String, slot: M2Key },
+    /// The slot, which lists the sizes in `slot`, has no screw position for the module's size.
+    FormFactorUnsupported {
+        socket: String,
+        form_factor: String,
+        slot: Vec<String>,
+    },
     /// The card in `by` covers the slot holding the device in `socket`.
     Obstructed { socket: String, by: String },
 }
@@ -49,8 +55,14 @@ pub fn check_physical(board: &Board, installed: &BTreeMap<String, Device>) -> Ve
 
 /// The shape of a socket as far as fitting a device into it is concerned.
 enum Receptacle {
-    Pcie { width: PcieWidth, open_ended: bool },
-    M2 { key: M2Key },
+    Pcie {
+        width: PcieWidth,
+        open_ended: bool,
+    },
+    M2 {
+        key: M2Key,
+        form_factors: Vec<String>,
+    },
     UsbC,
     UsbA,
     Other,
@@ -81,7 +93,10 @@ impl From<&Socket> for Receptacle {
                 width: slot.physical_form_factor,
                 open_ended: slot.open_ended,
             },
-            Socket::M2Slot(slot) => Receptacle::M2 { key: slot.key },
+            Socket::M2Slot(slot) => Receptacle::M2 {
+                key: slot.key,
+                form_factors: slot.supported_form_factors.clone(),
+            },
             Socket::UsbC(_) => Receptacle::UsbC,
             Socket::UsbA(_) => Receptacle::UsbA,
             Socket::SataPort(_) => Receptacle::Other,
@@ -110,11 +125,21 @@ fn misfit(id: &str, receptacle: Receptacle, device: &Device) -> Option<Diagnosti
                 slot: width,
             })
         }
-        (Receptacle::M2 { key }, DeviceKind::M2Module { physical, .. }) => {
-            (!physical.keys.contains(&key)).then(|| Diagnostic::KeyMismatch {
-                socket: id.to_string(),
-                slot: key,
-            })
+        (Receptacle::M2 { key, form_factors }, DeviceKind::M2Module { physical, .. }) => {
+            if !physical.keys.contains(&key) {
+                Some(Diagnostic::KeyMismatch {
+                    socket: id.to_string(),
+                    slot: key,
+                })
+            } else if !form_factors.is_empty() && !form_factors.contains(&physical.form_factor) {
+                Some(Diagnostic::FormFactorUnsupported {
+                    socket: id.to_string(),
+                    form_factor: physical.form_factor.clone(),
+                    slot: form_factors,
+                })
+            } else {
+                None
+            }
         }
         (Receptacle::UsbC, DeviceKind::Adapter { upstream, .. })
             if upstream.connector == UpstreamConnector::TypeC =>

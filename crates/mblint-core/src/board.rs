@@ -259,6 +259,9 @@ pub struct M2Slot {
     pub key: M2Key,
     #[serde(default)]
     pub supported_protocols: Vec<Protocol>,
+    /// Module sizes, such as `"2280"`, the slot has a screw position for; empty if not stated.
+    #[serde(default)]
+    pub supported_form_factors: Vec<String>,
     pub max_lanes: Option<u8>,
     /// PCIe generation of the slot's wiring, for a slot slower than its root.
     pub generation: Option<u8>,

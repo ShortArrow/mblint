@@ -2,4 +2,4 @@
 import type { M2Key } from "./M2Key";
 import type { PcieWidth } from "./PcieWidth";
 
-export type PhysicalDiagnostic = { "code": "UNKNOWN_SOCKET", socket: string, } | { "code": "WRONG_SOCKET_CATEGORY", socket: string, } | { "code": "EDGE_TOO_WIDE", socket: string, edge: PcieWidth, slot: PcieWidth, } | { "code": "KEY_MISMATCH", socket: string, slot: M2Key, } | { "code": "OBSTRUCTED", socket: string, by: string, };
+export type PhysicalDiagnostic = { "code": "UNKNOWN_SOCKET", socket: string, } | { "code": "WRONG_SOCKET_CATEGORY", socket: string, } | { "code": "EDGE_TOO_WIDE", socket: string, edge: PcieWidth, slot: PcieWidth, } | { "code": "KEY_MISMATCH", socket: string, slot: M2Key, } | { "code": "FORM_FACTOR_UNSUPPORTED", socket: string, form_factor: string, slot: Array<string>, } | { "code": "OBSTRUCTED", socket: string, by: string, };
