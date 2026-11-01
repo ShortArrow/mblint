@@ -4,7 +4,7 @@ use std::collections::{BTreeMap, BTreeSet};
 
 use serde::Serialize;
 
-use crate::board::{Board, Node};
+use crate::board::{Board, Node, Socket};
 use crate::occupancy::Occupancy;
 
 /// Lanes allocated to each socket, the sockets switched off, and the problems found.
@@ -40,7 +40,8 @@ pub enum Diagnostic {
 /// supply fewer lanes than demanded.
 ///
 /// A mux demands the sum of its selected mode's allocations and a bridge its upstream lanes,
-/// both charged to their direct parent. Diagnostics are grouped by kind in the order
+/// both charged to their direct parent. A PCIe or M.2 slot whose parent is a root demands its
+/// stated lanes from it, occupied or not, unless a selected mode disables it. Diagnostics are grouped by kind in the order
 /// `NoMatchingMode`, `SocketDisabled`, `LaneOvercommit`, each ordered by node id.
 pub fn resolve_lanes(board: &Board, occupancy: &Occupancy) -> LaneResolution {
     let mut allocations = BTreeMap::new();
@@ -64,6 +65,15 @@ pub fn resolve_lanes(board: &Board, occupancy: &Occupancy) -> LaneResolution {
                 *demand.entry(&bridge.parent).or_default() += bridge.upstream_lanes;
             }
             Node::Root(_) | Node::Socket(_) | Node::Controller(_) => {}
+        }
+    }
+
+    for (id, node) in &board.nodes {
+        if let Node::Socket(socket) = node
+            && !disabled_by.contains_key(id)
+            && matches!(board.nodes.get(socket.parent()), Some(Node::Root(_)))
+        {
+            *demand.entry(socket.parent()).or_default() += wired_lanes(socket);
         }
     }
 
@@ -97,4 +107,14 @@ pub fn resolve_lanes(board: &Board, occupancy: &Occupancy) -> LaneResolution {
         demanded: demanded_by_root,
         diagnostics,
     }
+}
+
+/// Lanes wired to a PCIe or M.2 slot, or 0 for another socket or a slot that states none.
+fn wired_lanes(socket: &Socket) -> u32 {
+    match socket {
+        Socket::PcieSlot(slot) => slot.max_electrical_lanes,
+        Socket::M2Slot(slot) => slot.max_lanes,
+        Socket::SataPort(_) | Socket::UsbC(_) | Socket::UsbA(_) => None,
+    }
+    .map_or(0, u32::from)
 }

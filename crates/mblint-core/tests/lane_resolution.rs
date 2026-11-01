@@ -152,3 +152,55 @@ fn unknown_socket_state_is_rejected_at_parse_time() {
 
     assert!(Board::from_toml(&toml).is_err());
 }
+
+fn slot_under_gpp(id: &str, lanes: &str) -> String {
+    format!(
+        r#"
+[nodes.{id}]
+type = "socket"
+category = "m2_slot"
+parent = "root_cpu_gpp"
+key = "M"
+{lanes}
+"#
+    )
+}
+
+#[test]
+fn empty_slots_wired_to_a_root_overcommit_it() {
+    let board = board(&format!(
+        "{PEG_HEADER}{CPU_GPP_ROOT}{}{}",
+        slot_under_gpp("M2_1", "max_lanes = 4"),
+        slot_under_gpp("M2_2", "max_lanes = 4"),
+    ));
+
+    let result = resolve_lanes(&board, &occupied(&[]));
+
+    assert_eq!(
+        result.diagnostics,
+        vec![Diagnostic::LaneOvercommit {
+            root: "root_cpu_gpp".into(),
+            supplied: 4,
+            demanded: 8,
+        }]
+    );
+}
+
+#[test]
+fn slot_without_stated_lanes_and_sata_port_draw_nothing_from_a_root() {
+    let board = board(&format!(
+        r#"{PEG_HEADER}{CPU_GPP_ROOT}{}{}
+[nodes.SATA_1]
+type = "socket"
+category = "sata_port"
+parent = "root_cpu_gpp"
+"#,
+        slot_under_gpp("M2_1", "max_lanes = 4"),
+        slot_under_gpp("M2_2", ""),
+    ));
+
+    let result = resolve_lanes(&board, &occupied(&["M2_1", "M2_2", "SATA_1"]));
+
+    assert_eq!(result.demanded.get("root_cpu_gpp"), Some(&4));
+    assert!(result.diagnostics.is_empty());
+}
