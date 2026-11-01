@@ -78,7 +78,7 @@ A bridge whose parent is a mux draws the lanes the mux allocates to it.
 | `category` | Strict | Fields |
 | --- | --- | --- |
 | `pcie_slot` | yes | `parent`, `slot_index`, `physical_form_factor`, `open_ended` (default `false`), `max_electrical_lanes`, `generation`, `iommu_group` |
-| `m2_slot` | yes | `parent`, `key`, `supported_protocols`, `max_lanes`, `generation`, `iommu_group` |
+| `m2_slot` | yes | `parent`, `key`, `supported_protocols`, `supported_form_factors`, `max_lanes`, `generation`, `iommu_group` |
 | `sata_port` | yes | `parent`, `iommu_group` |
 | `usb_c` | no | `parent`, `dp_alt_max_lanes` |
 | `usb_a` | no | `parent` |
@@ -89,6 +89,7 @@ A bridge whose parent is a mux draws the lanes the mux allocates to it.
 - `max_electrical_lanes` is optional. It is the number of lanes wired to the slot, which may be fewer than its form factor holds.
 - `generation` is optional. It is the PCIe generation of the socket's wiring, for a socket slower than its root.
 - `key` is `B`, `E` or `M`.
+- `supported_form_factors` is optional. It lists the module sizes, such as `"2280"`, that the slot has a screw position for.
 - `dp_alt_max_lanes` is the number of DisplayPort Alt Mode lanes the port can drive, or `"unknown"` for a port with DP Alt Mode whose lane count the board's manual does not state. A port without it has no DP Alt Mode.
 - `iommu_group` is optional. It is the group number observed on real hardware under `/sys/kernel/iommu_groups`.
 
