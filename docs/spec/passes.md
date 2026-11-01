@@ -50,6 +50,10 @@ Every Pass 2 diagnostic is an error.
 
 Pass 2 sees the devices bound to board sockets. A card or M.2 module runs the protocol of its `[interface]`, an adapter runs its upstream protocol, and a display runs `displayport`. Devices inside an adapter draw no lanes from the board.
 
+### Protocol support
+
+A device in an `m2_slot` whose `supported_protocols` is not empty must run one of those protocols. An empty `supported_protocols` is not checked.
+
 ### Mode selection
 
 Each mux selects the first of its modes, in declaration order, whose `when` holds. Each socket or bridge in the selected mode's `allocate` receives that many lanes. A mux with no mode that holds allocates nothing.
@@ -64,6 +68,7 @@ A mux demands the sum of its selected mode's `allocate` from its parent, and a b
 | --- | --- |
 | `NoMatchingMode` | No mode of a mux holds |
 | `SocketDisabled` | A device is installed in a socket that the selected mode of a mux disables |
+| `ProtocolUnsupported` | A device runs a protocol that its `m2_slot` does not support |
 | `LaneOvercommit` | A root's demand exceeds its supply |
 
 Diagnostics are grouped by kind in the order of this table, each group ordered by node id.

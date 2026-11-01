@@ -61,6 +61,7 @@ A diagnostic is an object with these fields, followed by the fields of its code:
 | `OBSTRUCTED` | `physical` | `socket`, `by` (the socket of the covering card) |
 | `NO_MATCHING_MODE` | `lanes` | `mux` |
 | `SOCKET_DISABLED` | `lanes` | `socket`, `mux` |
+| `PROTOCOL_UNSUPPORTED` | `lanes` | `socket`, `protocol` (such as `"sata"`) |
 | `LANE_OVERCOMMIT` | `lanes` | `root`, `supplied`, `demanded` |
 | `DP_ALT_MODE_UNSUPPORTED` | `tunnels` | `socket` |
 | `DP_LANES_INSUFFICIENT` | `tunnels` | `socket`, `required`, `available` |
