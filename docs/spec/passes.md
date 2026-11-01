@@ -56,7 +56,7 @@ Each mux selects the first of its modes, in declaration order, whose `when` hold
 
 ### Lane balance
 
-A mux demands the sum of its selected mode's `allocate` from its parent, and a bridge whose parent is a root demands its `upstream_lanes` from the root. A socket, and a bridge under a mux, draw lanes only through a mux's `allocate`. A root whose demand exceeds its `lanes` is overcommitted.
+A mux demands the sum of its selected mode's `allocate` from its parent, and a bridge whose parent is a root demands its `upstream_lanes` from the root. A `pcie_slot` or `m2_slot` whose parent is a root demands its `max_electrical_lanes` or `max_lanes` from the root, whether or not a device is installed in it. It demands nothing if the value is not stated or the selected mode of a mux disables it. Any other socket, and a socket or bridge under a mux, draws lanes only through a mux's `allocate`. A root whose demand exceeds its `lanes` is overcommitted.
 
 ### Diagnostics
 

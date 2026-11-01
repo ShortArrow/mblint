@@ -204,5 +204,5 @@ fn rig_with_a_physical_error_is_still_laid_out() {
     let layout = layout_of("M2_SHARED = \"devices/card.toml\"\n");
 
     assert_eq!(layout["M2_SHARED"]["device"], "devices/card.toml");
-    assert_eq!(layout["root_cpu"]["demanded"], 20);
+    assert_eq!(layout["root_cpu"]["demanded"], 24);
 }
