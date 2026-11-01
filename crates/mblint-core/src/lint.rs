@@ -261,7 +261,8 @@ fn occupancies(board: &Board) -> Vec<Diagnostic> {
                         overcommitted.insert(root, (supplied, demanded, witness.clone()));
                     }
                 }
-                lanes::Diagnostic::SocketDisabled { .. } => {}
+                lanes::Diagnostic::SocketDisabled { .. }
+                | lanes::Diagnostic::ProtocolUnsupported { .. } => {}
             }
         }
         if !advance(&mut digits, &sockets, &states) {

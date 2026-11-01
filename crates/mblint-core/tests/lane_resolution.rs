@@ -204,3 +204,42 @@ parent = "root_cpu_gpp"
     assert_eq!(result.demanded.get("root_cpu_gpp"), Some(&4));
     assert!(result.diagnostics.is_empty());
 }
+
+fn sata_module_in_m2_1() -> Occupancy {
+    let mut occupancy = Occupancy::default();
+    occupancy.install("M2_1", Protocol::Sata);
+    occupancy
+}
+
+fn gpp_board(protocols: &str) -> Board {
+    board(&format!(
+        "{PEG_HEADER}{CPU_GPP_ROOT}{}",
+        slot_under_gpp("M2_1", &format!("max_lanes = 4\n{protocols}"))
+    ))
+}
+
+#[test]
+fn sata_module_in_a_pcie_only_slot_is_unsupported() {
+    let board = gpp_board(r#"supported_protocols = ["pcie"]"#);
+
+    let result = resolve_lanes(&board, &sata_module_in_m2_1());
+
+    assert_eq!(
+        result.diagnostics,
+        vec![Diagnostic::ProtocolUnsupported {
+            socket: "M2_1".into(),
+            protocol: Protocol::Sata,
+        }]
+    );
+}
+
+#[test]
+fn slot_listing_the_module_protocol_or_none_accepts_it() {
+    for protocols in [r#"supported_protocols = ["pcie", "sata"]"#, ""] {
+        let board = gpp_board(protocols);
+
+        let result = resolve_lanes(&board, &sata_module_in_m2_1());
+
+        assert!(result.diagnostics.is_empty(), "{protocols}");
+    }
+}

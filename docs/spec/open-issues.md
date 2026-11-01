@@ -18,6 +18,5 @@ Ordered by impact.
 | # | Section | Undecided |
 | --- | --- | --- |
 | 10 | 4.1 `root_pch_hsio` | `bus = "hsio"` lanes are shared among PCIe, SATA and USB. Apart from `allocate`, there is no way to state how many HSIO lanes a socket consumes. |
-| 11 | 4.1 `M2_2.supported_protocols` | Which pass rejects a module whose protocol the M.2 slot does not support, such as a SATA SSD in a PCIe-only slot, is undecided. The module fits physically, so Pass 1 does not report it. |
 | 13 | 4.1 Roots | Devices behind a chipset share its link to the CPU, PCIe 4.0 x4 on AMD X870E. A root states the lanes it supplies but no shared upstream bandwidth, so the passes do not see that link saturate. |
 | 14 | 4.1, 4.3 | A board's lanes depend on the CPU installed: on the MSI MAG X870E TOMAHAWK WIFI, a Ryzen 8500 or 8300 runs PCI_E1 at PCIe 4.0 x4 and leaves M2_2 unavailable. A board file describes one CPU family. How a rig names its CPU is undecided. |

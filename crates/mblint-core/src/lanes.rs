@@ -6,6 +6,7 @@ use serde::Serialize;
 
 use crate::board::{Board, Node, Socket};
 use crate::occupancy::Occupancy;
+use crate::protocol::Protocol;
 
 /// Lanes allocated to each socket, the sockets switched off, and the problems found.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -34,15 +35,19 @@ pub enum Diagnostic {
     NoMatchingMode { mux: String },
     /// A device is installed in a socket that the selected mode of `mux` disables.
     SocketDisabled { socket: String, mux: String },
+    /// The device in an M.2 slot runs a protocol that the slot's `supported_protocols` omits.
+    ProtocolUnsupported { socket: String, protocol: Protocol },
 }
 
 /// Selects a mode for every mux, then reports devices in disabled sockets and roots that
-/// supply fewer lanes than demanded.
+/// supply fewer lanes than demanded, and M.2 slots holding a device whose protocol they do not
+/// support.
 ///
 /// A mux demands the sum of its selected mode's allocations and a bridge its upstream lanes,
 /// both charged to their direct parent. A PCIe or M.2 slot whose parent is a root demands its
 /// stated lanes from it, occupied or not, unless a selected mode disables it. Diagnostics are grouped by kind in the order
-/// `NoMatchingMode`, `SocketDisabled`, `LaneOvercommit`, each ordered by node id.
+/// `NoMatchingMode`, `SocketDisabled`, `ProtocolUnsupported`, `LaneOvercommit`, each ordered by
+/// node id.
 pub fn resolve_lanes(board: &Board, occupancy: &Occupancy) -> LaneResolution {
     let mut allocations = BTreeMap::new();
     let mut disabled_by: BTreeMap<String, &str> = BTreeMap::new();
@@ -82,6 +87,19 @@ pub fn resolve_lanes(board: &Board, occupancy: &Occupancy) -> LaneResolution {
             diagnostics.push(Diagnostic::SocketDisabled {
                 socket: socket.clone(),
                 mux: mux.to_string(),
+            });
+        }
+    }
+
+    for (id, node) in &board.nodes {
+        if let Node::Socket(Socket::M2Slot(slot)) = node
+            && let Some(protocol) = occupancy.protocol(id)
+            && !slot.supported_protocols.is_empty()
+            && !slot.supported_protocols.contains(&protocol)
+        {
+            diagnostics.push(Diagnostic::ProtocolUnsupported {
+                socket: id.clone(),
+                protocol,
             });
         }
     }

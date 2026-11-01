@@ -332,6 +332,10 @@ fn message(diagnostic: &Diagnostic) -> String {
             lanes::Diagnostic::SocketDisabled { socket, mux } => {
                 format!("{socket} is disabled by the selected mode of {mux}.")
             }
+            lanes::Diagnostic::ProtocolUnsupported { socket, protocol } => format!(
+                "{socket} does not support {}, the protocol of its module.",
+                protocol_name(*protocol)
+            ),
             lanes::Diagnostic::LaneOvercommit {
                 root,
                 supplied,

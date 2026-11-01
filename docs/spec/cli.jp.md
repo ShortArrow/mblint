@@ -61,6 +61,7 @@ rig、そのボード、そのデバイスは、すべて rig が書くパスで
 | `OBSTRUCTED` | `physical` | `socket`、`by`（覆っているカードのソケット） |
 | `NO_MATCHING_MODE` | `lanes` | `mux` |
 | `SOCKET_DISABLED` | `lanes` | `socket`、`mux` |
+| `PROTOCOL_UNSUPPORTED` | `lanes` | `socket`、`protocol`（`"sata"` など） |
 | `LANE_OVERCOMMIT` | `lanes` | `root`、`supplied`、`demanded` |
 | `DP_ALT_MODE_UNSUPPORTED` | `tunnels` | `socket` |
 | `DP_LANES_INSUFFICIENT` | `tunnels` | `socket`、`required`、`available` |
