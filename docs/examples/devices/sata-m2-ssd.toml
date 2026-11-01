@@ -1,0 +1,15 @@
+# A generic M.2 SATA SSD, not a product. Its values are typical of the kind, not taken from a
+# specification.
+schema_version = "2.0.0"
+id = "sata_m2_ssd"
+name = "Example M.2 SATA SSD"
+type = "m2_module"
+
+[interface]
+protocol = "sata"
+generation = 3
+lanes = 1
+
+[physical]
+keys = ["B", "M"]
+form_factor = "2280"

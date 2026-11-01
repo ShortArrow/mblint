@@ -90,5 +90,6 @@ for board in data/boards/*/*.toml; do cargo run -q -p mblint -- lint --data-root
 | `crates/mblint-wasm` | Web シミュレーター向けの、コアの Wasm ビルド。コアのレポートを返す |
 | `data/` | 基準ボードを収めるデータルート |
 | `docs/` | 要求仕様、仕様書、ADR、未決事項 |
+| `docs/examples` | mblint を試すための、製品ではない例のファイル |
 | `web/` | Web シミュレーターのページ。TypeScript で書く。Cloudflare Workers の設定も置く |
 | `web/src/report` | コアから生成した、TypeScript 向けのレポートの型 |

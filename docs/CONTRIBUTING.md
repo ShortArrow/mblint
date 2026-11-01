@@ -90,5 +90,6 @@ The last line needs the `wasm32-unknown-unknown` target (`rustup target add wasm
 | `crates/mblint-wasm` | The core as Wasm for the web simulator, which returns the core's report |
 | `data/` | Data root holding the reference boards |
 | `docs/` | Requirements, specifications, ADRs and open issues |
+| `docs/examples` | Example files that are not products, for trying mblint |
 | `web/` | The web simulator page, in TypeScript, and its Cloudflare Workers configuration |
 | `web/src/report` | The report types for TypeScript, generated from the core |
