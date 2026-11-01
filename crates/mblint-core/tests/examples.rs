@@ -5,7 +5,6 @@ use std::collections::BTreeMap;
 use mblint_core::evaluate::evaluate;
 use mblint_core::report::report;
 use mblint_core::rig::load_rig;
-use serde_json::Value;
 
 const SATA_M2_SSD: &str = include_str!("../../../docs/examples/devices/sata-m2-ssd.toml");
 
