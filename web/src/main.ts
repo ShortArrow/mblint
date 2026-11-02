@@ -1,6 +1,7 @@
 import "./styles.css";
 import init from "./wasm/mblint_wasm";
 import { type Block, linkGbps, rootBars, scaleFor, socketBars } from "./bars";
+import { rigBundle, zip } from "./export";
 import { dataFiles } from "./files";
 import { addLoaded, type Loaded, resolveRig, sameRig } from "./load";
 import { catalog, check, type Files, layout } from "./mblint";
@@ -462,6 +463,18 @@ $<HTMLInputElement>("file").addEventListener("change", (event) => {
   const input = event.target as HTMLInputElement;
   if (input.files) void load(input.files).then(() => (input.value = ""));
 });
+$("export").addEventListener("click", () => {
+  if (board === null) return;
+  const marked = rigs().find(([, entry]) => isApplied(entry));
+  const name = (marked?.[1].name ?? "rig").replace(/[^\w.-]/g, "_");
+  const archive = zip(rigBundle(files, board, bindings, name));
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(new Blob([archive], { type: "application/zip" }));
+  link.download = `${name}.zip`;
+  link.click();
+  URL.revokeObjectURL(link.href);
+});
+
 $("clear").addEventListener("click", () => {
   bindings = {};
   notices = [];
