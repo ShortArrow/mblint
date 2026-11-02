@@ -111,6 +111,8 @@ A socket shows its id, the device in it and two bars on one scale of Gbps: what 
 
 A root shows two bars in lanes, one block per lane: the lanes its children demand above the lanes it supplies. The longest root bar on the board is drawn at the same fixed width. Demanded lanes beyond the supply are marked as an overcommit.
 
+A bar of more than 64 lanes, socket or root, is drawn as at most two blocks instead of one per lane: the lanes up to the point where its marking starts, and the lanes beyond. Its length and its marking are those of the bar drawn lane by lane.
+
 ### The report
 
 The page shows the status of the report, each diagnostic with its severity, message and code, and the link of each rated device.

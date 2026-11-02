@@ -31,9 +31,14 @@ export function socketBars(
 /** The lanes a root's children demand above the lanes it supplies, one unit per lane. */
 export function rootBars(demanded: number, supplied: number): { needs: Block[]; gives: Block[] } {
   const unit = (count: number, limit: number, mark: Block["mark"]): Block[] =>
-    Array.from({ length: count }, (_, i) => ({ width: 1, mark: i >= limit ? mark : null }));
+    count > MAX_BLOCKS
+      ? merged(count, Math.min(count, limit), 1, mark)
+      : Array.from({ length: count }, (_, i) => ({ width: 1, mark: i >= limit ? mark : null }));
   return { needs: unit(demanded, supplied, "over"), gives: unit(supplied, demanded, "spare") };
 }
+
+/** The most lanes a bar draws one block per lane; a longer bar is drawn as `merged` blocks. */
+export const MAX_BLOCKS = 64;
 
 /** The data rate of a link in Gbps: its lanes at the rate of a lane of its generation. */
 export function linkGbps(link: LinkWidth): number {
@@ -48,8 +53,21 @@ export function scaleFor(lengths: number[], width: number): number {
 
 function lanes(link: LinkWidth, other: number, mark: Block["mark"]): Block[] {
   const width = LANE_GBPS[link.generation] ?? 0;
+  if (link.lanes > MAX_BLOCKS) {
+    const unmarked = width > 0 ? Math.floor(other / width - 0.5) + 1 : link.lanes;
+    return merged(link.lanes, Math.max(0, Math.min(link.lanes, unmarked)), width, mark);
+  }
   return Array.from({ length: link.lanes }, (_, i) => ({
     width,
     mark: (i + 0.5) * width > other ? mark : null,
   }));
+}
+
+/** `count` lanes of `width` as one block of the first `unmarked` lanes and one of the rest, leaving out an empty one. */
+function merged(count: number, unmarked: number, width: number, mark: Block["mark"]): Block[] {
+  const runs: [number, Block["mark"]][] = [
+    [unmarked, null],
+    [count - unmarked, mark],
+  ];
+  return runs.flatMap(([lanes, mark]) => (lanes > 0 ? [{ width: lanes * width, mark }] : []));
 }

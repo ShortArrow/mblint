@@ -50,6 +50,39 @@ describe("rootBars", () => {
   });
 });
 
+describe("bars of more than 64 lanes", () => {
+  const total = (blocks: { width: number }[]) => blocks.reduce((sum, b) => sum + b.width, 0);
+
+  it("draws a socket bar as the lanes before its marking and the lanes beyond", () => {
+    const bars = socketBars({ generation: 5, lanes: 4_000_000_000 }, { generation: 5, lanes: 4 });
+
+    expect(marks(bars.needs!)).toEqual([null, "short"]);
+    expect(widths(bars.needs!)[0]).toBeCloseTo(LANE_GBPS[5]! * 4);
+    expect(total(bars.needs!)).toBeCloseTo(LANE_GBPS[5]! * 4_000_000_000);
+    expect(marks(bars.offers!)).toEqual([null, null, null, null]);
+  });
+
+  it("draws a root bar as the lanes within the supply and the overcommit", () => {
+    const bars = rootBars(4_000_000_000, 24);
+
+    expect(bars.needs).toEqual([
+      { width: 24, mark: null },
+      { width: 4_000_000_000 - 24, mark: "over" },
+    ]);
+    expect(bars.gives).toHaveLength(24);
+  });
+
+  it("draws a bar wholly on one side of its marking as one block", () => {
+    expect(rootBars(100, 200).needs).toEqual([{ width: 100, mark: null }]);
+    expect(socketBars(null, { generation: 4, lanes: 100 }).offers).toEqual([{ width: LANE_GBPS[4]! * 100, mark: "spare" }]);
+  });
+
+  it("still draws 64 lanes one block per lane", () => {
+    expect(rootBars(64, 0).needs).toHaveLength(64);
+    expect(socketBars({ generation: 4, lanes: 64 }, { generation: 4, lanes: 64 }).offers).toHaveLength(64);
+  });
+});
+
 describe("scaleFor", () => {
   it("rates a link as its lanes at the rate of a lane of its generation", () => {
     expect(linkGbps({ generation: 5, lanes: 16 })).toBe(LANE_GBPS[5]! * 16);
