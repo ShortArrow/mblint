@@ -307,6 +307,9 @@ body.resizing {
   flex: 1 1 0;
   overflow-y: auto;
 }
+.picker .list.rigs {
+  max-height: 30%;
+}
 .panel.stage {
   position: sticky;
   top: var(--header-h);

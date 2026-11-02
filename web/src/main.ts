@@ -2,7 +2,7 @@ import "./styles.css";
 import init from "./wasm/mblint_wasm";
 import { type Block, linkGbps, rootBars, scaleFor, socketBars } from "./bars";
 import { dataFiles } from "./files";
-import { addLoaded, type Loaded, resolveRig } from "./load";
+import { addLoaded, type Loaded, resolveRig, sameRig } from "./load";
 import { catalog, check, type Files, layout } from "./mblint";
 import type { CatalogEntry } from "./report/CatalogEntry";
 import type { LayoutNode } from "./report/LayoutNode";
@@ -32,6 +32,7 @@ const REPORT_KEY = "mblint-report";
 const DEFAULT_WIDTH: Record<Side, number> = { left: 230, right: 280 };
 
 type Device = Extract<CatalogEntry, { kind: "device" }>;
+type RigEntry = Extract<CatalogEntry, { kind: "rig" }>;
 type Socket = Extract<LayoutNode, { kind: "socket" }>;
 
 let files: Files = dataFiles(
@@ -59,6 +60,18 @@ function devices(): [string, Device][] {
   return Object.entries(entries)
     .flatMap(([path, entry]): [string, Device][] => (entry.kind === "device" ? [[path, entry]] : []))
     .sort(([, a], [, b]) => a.name.localeCompare(b.name));
+}
+
+function rigs(): [string, RigEntry][] {
+  return Object.entries(entries)
+    .flatMap(([path, entry]): [string, RigEntry][] => (entry.kind === "rig" ? [[path, entry]] : []))
+    .sort(([, a], [, b]) => a.name.localeCompare(b.name));
+}
+
+/** Whether the rig being built is the rig `entry` names, every path it names found. */
+function isApplied(entry: RigEntry): boolean {
+  const resolved = resolveRig(entry.board, entry.bindings, files);
+  return board !== null && resolved.missing.length === 0 && sameRig(resolved, { board, bindings });
 }
 
 function colour(path: string): string {
@@ -211,6 +224,15 @@ function render(): void {
         .join("")
     : `<p class="empty">No parts yet. Load device TOML files to add some.</p>`;
 
+  const rigList = rigs();
+  $("rigs").innerHTML = rigList.length
+    ? rigList
+        .map(([path, entry]) => `<button type="button" class="board-item ${isApplied(entry) ? "selected" : ""}" data-rig="${escape(path)}">
+          <small>${escape(path.slice(path.lastIndexOf("/") + 1))}</small><b>${escape(entry.name)}</b>
+        </button>`)
+        .join("")
+    : `<p class="empty">No rigs yet. Load rig TOML files to add some.</p>`;
+
   let nodes: Record<string, LayoutNode> | null = null;
   let report: Report | null = null;
   if (board !== null) {
@@ -242,7 +264,6 @@ async function load(fileList: FileList | File[]): Promise<void> {
   files = addLoaded(files, loaded);
   entries = catalog(files);
   notices = [];
-  const names = loaded.map((file) => file.name);
   for (const { name } of loaded) {
     const entry = entries[`local/${name}`]!;
     if (entry.kind === "invalid") {
@@ -251,13 +272,19 @@ async function load(fileList: FileList | File[]): Promise<void> {
       board = `local/${name}`;
       bindings = {};
     } else if (entry.kind === "rig") {
-      const resolved = resolveRig(entry.board, entry.bindings, files, names);
-      board = resolved.board;
-      bindings = resolved.bindings;
-      if (resolved.missing.length) notices.push(`${name} names files that were not loaded: ${resolved.missing.join(", ")}`);
+      applyRig(name, entry);
     }
   }
   render();
+}
+
+/** Chooses the board of the rig in the file `name` and installs its bindings, noting the paths no file supplies. */
+function applyRig(name: string, entry: RigEntry): void {
+  const resolved = resolveRig(entry.board, entry.bindings, files);
+  board = resolved.board;
+  bindings = resolved.bindings;
+  selected = null;
+  if (resolved.missing.length) notices.push(`${name} names files that were not loaded: ${resolved.missing.join(", ")}`);
 }
 
 function chooseBoard(path: string): void {
@@ -378,6 +405,14 @@ document.addEventListener("click", (event) => {
   const choice = target.closest<HTMLElement>("[data-board]");
   if (choice) {
     chooseBoard(choice.dataset.board!);
+    return;
+  }
+  const rig = target.closest<HTMLElement>("[data-rig]");
+  if (rig) {
+    const path = rig.dataset.rig!;
+    notices = [];
+    applyRig(path.slice(path.lastIndexOf("/") + 1), entries[path] as RigEntry);
+    render();
     return;
   }
   const part = target.closest<HTMLElement>("[data-part]");
