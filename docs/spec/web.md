@@ -90,7 +90,7 @@ One control loads TOML files, chosen from disk or dropped anywhere on the page. 
 | --- | --- |
 | Board | Added to the boards and chosen |
 | Device | Added to the parts |
-| Rig | Its board is chosen and its bindings installed. A path it names that is not in `files` is taken from a file loaded with it whose name is the path's last segment; a path neither supplies is reported by name |
+| Rig | Added to the rigs and applied |
 | Invalid | Its message is reported with the file name |
 
 ### The rig
@@ -98,6 +98,8 @@ One control loads TOML files, chosen from disk or dropped anywhere on the page. 
 The page keeps the rig being built as a rig file at `local/rig.toml` in `files`, on the board chosen, and evaluates it with `check` and `layout` on every change. Choosing another board empties the rig.
 
 The parts are the devices in `files`, each shown with its name and its interface. A part is placed by selecting it and then a socket, or by dragging it onto a socket. Only a socket whose category is the part's `socket_category` takes it; such sockets are marked while a part is selected. A part placed in an occupied socket replaces the device there. A device is removed from its socket by a control on the socket.
+
+The rigs are the rig files in `files`, each shown with its name. A rig is applied when it is loaded or chosen from the rigs: its board is chosen and its bindings installed. A path it names that is not in `files` is taken from the loaded file whose name is the path's last segment, whenever that file was loaded; a path neither supplies is reported by name. A listed rig is marked while the rig being built has its board and bindings.
 
 ### The bracket
 
@@ -113,7 +115,7 @@ The page shows the status of the report, each diagnostic with its severity, mess
 
 ### Appearance
 
-The boards and the parts are listed in a sidebar on the left, the report is in a sidebar on the right, and the bracket takes the space between them. The header colours a frame around the window, and the two sidebars and the bracket each lie in an inset with small rounded corners sunk into that frame. Each inset fills the height below the header and scrolls within itself, so that the page does not scroll and the header and the other insets stay in place. Dragging the inner edge of a sidebar, or moving it with the arrow keys, changes the sidebar's width between 180 and 480 pixels, and the browser remembers the width; a double click on the edge restores the width it starts with. A control at the foot of each sidebar collapses it to a narrow rail of icons, and the rail opens it again; the browser remembers whether each sidebar is open. On a narrow screen the three are stacked in that order and the page scrolls through them, a collapsed sidebar is one row of its icons, and the header shows its controls as icons alone.
+The boards, the parts and the rigs are listed in a sidebar on the left, the report is in a sidebar on the right, and the bracket takes the space between them. The header colours a frame around the window, and the two sidebars and the bracket each lie in an inset with small rounded corners sunk into that frame. Each inset fills the height below the header and scrolls within itself, so that the page does not scroll and the header and the other insets stay in place. Dragging the inner edge of a sidebar, or moving it with the arrow keys, changes the sidebar's width between 180 and 480 pixels, and the browser remembers the width; a double click on the edge restores the width it starts with. A control at the foot of each sidebar collapses it to a narrow rail of icons, and the rail opens it again; the browser remembers whether each sidebar is open. On a narrow screen the three are stacked in that order and the page scrolls through them, a collapsed sidebar is one row of its icons, and the header shows its controls as icons alone.
 
 The controls in the header are icons, each named in its tooltip: loading files, clearing the rig, switching between the light and the dark theme, and a cog that opens the settings.
 
