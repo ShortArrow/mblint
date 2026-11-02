@@ -58,6 +58,7 @@ rig、そのボード、そのデバイスは、すべて rig が書くパスで
 | `WRONG_SOCKET_CATEGORY` | `physical` | `socket` |
 | `EDGE_TOO_WIDE` | `physical` | `socket`、`edge`、`slot`（`"x16"` などの幅） |
 | `KEY_MISMATCH` | `physical` | `socket`、`slot`（スロットのキー。`"M"` など） |
+| `FORM_FACTOR_UNSUPPORTED` | `physical` | `socket`、`form_factor`（モジュールのもの。`"22110"` など）、`slot`（スロットの `supported_form_factors`） |
 | `OBSTRUCTED` | `physical` | `socket`、`by`（覆っているカードのソケット） |
 | `NO_MATCHING_MODE` | `lanes` | `mux` |
 | `SOCKET_DISABLED` | `lanes` | `socket`、`mux` |

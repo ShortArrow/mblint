@@ -325,6 +325,14 @@ fn message(diagnostic: &Diagnostic) -> String {
             P::KeyMismatch { socket, slot } => {
                 format!("The module in {socket} has no notch for the slot's {slot:?} key.")
             }
+            P::FormFactorUnsupported {
+                socket,
+                form_factor,
+                slot,
+            } => format!(
+                "{socket} has no screw position for the {form_factor} module; it holds {}.",
+                slot.join(", ")
+            ),
             P::Obstructed { socket, by } => format!("The card in {by} covers {socket}."),
         },
         Diagnostic::Lanes(d) => match d {

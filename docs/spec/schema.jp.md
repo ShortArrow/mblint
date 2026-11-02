@@ -78,7 +78,7 @@ when = { socket = "M2_2", protocol = "pcie" }
 | `category` | 厳格 | フィールド |
 | --- | --- | --- |
 | `pcie_slot` | はい | `parent`、`slot_index`、`physical_form_factor`、`open_ended`（既定値 `false`）、`max_electrical_lanes`、`generation`、`iommu_group` |
-| `m2_slot` | はい | `parent`、`key`、`supported_protocols`、`max_lanes`、`generation`、`iommu_group` |
+| `m2_slot` | はい | `parent`、`key`、`supported_protocols`、`supported_form_factors`、`max_lanes`、`generation`、`iommu_group` |
 | `sata_port` | はい | `parent`、`iommu_group` |
 | `usb_c` | いいえ | `parent`、`dp_alt_max_lanes` |
 | `usb_a` | いいえ | `parent` |
@@ -89,6 +89,7 @@ when = { socket = "M2_2", protocol = "pcie" }
 - `max_electrical_lanes` は省略できます。スロットに配線されたレーン数で、形状が収める数より少ないことがあります。
 - `generation` は省略できます。ルートより遅いソケットについて、その配線の PCIe の世代を書きます。
 - `key` は `B`、`E`、`M` のいずれかです。
+- `supported_form_factors` は省略できます。スロットがネジを留める位置を持つモジュールのサイズを、`"2280"` のように並べます。
 - `dp_alt_max_lanes` は、そのポートが駆動できる DisplayPort Alt Mode のレーン数です。DP Alt Mode を持つがボードのマニュアルがレーン数を書いていないポートでは `"unknown"` です。これが無いポートは DP Alt Mode を持ちません。
 - `iommu_group` は省略できます。実機の `/sys/kernel/iommu_groups` で確認したグループ番号を書きます。
 

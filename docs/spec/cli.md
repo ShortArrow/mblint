@@ -58,6 +58,7 @@ A diagnostic is an object with these fields, followed by the fields of its code:
 | `WRONG_SOCKET_CATEGORY` | `physical` | `socket` |
 | `EDGE_TOO_WIDE` | `physical` | `socket`, `edge`, `slot` (widths such as `"x16"`) |
 | `KEY_MISMATCH` | `physical` | `socket`, `slot` (the slot's key, such as `"M"`) |
+| `FORM_FACTOR_UNSUPPORTED` | `physical` | `socket`, `form_factor` (the module's, such as `"22110"`), `slot` (the slot's `supported_form_factors`) |
 | `OBSTRUCTED` | `physical` | `socket`, `by` (the socket of the covering card) |
 | `NO_MATCHING_MODE` | `lanes` | `mux` |
 | `SOCKET_DISABLED` | `lanes` | `socket`, `mux` |

@@ -205,3 +205,71 @@ fn device_protocol_is_read_from_its_interface() {
         mblint_core::protocol::Protocol::Pcie
     );
 }
+
+fn board_with_m2_1_sizes(sizes: &str) -> Board {
+    Board::from_toml(&BOARD.replace(
+        r#"key = "M""#,
+        &format!("key = \"M\"\nsupported_form_factors = {sizes}"),
+    ))
+    .expect("fixture board must parse")
+}
+
+fn module_of_size(keys: &str, size: &str) -> Device {
+    Device::from_toml(&format!(
+        r#"
+schema_version = "2.0.0"
+id = "test_ssd"
+name = "Test SSD"
+type = "m2_module"
+
+[interface]
+protocol = "pcie"
+generation = 5
+lanes = 4
+
+[physical]
+keys = {keys}
+form_factor = "{size}"
+"#
+    ))
+    .expect("fixture module must parse")
+}
+
+#[test]
+fn module_without_a_screw_position_in_the_slot_does_not_fit() {
+    let board = board_with_m2_1_sizes(r#"["2242", "2280"]"#);
+    let devices = installed(vec![("M2_1", module_of_size(r#"["M"]"#, "22110"))]);
+
+    assert_eq!(
+        check_physical(&board, &devices),
+        vec![Diagnostic::FormFactorUnsupported {
+            socket: "M2_1".into(),
+            form_factor: "22110".into(),
+            slot: vec!["2242".into(), "2280".into()],
+        }]
+    );
+}
+
+#[test]
+fn module_of_a_listed_size_fits_and_an_unlisted_slot_takes_any_size() {
+    let listed = board_with_m2_1_sizes(r#"["2242", "2280"]"#);
+    let devices = installed(vec![("M2_1", module_of_size(r#"["M"]"#, "2242"))]);
+    assert!(check_physical(&listed, &devices).is_empty());
+
+    let devices = installed(vec![("M2_1", module_of_size(r#"["M"]"#, "22110"))]);
+    assert!(check_physical(&board(), &devices).is_empty());
+}
+
+#[test]
+fn module_whose_key_does_not_fit_is_reported_for_its_key_alone() {
+    let board = board_with_m2_1_sizes(r#"["2280"]"#);
+    let devices = installed(vec![("M2_1", module_of_size(r#"["B"]"#, "22110"))]);
+
+    assert_eq!(
+        check_physical(&board, &devices),
+        vec![Diagnostic::KeyMismatch {
+            socket: "M2_1".into(),
+            slot: M2Key::M,
+        }]
+    );
+}

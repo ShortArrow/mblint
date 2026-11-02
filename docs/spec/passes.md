@@ -17,14 +17,14 @@ Board sockets and adapter sockets are checked by the same rules:
 | Device | Fits |
 | --- | --- |
 | `card` | A `pcie_slot` no narrower than its edge, or an open-ended one |
-| `m2_module` | An `m2_slot` whose key is among the module's `keys` |
+| `m2_module` | An `m2_slot` whose key is among the module's `keys`, and whose `supported_form_factors`, if not empty, include the module's `form_factor` |
 | `adapter` with `connector = "type_c"` | A `usb_c` socket |
 | `adapter` with `connector = "type_a"` | A `usb_a` socket |
 | `display` | A `usb_c` socket |
 
 A device in a socket of any other category is in the wrong socket category. A socket path that leads to no socket is an unknown socket: the id names no board socket, the parent path holds no adapter, or the adapter has no socket of that name.
 
-`length_mm` and `form_factor` are not checked.
+`length_mm` is not checked. A module whose key does not fit is reported for its key alone.
 
 ### Obstruction
 
@@ -38,6 +38,7 @@ A card in slot index *i* with thickness *t* covers indices *i* to *i* + *t* − 
 | `WrongSocketCategory` | The device is not made for the socket's category |
 | `EdgeTooWide` | A card edge is wider than a closed-ended slot |
 | `KeyMismatch` | The slot's key is not among the module's notches |
+| `FormFactorUnsupported` | The slot has no screw position for the module's size |
 | `Obstructed` | A card covers the slot holding another device |
 
 Fit diagnostics come first, ordered by socket path, followed by obstructions ordered by the obstructed socket. A slot covered by several cards is reported once, against the card with the smallest socket id.
