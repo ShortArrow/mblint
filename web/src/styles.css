@@ -580,6 +580,7 @@ body.resizing {
   padding: 10px;
   display: grid;
   gap: 4px;
+  align-content: start;
 }
 .board-item {
   display: grid;
@@ -603,6 +604,7 @@ body.resizing {
   padding: 10px;
   display: grid;
   gap: 8px;
+  align-content: start;
 }
 .part {
   display: grid;
