@@ -1,5 +1,14 @@
 import { expect, type Page, test } from "@playwright/test";
 
+/** The gaps between the bracket and the sidebar on each side of it, in CSS pixels. */
+async function gaps(page: Page): Promise<{ left: number; right: number }> {
+  return page.evaluate(() => {
+    const box = (selector: string) => document.querySelector(selector)!.getBoundingClientRect();
+    const [left, stage, right] = [box(".picker"), box(".panel.stage"), box(".report-panel")];
+    return { left: stage.left - left.right, right: right.left - stage.right };
+  });
+}
+
 /** Clicks the control at the foot of the sidebar `side`, moves the pointer off it and waits for its width to settle. */
 async function toggle(page: Page, side: ".picker" | ".report-panel"): Promise<void> {
   await page.locator(`${side} > .foot`).click();
@@ -10,6 +19,15 @@ async function toggle(page: Page, side: ".picker" | ".report-panel"): Promise<vo
 test.beforeEach(async ({ page }) => {
   await page.goto("/");
   await expect(page.locator("#bracket .node").first()).toBeVisible();
+});
+
+test("the bracket lies 8 pixels from each sidebar, open or collapsed", async ({ page }) => {
+  expect(await gaps(page)).toEqual({ left: 8, right: 8 });
+  await toggle(page, ".picker");
+  expect(await gaps(page)).toEqual({ left: 8, right: 8 });
+  await toggle(page, ".picker");
+  await toggle(page, ".report-panel");
+  expect(await gaps(page)).toEqual({ left: 8, right: 8 });
 });
 
 for (const side of [".picker", ".report-panel"] as const) {

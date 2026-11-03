@@ -429,10 +429,10 @@ body.resizing {
     overflow: hidden;
     z-index: 0;
   }
-  .picker {
+  :root[data-left="off"] .picker {
     justify-self: start;
   }
-  .report-panel {
+  :root[data-report="off"] .report-panel {
     justify-self: end;
   }
   :root[data-left="off"] .picker:hover,
