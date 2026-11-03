@@ -4,6 +4,7 @@ import { type Block, linkGbps, rootBars, scaleFor, socketBars } from "./bars";
 import { rigBundle, zip } from "./export";
 import type { CodeEditor } from "./code";
 import { downloadName, edit } from "./editor";
+import { escape } from "./escape";
 import { dataFiles } from "./files";
 import { addLoaded, isLoadableName, type Loaded, resolveRig, sameRig } from "./load";
 import { catalog, check, type Files, layout } from "./mblint";
@@ -58,10 +59,6 @@ let loadingCode: Promise<CodeEditor> | null = null;
 let openings = 0;
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
-
-function escape(text: string): string {
-  return text.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
-}
 
 function boards(): [string, Extract<CatalogEntry, { kind: "board" }>][] {
   return Object.entries(entries).flatMap(([path, entry]) => (entry.kind === "board" ? [[path, entry]] : []));
