@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { addLoaded, resolveRig, sameRig } from "./load";
+import { addLoaded, isLoadableName, resolveRig, sameRig } from "./load";
 
 describe("addLoaded", () => {
   it("adds each loaded file under local/ by its name, replacing one of the same name", () => {
@@ -53,5 +53,18 @@ describe("sameRig", () => {
     expect(sameRig(rig, { ...rig, bindings: { S1: "devices/c.toml" } })).toBe(false);
     expect(sameRig(rig, { ...rig, bindings: { ...rig.bindings, S3: "devices/c.toml" } })).toBe(false);
     expect(sameRig(rig, { ...rig, bindings: { ...rig.bindings, S2: "devices/c.toml" } })).toBe(false);
+  });
+});
+
+describe("isLoadableName", () => {
+  it("takes a plain file name, dots within it included", () => {
+    expect(isLoadableName("x.toml")).toBe(true);
+    expect(isLoadableName("a..b.toml")).toBe(true);
+  });
+
+  it("refuses a name that leaves its folder or names one", () => {
+    for (const name of ["../x.toml", "a/x.toml", "..\\..\\x.toml", "a\\x.toml", ".", "..", ""]) {
+      expect(isLoadableName(name), name).toBe(false);
+    }
   });
 });

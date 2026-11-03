@@ -3,13 +3,14 @@ import init from "./wasm/mblint_wasm";
 import { type Block, linkGbps, rootBars, scaleFor, socketBars } from "./bars";
 import { rigBundle, zip } from "./export";
 import { dataFiles } from "./files";
-import { addLoaded, type Loaded, resolveRig, sameRig } from "./load";
+import { addLoaded, isLoadableName, type Loaded, resolveRig, sameRig } from "./load";
 import { catalog, check, type Files, layout } from "./mblint";
 import type { CatalogEntry } from "./report/CatalogEntry";
 import type { LayoutNode } from "./report/LayoutNode";
 import type { LinkWidth } from "./report/LinkWidth";
 import type { Report } from "./report/Report";
-import { rigToml } from "./rig";
+import type { SocketCategory } from "./report/SocketCategory";
+import { rigToml, takes } from "./rig";
 import { flag, flagValue, readPref, removePref, writePref } from "./prefs";
 import { dragWidth, type Side, storedWidth } from "./resize";
 import {
@@ -110,9 +111,8 @@ function socketHtml(id: string, socket: Socket, report: Report | null): string {
   ].join("");
   const finding = report?.diagnostics.find((d) => "socket" in d && d.socket === id);
   const link = report?.links[id];
-  const part = selected === null ? undefined : entries[selected];
-  const target = part?.kind === "device" && part.socket_category === socket.category;
-  return `<div class="node socket ${socket.disabled ? "disabled" : ""} ${finding ? `flag-${finding.severity}` : ""} ${target ? "target" : ""}" data-socket="${escape(id)}">
+  const target = takes(entries, selected, socket.category);
+  return `<div class="node socket ${socket.disabled ? "disabled" : ""} ${finding ? `flag-${finding.severity}` : ""} ${target ? "target" : ""}" data-socket="${escape(id)}" data-category="${socket.category}">
     <div class="title"><b class="mono">${escape(id)}</b><span class="meta">${socket.category.replace("_", " ")}${socket.slot_index === null ? "" : ` · slot ${socket.slot_index}`}</span></div>
     ${
       name === null
@@ -258,13 +258,17 @@ function install(socket: string, part: string): void {
 }
 
 async function load(fileList: FileList | File[]): Promise<void> {
+  const chosen = [...fileList];
+  const refused = chosen.filter((file) => !isLoadableName(file.name));
   const loaded: Loaded[] = await Promise.all(
-    [...fileList].map(async (file) => ({ name: file.name, contents: await file.text() })),
+    chosen
+      .filter((file) => isLoadableName(file.name))
+      .map(async (file) => ({ name: file.name, contents: await file.text() })),
   );
-  if (loaded.length === 0) return;
+  if (chosen.length === 0) return;
   files = addLoaded(files, loaded);
   entries = catalog(files);
-  notices = [];
+  notices = refused.map((file) => `${file.name}: not loaded, as its name is not a plain file name`);
   for (const { name } of loaded) {
     const entry = entries[`local/${name}`]!;
     if (entry.kind === "invalid") {
@@ -456,7 +460,7 @@ document.addEventListener("drop", (event) => {
   }
   const socket = (event.target as HTMLElement).closest<HTMLElement>(".node.socket.target");
   const part = transfer.getData("text/x-mblint-part");
-  if (socket && part) install(socket.dataset.socket!, part);
+  if (socket && takes(entries, part, socket.dataset.category as SocketCategory)) install(socket.dataset.socket!, part);
 });
 
 $<HTMLInputElement>("file").addEventListener("change", (event) => {

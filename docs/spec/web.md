@@ -82,7 +82,7 @@ The page builds a rig on a board and shows what the board makes of it.
 
 ### Files
 
-The page carries every file under `data/` as `files`, keyed by its path under `data/`. Files the user loads are added under `local/<file name>`, replacing a loaded file of the same name. Loaded files stay in the browser and are sent nowhere.
+The page carries every file under `data/` as `files`, keyed by its path under `data/`. Files the user loads are added under `local/<file name>`, replacing a loaded file of the same name. A file whose name contains `/` or `\`, or is `.` or `..`, is not added, and the page says so. Loaded files stay in the browser and are sent nowhere.
 
 One control loads TOML files, chosen from disk or dropped anywhere on the page. `catalog` decides what each file is:
 
@@ -97,7 +97,7 @@ One control loads TOML files, chosen from disk or dropped anywhere on the page. 
 
 The page keeps the rig being built as a rig file at `local/rig.toml` in `files`, on the board chosen, and evaluates it with `check` and `layout` on every change. Choosing another board empties the rig.
 
-The parts are the devices in `files`, each shown with its name and its interface. A part is placed by selecting it and then a socket, or by dragging it onto a socket. Only a socket whose category is the part's `socket_category` takes it; such sockets are marked while a part is selected. A part placed in an occupied socket replaces the device there. A device is removed from its socket by a control on the socket.
+The parts are the devices in `files`, each shown with its name and its interface. A part is placed by selecting it and then a socket, or by dragging it onto a socket. Only a socket whose category is the part's `socket_category` takes it; such sockets are marked while a part is selected. Anything else dropped on a socket is ignored. A part placed in an occupied socket replaces the device there. A device is removed from its socket by a control on the socket.
 
 The rigs are the rig files in `files`, each shown with its name. A rig is applied when it is loaded or chosen from the rigs: its board is chosen and its bindings installed. A path it names that is not in `files` is taken from the loaded file whose name is the path's last segment, whenever that file was loaded; a path neither supplies is reported by name. A listed rig is marked while the rig being built has its board and bindings.
 
