@@ -6,8 +6,8 @@ import type { CodeEditor } from "./code";
 import { downloadName, edit } from "./editor";
 import { escape } from "./escape";
 import { dataFiles } from "./files";
-import { addLoaded, isLoadableName, type Loaded, resolveRig, sameRig } from "./load";
-import { catalog, check, type Files, layout } from "./mblint";
+import { addLoaded, isLoadableName, type Loaded, resolveRig, sameRig, toWrite } from "./load";
+import { catalog, check, type Files, layout, rebind } from "./mblint";
 import type { CatalogEntry } from "./report/CatalogEntry";
 import type { LayoutNode } from "./report/LayoutNode";
 import type { LinkWidth } from "./report/LinkWidth";
@@ -280,10 +280,41 @@ function render(): void {
 }
 
 function install(socket: string, part: string): void {
+  settleEdit();
   bindings = { ...bindings, [socket]: part };
   selected = null;
   notices = [];
+  writeRig(true);
   render();
+}
+
+/** The rig open in the editor, or null when the editor holds no rig. */
+function openRig(): [string, RigEntry] | null {
+  const entry = editing === null ? undefined : entries[editing];
+  return entry?.kind === "rig" ? [editing!, entry] : null;
+}
+
+/**
+ * Writes the rig being built into the rig open in the editor with `rebind`, keeping a binding
+ * whose file was not loaded when `keepUnloaded`, and shows the new text in the editor.
+ */
+function writeRig(keepUnloaded: boolean): void {
+  const open = openRig();
+  if (open === null || board === null) return;
+  const [path, entry] = open;
+  const written = toWrite(entry, { board, bindings }, files, rootOf(path), keepUnloaded);
+  const text = rebind(files[path]!, written.board, written.bindings);
+  if (text === files[path]) return;
+  files = { ...files, [path]: text };
+  code?.show(text);
+}
+
+/** Takes an edit still waiting in the editor, so that a change made on the page builds on it. */
+function settleEdit(): void {
+  if (pendingEdit === undefined) return;
+  clearTimeout(pendingEdit);
+  pendingEdit = undefined;
+  takeEdit();
 }
 
 async function load(fileList: FileList | File[]): Promise<void> {
@@ -346,9 +377,11 @@ function applyRig(path: string, entry: RigEntry): void {
 
 function chooseBoard(path: string): void {
   if (path === board) return;
+  settleEdit();
   board = path;
   bindings = {};
   notices = [];
+  writeRig(false);
   render();
 }
 
@@ -369,11 +402,17 @@ async function openEditor(path: string | null): Promise<void> {
   if (path !== null && code === null) code = await loadCode();
   if (opening !== openings) return;
   clearTimeout(pendingEdit);
+  pendingEdit = undefined;
   editing = path;
   $("editor").hidden = path === null;
   $("editor-path").textContent = path ?? "";
   code?.show(path === null ? "" : (files[path] ?? ""));
   showRefusal(null);
+  const rig = openRig();
+  if (rig !== null) {
+    notices = [];
+    applyRig(...rig);
+  }
   render();
 }
 
@@ -393,6 +432,7 @@ function scheduleEdit(): void {
 
 /** Takes the editor's text as the file being edited and evaluates it, or says why the text is not taken. */
 function takeEdit(): void {
+  pendingEdit = undefined;
   if (editing === null || code === null) return;
   const result = edit(files, editing, code.text());
   if ("refused" in result) {
@@ -402,6 +442,9 @@ function takeEdit(): void {
   showRefusal(null);
   files = result.files;
   notices = [];
+  entries = catalog(files);
+  const rig = openRig();
+  if (rig !== null) applyRig(...rig);
   render();
 }
 
@@ -518,8 +561,10 @@ document.addEventListener("click", (event) => {
   for (const menu of document.querySelectorAll(".new-menu[open]")) if (!menu.contains(target)) menu.removeAttribute("open");
   const remove = target.closest<HTMLElement>("[data-remove]");
   if (remove) {
+    settleEdit();
     const { [remove.dataset.remove!]: _, ...rest } = bindings;
     bindings = rest;
+    writeRig(true);
     render();
     return;
   }
@@ -622,8 +667,10 @@ $("editor-download").addEventListener("click", () => {
 });
 
 $("clear").addEventListener("click", () => {
+  settleEdit();
   bindings = {};
   notices = [];
+  writeRig(false);
   render();
 });
 $("theme").addEventListener("click", (event) =>
