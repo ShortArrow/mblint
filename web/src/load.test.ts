@@ -33,6 +33,16 @@ describe("resolveRig", () => {
     });
   });
 
+  it("reads a path first from the files of the rig's repository", () => {
+    const withRepository = { ...files, "github/a/r/boards/b.toml": "", "github/a/r/devices/x/c.toml": "" };
+
+    expect(resolveRig("boards/b.toml", { S1: "devices/x/c.toml", S2: "devices/c.toml" }, withRepository, "github/a/r/")).toEqual({
+      board: "github/a/r/boards/b.toml",
+      bindings: { S1: "github/a/r/devices/x/c.toml", S2: "devices/c.toml" },
+      missing: [],
+    });
+  });
+
   it("names each path neither files nor the loaded files supply", () => {
     const resolved = resolveRig("boards/none.toml", { S1: "devices/gone.toml" }, files);
 
