@@ -131,4 +131,6 @@ The Wasm module is `mblint-wasm` built for `wasm32-unknown-unknown`, then wrappe
 
 The page is published at mblint.shortarrow.jp as a Cloudflare Worker serving the static assets in `web/dist`, configured in `web/wrangler.jsonc`. Cloudflare Workers Builds deploys `main` and builds other branches as previews, running `web/scripts/cloudflare-build.sh`, which installs Rust and the `wasm-bindgen` command line before building the page.
 
+Every response carries the Content Security Policy in `web/public/_headers`. It runs scripts and Wasm only from the page's own origin, so `index.html` holds no inline script; takes styles from the page and Google Fonts, and fonts from Google Fonts; and lets no other site frame the page.
+
 The TypeScript types of the reports, the catalog and the layout are generated from the core's Rust types by ts-rs, one file per type, into `web/src/report/`. `cargo test -p mblint-core --features ts` writes them, and CI fails when the files committed there differ from what it writes. The diagnostic type of each pass is named after the pass: `PhysicalDiagnostic`, `LanesDiagnostic`, `TunnelsDiagnostic` and `ThroughputDiagnostic`.
