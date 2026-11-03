@@ -109,6 +109,10 @@ A control on each board, part and rig in the lists opens its file in an editor b
 
 The editor colours the text as TOML. It offers to complete the key being typed with the keys a board, a device or a rig may hold at that place, and the value after `=` with the values its field may take when those are listed, such as the categories of a socket. When a text is not taken, the editor marks the line at fault.
 
+### New files
+
+A control beside the heading of the boards creates a board, and one beside the heading of the parts creates a card, an M.2 module, an adapter or a display, chosen from a menu. The new file is the smallest of its kind that `catalog` reads, with each required field holding an example value: a board has one root and one PCIe slot under it, and an adapter one downstream socket. It is added under `local/new-<kind>.toml`, where `<kind>` is `board`, `card`, `m2-module`, `adapter` or `display`. When that path is already in `files`, it is added under `local/new-<kind>-<n>.toml` instead, with the smallest `<n>` from 2 whose path is not, so that a new file never replaces another. It then takes the effect a loaded file of its kind takes, and opens in the editor. The example values are unspecified.
+
 ### The bracket
 
 Each root is drawn as a bracket: its sockets at the leaves on the left, joined through muxes and bridges to the root on the right. Roots are drawn in order of generation, then of the lanes they supply, highest first, then of id. A line runs from each child to the join of its siblings, and from the join to their parent. The lines are one width and meet at their centres, so a line continues straight through a join. A mux shows the position, counted from 1, of its selected mode, or that no mode holds; a bridge shows the lanes it demands. Sockets whose parent is `unknown` are drawn together apart from the roots. Controllers are not drawn.

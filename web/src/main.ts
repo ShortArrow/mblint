@@ -13,6 +13,7 @@ import type { LinkWidth } from "./report/LinkWidth";
 import type { Report } from "./report/Report";
 import type { SocketCategory } from "./report/SocketCategory";
 import { rigToml, takes } from "./rig";
+import { newFile, type Template } from "./templates";
 import { flag, flagValue, readPref, removePref, writePref } from "./prefs";
 import { dragWidth, type Side, storedWidth } from "./resize";
 import {
@@ -52,6 +53,8 @@ let scale = { gbps: 0, lane: 0 };
 let editing: string | null = null;
 let pendingEdit: ReturnType<typeof setTimeout> | undefined;
 let code: CodeEditor | null = null;
+let loadingCode: Promise<CodeEditor> | null = null;
+let openings = 0;
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 
@@ -293,9 +296,14 @@ async function load(fileList: FileList | File[]): Promise<void> {
       .map(async (file) => ({ name: file.name, contents: await file.text() })),
   );
   if (chosen.length === 0) return;
+  notices = refused.map((file) => `${file.name}: not loaded, as its name is not a plain file name`);
+  add(loaded);
+}
+
+/** Adds `loaded` under `local/`, each file taking the effect of its kind, and shows the change. */
+function add(loaded: Loaded[]): void {
   files = addLoaded(files, loaded);
   entries = catalog(files);
-  notices = refused.map((file) => `${file.name}: not loaded, as its name is not a plain file name`);
   for (const { name } of loaded) {
     const entry = entries[`local/${name}`]!;
     if (entry.kind === "invalid") {
@@ -328,12 +336,22 @@ function chooseBoard(path: string): void {
   render();
 }
 
-/** Opens the file at `path` in the editor, loading the editor the first time, or closes it when `path` is null. */
+/** The editor, created once however often it is asked for while CodeMirror loads. */
+function loadCode(): Promise<CodeEditor> {
+  loadingCode ??= import("./code").then(({ codeEditor }) =>
+    codeEditor($("editor-text"), () => (editing === null ? null : (entries[editing]?.kind ?? null)), scheduleEdit),
+  );
+  return loadingCode;
+}
+
+/**
+ * Opens the file at `path` in the editor, loading the editor the first time, or closes it when
+ * `path` is null. Of the calls made while the editor loads, the last one decides what is open.
+ */
 async function openEditor(path: string | null): Promise<void> {
-  if (path !== null && code === null) {
-    const { codeEditor } = await import("./code");
-    code = codeEditor($("editor-text"), () => (editing === null ? null : (entries[editing]?.kind ?? null)), scheduleEdit);
-  }
+  const opening = ++openings;
+  if (path !== null && code === null) code = await loadCode();
+  if (opening !== openings) return;
   clearTimeout(pendingEdit);
   editing = path;
   $("editor").hidden = path === null;
@@ -474,11 +492,21 @@ matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {
 
 document.addEventListener("click", (event) => {
   const target = event.target as HTMLElement;
+  for (const menu of document.querySelectorAll(".new-menu[open]")) if (!menu.contains(target)) menu.removeAttribute("open");
   const remove = target.closest<HTMLElement>("[data-remove]");
   if (remove) {
     const { [remove.dataset.remove!]: _, ...rest } = bindings;
     bindings = rest;
     render();
+    return;
+  }
+  const create = target.closest<HTMLElement>("[data-new]");
+  if (create) {
+    create.closest("details")?.removeAttribute("open");
+    const file = newFile(files, create.dataset.new as Template);
+    notices = [];
+    add([file]);
+    void openEditor(`local/${file.name}`);
     return;
   }
   const open = target.closest<HTMLElement>("[data-edit]");
