@@ -87,8 +87,27 @@ describe("fetchRoot", () => {
 
     expect(root).toEqual({
       files: { "github/acme/rigs/rigs/a/rig.toml": "a", "github/acme/rigs/rigs/b/rig.toml": "b" },
-      tooLong: ["data/big.toml"],
+      skipped: [{ path: "data/big.toml", reason: "it is longer than 1 MiB" }],
     });
+  });
+
+  it("leaves out a file whose path could escape an unpacked archive, naming it", async () => {
+    const unsafe = ["a\\..\\..\\evil.toml", "c:evil.toml", "bad\u0001name.toml"];
+    const { fetch, asked } = fakeFetch({
+      [`${API}/git/trees/v1?recursive=1`]: {
+        json: {
+          truncated: false,
+          tree: [{ path: "ok.toml", type: "blob", size: 1 }, ...unsafe.map((path) => ({ path, type: "blob", size: 1 }))],
+        },
+      },
+      [`${RAW}/v1/ok.toml`]: { text: "ok" },
+    });
+
+    expect(await fetchRoot({ owner: "acme", repo: "rigs", ref: "v1", path: "" }, fetch)).toEqual({
+      files: { "github/acme/rigs/ok.toml": "ok" },
+      skipped: unsafe.map((path) => ({ path, reason: "its path holds \\, : or a control character" })),
+    });
+    expect(asked.filter((url) => url.startsWith(RAW))).toEqual([`${RAW}/v1/ok.toml`]);
   });
 
   it("reads the ref the address names without asking for the default branch", async () => {
@@ -99,7 +118,7 @@ describe("fetchRoot", () => {
 
     expect(await fetchRoot({ owner: "acme", repo: "rigs", ref: "v1", path: "" }, fetch)).toEqual({
       files: { "github/acme/rigs/a.toml": "a" },
-      tooLong: [],
+      skipped: [],
     });
     expect(asked).not.toContain(API);
   });

@@ -324,10 +324,10 @@ function add(loaded: Loaded[]): void {
  * Adds the files `loaded` from the repository whose prefix is `root` in place of those loaded from
  * it before, applying its rig when it holds exactly one, and shows the change.
  */
-function addRepository(root: string, loaded: Files, tooLong: string[]): void {
+function addRepository(root: string, loaded: Files, skipped: { path: string; reason: string }[]): void {
   files = withRepository(files, root, loaded);
   entries = catalog(files);
-  notices = tooLong.map((path) => `${path}: not loaded, as it is longer than 1 MiB`);
+  notices = skipped.map(({ path, reason }) => `${path}: not loaded, as ${reason}`);
   const own = Object.keys(loaded).map((path) => [path, entries[path]!] as const);
   for (const [path, entry] of own) if (entry.kind === "invalid") notices.push(`${path}: ${entry.message}`);
   const repositoryRigs = own.filter(([, entry]) => entry.kind === "rig");
@@ -651,7 +651,7 @@ $<HTMLFormElement>("github-form").addEventListener("submit", async (event) => {
       return;
     }
     github.close();
-    addRepository(`github/${address.owner}/${address.repo}/`, root.files, root.tooLong);
+    addRepository(`github/${address.owner}/${address.repo}/`, root.files, root.skipped);
   } catch {
     showError("GitHub could not be reached.");
   } finally {

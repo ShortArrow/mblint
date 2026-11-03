@@ -48,10 +48,13 @@ function refusal(response: Response): string | null {
 
 /**
  * The TOML files in the folder `at` and below, keyed `github/<owner>/<repo>/` followed by the
- * path from the folder, with the paths in the repository of those longer than 1 MiB, which are
- * left out; or why none is taken.
+ * path from the folder, with the path in the repository of each file left out and why; or why
+ * none is taken.
  */
-export async function fetchRoot(at: Address, fetch: Fetch): Promise<{ files: Files; tooLong: string[] } | { refused: string }> {
+export async function fetchRoot(
+  at: Address,
+  fetch: Fetch,
+): Promise<{ files: Files; skipped: { path: string; reason: string }[] } | { refused: string }> {
   const api = `https://api.github.com/repos/${at.owner}/${at.repo}`;
   let ref = at.ref;
   if (ref === null) {
@@ -68,8 +71,11 @@ export async function fetchRoot(at: Address, fetch: Fetch): Promise<{ files: Fil
   const tomls = tree.filter((entry) => entry.type === "blob" && entry.path.startsWith(folder) && entry.path.endsWith(".toml"));
   if (truncated || tomls.length > MAX_ROOT_FILES) return { refused: `The folder holds more than ${MAX_ROOT_FILES} TOML files.` };
   if (tomls.length === 0) return { refused: "The folder holds no TOML file." };
-  const tooLong = tomls.filter((entry) => (entry.size ?? 0) > MAX_EDIT_BYTES).map((entry) => entry.path);
-  const taken = tomls.filter((entry) => (entry.size ?? 0) <= MAX_EDIT_BYTES);
+  const skipped = tomls.flatMap((entry) => {
+    const reason = whyLeftOut(entry);
+    return reason === null ? [] : [{ path: entry.path, reason }];
+  });
+  const taken = tomls.filter((entry) => whyLeftOut(entry) === null);
   const raw = `https://raw.githubusercontent.com/${at.owner}/${at.repo}/${encodeURIComponent(ref)}`;
   const answers = await Promise.all(taken.map((entry) => fetch(`${raw}/${entry.path.split("/").map(encodeURIComponent).join("/")}`)));
   const failed = answers.map(refusal).find(Boolean);
@@ -78,5 +84,15 @@ export async function fetchRoot(at: Address, fetch: Fetch): Promise<{ files: Fil
   const files = Object.fromEntries(
     taken.map((entry, i) => [`github/${at.owner}/${at.repo}/${entry.path.slice(folder.length)}`, texts[i]!]),
   );
-  return { files, tooLong };
+  return { files, skipped };
+}
+
+/**
+ * Why the file `entry` is left out, or null when it is taken: longer than 1 MiB, or with a path
+ * that an archive tool could read as leaving the folder it unpacks into.
+ */
+function whyLeftOut(entry: Entry): string | null {
+  if (/[\\:\u0000-\u001f\u007f]/.test(entry.path)) return "its path holds \\, : or a control character";
+  if ((entry.size ?? 0) > MAX_EDIT_BYTES) return "it is longer than 1 MiB";
+  return null;
 }
