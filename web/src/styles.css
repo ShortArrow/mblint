@@ -515,7 +515,11 @@ body.resizing {
   color: var(--muted);
   cursor: pointer;
 }
-.tool.new:hover,
+.tool.new:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.tool.new:not(:disabled):hover,
 .new-menu[open] > .tool.new {
   color: var(--accent);
   background: var(--panel);
@@ -576,6 +580,7 @@ body.resizing {
   padding: 10px;
   display: grid;
   gap: 4px;
+  align-content: start;
 }
 .board-item {
   display: grid;
@@ -599,6 +604,7 @@ body.resizing {
   padding: 10px;
   display: grid;
   gap: 8px;
+  align-content: start;
 }
 .part {
   display: grid;

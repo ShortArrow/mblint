@@ -13,7 +13,7 @@ import type { LinkWidth } from "./report/LinkWidth";
 import type { Report } from "./report/Report";
 import type { SocketCategory } from "./report/SocketCategory";
 import { rigToml, takes } from "./rig";
-import { newFile, type Template } from "./templates";
+import { newFile, newRig, type Template } from "./templates";
 import { fetchRoot, parseAddress, rootOf, withRepository } from "./github";
 import { flag, flagValue, readPref, removePref, writePref } from "./prefs";
 import { dragWidth, type Side, storedWidth } from "./resize";
@@ -224,6 +224,7 @@ function render(): void {
   entries = catalog(files);
   if (board !== null && entries[board]?.kind !== "board") board = null;
   board ??= boards()[0]?.[0] ?? null;
+  $<HTMLButtonElement>("new-rig").disabled = board === null;
 
   $("boards").innerHTML = boards()
     .map(([path, entry]) =>
@@ -521,7 +522,9 @@ document.addEventListener("click", (event) => {
   const create = target.closest<HTMLElement>("[data-new]");
   if (create) {
     create.closest("details")?.removeAttribute("open");
-    const file = newFile(files, create.dataset.new as Template);
+    const kind = create.dataset.new!;
+    if (kind === "rig" && board === null) return;
+    const file = kind === "rig" ? newRig(files, board!, bindings) : newFile(files, kind as Template);
     notices = [];
     add([file]);
     void openEditor(`local/${file.name}`);

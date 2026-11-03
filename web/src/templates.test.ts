@@ -4,7 +4,7 @@ import { beforeAll, describe, expect, it } from "vitest";
 import { initSync } from "./wasm/mblint_wasm";
 import { catalog, layout } from "./mblint";
 import { rigToml } from "./rig";
-import { newFile, TEMPLATES } from "./templates";
+import { newFile, newRig, TEMPLATES } from "./templates";
 
 beforeAll(() => {
   initSync({ module: readFileSync(join(import.meta.dirname, "wasm/mblint_wasm_bg.wasm")) });
@@ -40,5 +40,15 @@ describe("newFile", () => {
     const files = { "local/new-card.toml": "", "local/new-card-2.toml": "", "local/new-card-4.toml": "" };
 
     expect(newFile(files, "card").name).toBe("new-card-3.toml");
+  });
+});
+
+describe("newRig", () => {
+  it("is the rig being built, named after its file", () => {
+    const files = { "local/new-rig.toml": "" };
+    const rig = newRig(files, "local/b.toml", { PCIE1: "local/c.toml" });
+
+    expect(rig).toEqual({ name: "new-rig-2.toml", contents: rigToml("local/b.toml", { PCIE1: "local/c.toml" }, "new-rig-2") });
+    expect(catalog({ "local/x.toml": rig.contents })["local/x.toml"]).toMatchObject({ kind: "rig", name: "new-rig-2" });
   });
 });
