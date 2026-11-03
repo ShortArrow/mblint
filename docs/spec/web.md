@@ -22,7 +22,7 @@ When a file cannot be loaded, the function throws an `Error` whose message names
 
 ### Rebinding
 
-`rebind` changes only the values that differ and keeps the rest of `text` as it is, its comments, order and layout included. A binding whose socket is in `bindings` keeps its place and takes the new path; one whose socket is not is removed, with the comments on its line; a socket new to the rig is added after the last binding. The bindings keep the form the text gives them, a table or an inline table, and a rig without bindings gains a `[bindings]` table at the end. When `text` is not a rig, `rebind` throws as the other functions do.
+`rebind` changes only the values that differ and keeps the rest of `text` as it is, its comments, order and layout included. A binding whose socket is in `bindings` keeps its place and takes the new path; one whose socket is not is removed, with the comments on its line and on the lines just above it; a socket new to the rig is added after the last binding. The bindings keep the form the text gives them, a table or an inline table, and a rig without bindings gains a `[bindings]` table at the end. When `text` is not a rig, `rebind` throws as the other functions do.
 
 ## Catalog
 
