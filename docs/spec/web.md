@@ -6,7 +6,7 @@ The web simulator runs the core in the browser as Wasm. The page is TypeScript u
 
 ## Wasm interface
 
-The module exports these functions. Each takes the files it may read as an object mapping a path, by the rule for paths in [the data schema](schema.md), to the file's contents.
+The module exports these functions. Each but `rebind` takes the files it may read as an object mapping a path, by the rule for paths in [the data schema](schema.md), to the file's contents.
 
 | Function | Arguments | Returns |
 | --- | --- | --- |
@@ -14,10 +14,15 @@ The module exports these functions. Each takes the files it may read as an objec
 | `lint(files, board)` | `files`, and `board`, the path of the board file | The report of `mblint lint --json` |
 | `catalog(files)` | `files` | What each file is, as in [Catalog](#catalog) |
 | `layout(files, rig)` | `files`, and `rig`, the path of the rig file | The rig's board as the page draws it, as in [Layout](#layout) |
+| `rebind(text, board, bindings)` | `text`, a rig file; `board`, a path; and `bindings`, an object mapping each socket path to a device path | `text` with `board` and `bindings` in place of the rig's, as in [Rebinding](#rebinding) |
 
 Files are read only by the paths the rig or the call names, as the CLI reads them under its data root. A path absent from `files` cannot be read.
 
 When a file cannot be loaded, the function throws an `Error` whose message names the file and why, the message the CLI prints to standard error after `mblint: `. No report is returned.
+
+### Rebinding
+
+`rebind` changes only the values that differ and keeps the rest of `text` as it is, its comments, order and layout included. A binding whose socket is in `bindings` keeps its place and takes the new path; one whose socket is not is removed, with the comments on its line; a socket new to the rig is added after the last binding. The bindings keep the form the text gives them, a table or an inline table, and a rig without bindings gains a `[bindings]` table at the end. When `text` is not a rig, `rebind` throws as the other functions do.
 
 ## Catalog
 
@@ -110,6 +115,8 @@ The rig being built is exported as a zip archive that unpacks into a data root: 
 A control on each board, part and rig in the lists opens its file in an editor beside the bracket, as text. Each edit replaces the file's text in `files` under its path, and the page evaluates the change as it evaluates any other. A text longer than 1 MiB, or one that `catalog` cannot read, is not taken: the page says why, with the line at fault when there is one, and the bracket and the report keep what they last showed. An edited file is saved as a download of that file, or with the rig in the exported archive; otherwise its edits last only while the page is open.
 
 The editor colours the text as TOML. It offers to complete the key being typed with the keys a board, a device or a rig may hold at that place, and the value after `=` with the values its field may take when those are listed, such as the categories of a socket. When a text is not taken, the editor marks the line at fault.
+
+While a rig is open in the editor, it is the rig being built. It is applied when it is opened and whenever an edit to it is taken. Each change the page makes to the rig being built, placing or removing a part, clearing the rig or choosing another board, is written into the rig's text with `rebind` and shown in the editor. A binding the change leaves alone keeps the path the rig names, including one whose file was not loaded; a new path is written as its path in `files`, without the prefix `github/<owner>/<repo>/` when the rig and the file come from the same repository.
 
 ### New files
 
