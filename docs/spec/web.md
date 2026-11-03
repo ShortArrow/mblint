@@ -105,7 +105,9 @@ The rig being built is exported as a zip archive that unpacks into a data root: 
 
 ### The editor
 
-A control on each board, part and rig in the lists opens its file in an editor beside the bracket, as plain text. Each edit replaces the file's text in `files` under its path, and the page evaluates the change as it evaluates any other. A text longer than 1 MiB, or one that `catalog` cannot read, is not taken: the page says why, with the line at fault when there is one, and the bracket and the report keep what they last showed. An edited file is saved as a download of that file, or with the rig in the exported archive; otherwise its edits last only while the page is open.
+A control on each board, part and rig in the lists opens its file in an editor beside the bracket, as text. Each edit replaces the file's text in `files` under its path, and the page evaluates the change as it evaluates any other. A text longer than 1 MiB, or one that `catalog` cannot read, is not taken: the page says why, with the line at fault when there is one, and the bracket and the report keep what they last showed. An edited file is saved as a download of that file, or with the rig in the exported archive; otherwise its edits last only while the page is open.
+
+The editor colours the text as TOML. It offers to complete the key being typed with the keys a board, a device or a rig may hold at that place, and the value after `=` with the values its field may take when those are listed, such as the categories of a socket. When a text is not taken, the editor marks the line at fault.
 
 ### The bracket
 
@@ -136,5 +138,7 @@ The Wasm module is `mblint-wasm` built for `wasm32-unknown-unknown`, then wrappe
 The page is published at mblint.shortarrow.jp as a Cloudflare Worker serving the static assets in `web/dist`, configured in `web/wrangler.jsonc`. Cloudflare Workers Builds deploys `main` and builds other branches as previews, running `web/scripts/cloudflare-build.sh`, which installs Rust and the `wasm-bindgen` command line before building the page.
 
 Every response carries the Content Security Policy in `web/public/_headers`. It runs scripts and Wasm only from the page's own origin, so `index.html` holds no inline script; takes styles from the page and Google Fonts, and fonts from Google Fonts; and lets no other site frame the page.
+
+The keys and the listed values the editor offers are generated from the core's Rust types of the board, the device and the rig, and CI fails when the ones committed differ from what is generated.
 
 The TypeScript types of the reports, the catalog and the layout are generated from the core's Rust types by ts-rs, one file per type, into `web/src/report/`. `cargo test -p mblint-core --features ts` writes them, and CI fails when the files committed there differ from what it writes. The diagnostic type of each pass is named after the pass: `PhysicalDiagnostic`, `LanesDiagnostic`, `TunnelsDiagnostic` and `ThroughputDiagnostic`.

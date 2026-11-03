@@ -12,6 +12,7 @@ use crate::protocol::Protocol;
 
 /// A device as declared in `devices/**/<id>.toml`.
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 pub struct Device {
     pub schema_version: String,
     pub id: String,
@@ -82,6 +83,7 @@ pub enum DeviceType {
 }
 
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 #[serde(tag = "type", rename_all = "snake_case")]
 pub enum DeviceKind {
     Card {
@@ -106,6 +108,7 @@ pub enum DeviceKind {
 
 /// The link a device runs: protocol, generation and electrical lane count.
 #[derive(Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 #[cfg_attr(feature = "ts", derive(ts_rs::TS))]
 #[serde(deny_unknown_fields)]
 pub struct Interface {
@@ -115,6 +118,7 @@ pub struct Interface {
 }
 
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 #[serde(deny_unknown_fields)]
 pub struct CardShape {
     pub edge: PcieWidth,
@@ -124,6 +128,7 @@ pub struct CardShape {
 }
 
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 #[serde(deny_unknown_fields)]
 pub struct M2ModuleShape {
     /// Notches cut in the module; it fits any slot whose key is listed.
@@ -133,6 +138,7 @@ pub struct M2ModuleShape {
 
 /// The side of an adapter that plugs into the board.
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 #[serde(deny_unknown_fields)]
 pub struct Upstream {
     pub connector: UpstreamConnector,
@@ -142,6 +148,7 @@ pub struct Upstream {
 
 /// The protocol translation inside an adapter.
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 #[serde(deny_unknown_fields)]
 pub struct Bridge {
     /// The protocol of the adapter's downstream side.
@@ -153,12 +160,14 @@ pub struct Bridge {
 
 /// A socket inside an adapter, with the attributes of its category.
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 #[serde(tag = "category", rename_all = "snake_case")]
 pub enum DownstreamSocket {
     PcieSlot(AdapterPcieSlot),
 }
 
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 #[serde(deny_unknown_fields)]
 pub struct AdapterPcieSlot {
     pub physical_form_factor: PcieWidth,
@@ -170,6 +179,7 @@ pub struct AdapterPcieSlot {
 
 /// What a display needs to show its resolution at its refresh rate.
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 #[serde(deny_unknown_fields)]
 pub struct DisplaySpec {
     pub resolution: String,

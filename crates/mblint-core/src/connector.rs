@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 
 /// The width of a PCIe slot or card edge. Variants are ordered from narrowest to widest.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Deserialize, Serialize)]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 #[cfg_attr(feature = "ts", derive(ts_rs::TS))]
 #[serde(rename_all = "lowercase")]
 pub enum PcieWidth {
@@ -15,6 +16,7 @@ pub enum PcieWidth {
 
 /// The plug an adapter uses towards the board.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize)]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 #[serde(rename_all = "snake_case")]
 pub enum UpstreamConnector {
     TypeC,
@@ -23,6 +25,7 @@ pub enum UpstreamConnector {
 
 /// The key of an M.2 slot, or one of the notches cut in an M.2 module.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Deserialize, Serialize)]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 #[cfg_attr(feature = "ts", derive(ts_rs::TS))]
 pub enum M2Key {
     B,

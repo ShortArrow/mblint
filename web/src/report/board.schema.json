@@ -1,0 +1,529 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Board",
+  "description": "A motherboard as declared in `boards/<vendor>/<model>.toml`.\n\nNodes are keyed by their id, which contains no `.`; every non-root node names its upstream\nnode in `parent`.",
+  "type": "object",
+  "properties": {
+    "model": {
+      "type": "string"
+    },
+    "nodes": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/$defs/Node"
+      }
+    },
+    "schema_version": {
+      "type": "string"
+    },
+    "vendor": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "vendor",
+    "model",
+    "nodes"
+  ],
+  "$defs": {
+    "Bridge": {
+      "description": "A protocol bridge. Under a root it consumes `upstream_lanes`; under a mux it receives the\nlanes the selected mode allocates to it.",
+      "type": "object",
+      "properties": {
+        "parent": {
+          "type": "string"
+        },
+        "upstream_lanes": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "parent",
+        "upstream_lanes"
+      ]
+    },
+    "Condition": {
+      "description": "A test on one socket: either its occupancy or the protocol of the device in it.",
+      "anyOf": [
+        {
+          "$ref": "#/$defs/StateCondition"
+        },
+        {
+          "$ref": "#/$defs/ProtocolCondition"
+        }
+      ]
+    },
+    "Controller": {
+      "description": "An onboard controller with an IOMMU group of its own. Other fields are accepted unchecked.",
+      "type": "object",
+      "properties": {
+        "iommu_group": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "iommu_group"
+      ]
+    },
+    "DpAltLanes": {
+      "description": "The DP Alt Mode lanes of a Type-C port that has DP Alt Mode, written as a count or `\"unknown\"`.",
+      "anyOf": [
+        {
+          "type": "integer",
+          "format": "uint8",
+          "maximum": 255,
+          "minimum": 0
+        },
+        {
+          "description": "The board's manual does not state the lane count.",
+          "$ref": "#/$defs/Unknown"
+        }
+      ]
+    },
+    "M2Key": {
+      "description": "The key of an M.2 slot, or one of the notches cut in an M.2 module.",
+      "type": "string",
+      "enum": [
+        "B",
+        "E",
+        "M"
+      ]
+    },
+    "Mode": {
+      "description": "One configuration of a mux, applied while `when` holds.",
+      "type": "object",
+      "properties": {
+        "allocate": {
+          "description": "Lanes each socket or bridge receives from the mux's parent, keyed by its id.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "integer",
+            "format": "uint32",
+            "minimum": 0
+          },
+          "default": {}
+        },
+        "disables": {
+          "description": "Sockets that stop working while this mode applies.",
+          "type": "array",
+          "default": [],
+          "items": {
+            "type": "string"
+          }
+        },
+        "when": {
+          "$ref": "#/$defs/Condition"
+        }
+      },
+      "required": [
+        "when"
+      ]
+    },
+    "Mux": {
+      "description": "A switch whose lane allocation depends on which sockets are occupied.\n\nEvery subtype is evaluated the same way; `subtype` only describes the hardware.",
+      "type": "object",
+      "properties": {
+        "modes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Mode"
+          }
+        },
+        "parent": {
+          "type": "string"
+        },
+        "subtype": {
+          "$ref": "#/$defs/MuxSubtype"
+        }
+      },
+      "required": [
+        "parent",
+        "subtype",
+        "modes"
+      ]
+    },
+    "MuxSubtype": {
+      "type": "string",
+      "enum": [
+        "bifurcation",
+        "exclusive"
+      ]
+    },
+    "Node": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "root"
+            }
+          },
+          "$ref": "#/$defs/Root",
+          "required": [
+            "type"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "mux"
+            }
+          },
+          "$ref": "#/$defs/Mux",
+          "required": [
+            "type"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "bridge"
+            }
+          },
+          "$ref": "#/$defs/Bridge",
+          "required": [
+            "type"
+          ]
+        },
+        {
+          "description": "A physical socket that devices are installed into, with the attributes of its category.",
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "socket"
+            }
+          },
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "category": {
+                  "type": "string",
+                  "const": "pcie_slot"
+                },
+                "generation": {
+                  "description": "PCIe generation of the slot's wiring, for a slot slower than its root.",
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "format": "uint8",
+                  "maximum": 255,
+                  "minimum": 0
+                },
+                "iommu_group": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "format": "uint32",
+                  "minimum": 0
+                },
+                "max_electrical_lanes": {
+                  "description": "Lanes wired to the slot, which may be fewer than its form factor holds.",
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "format": "uint8",
+                  "maximum": 255,
+                  "minimum": 0
+                },
+                "open_ended": {
+                  "description": "Whether the back of the slot is open, so that a wider card edge overhangs it.",
+                  "type": "boolean",
+                  "default": false
+                },
+                "parent": {
+                  "type": "string"
+                },
+                "physical_form_factor": {
+                  "$ref": "#/$defs/PcieWidth"
+                },
+                "slot_index": {
+                  "description": "Bracket position on the board, counted away from the CPU.",
+                  "type": "integer",
+                  "format": "uint8",
+                  "maximum": 255,
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "category",
+                "parent",
+                "slot_index",
+                "physical_form_factor"
+              ]
+            },
+            {
+              "type": "object",
+              "properties": {
+                "category": {
+                  "type": "string",
+                  "const": "m2_slot"
+                },
+                "generation": {
+                  "description": "PCIe generation of the slot's wiring, for a slot slower than its root.",
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "format": "uint8",
+                  "maximum": 255,
+                  "minimum": 0
+                },
+                "iommu_group": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "format": "uint32",
+                  "minimum": 0
+                },
+                "key": {
+                  "$ref": "#/$defs/M2Key"
+                },
+                "max_lanes": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "format": "uint8",
+                  "maximum": 255,
+                  "minimum": 0
+                },
+                "parent": {
+                  "type": "string"
+                },
+                "supported_form_factors": {
+                  "description": "Module sizes, such as `\"2280\"`, the slot has a screw position for; empty if not stated.",
+                  "type": "array",
+                  "default": [],
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "supported_protocols": {
+                  "type": "array",
+                  "default": [],
+                  "items": {
+                    "$ref": "#/$defs/Protocol"
+                  }
+                }
+              },
+              "required": [
+                "category",
+                "parent",
+                "key"
+              ]
+            },
+            {
+              "type": "object",
+              "properties": {
+                "category": {
+                  "type": "string",
+                  "const": "sata_port"
+                },
+                "iommu_group": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "format": "uint32",
+                  "minimum": 0
+                },
+                "parent": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "category",
+                "parent"
+              ]
+            },
+            {
+              "type": "object",
+              "properties": {
+                "category": {
+                  "type": "string",
+                  "const": "usb_c"
+                }
+              },
+              "$ref": "#/$defs/UsbC",
+              "required": [
+                "category"
+              ]
+            },
+            {
+              "type": "object",
+              "properties": {
+                "category": {
+                  "type": "string",
+                  "const": "usb_a"
+                }
+              },
+              "$ref": "#/$defs/UsbA",
+              "required": [
+                "category"
+              ]
+            }
+          ],
+          "required": [
+            "type"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "controller"
+            }
+          },
+          "$ref": "#/$defs/Controller",
+          "required": [
+            "type"
+          ]
+        }
+      ]
+    },
+    "PcieWidth": {
+      "description": "The width of a PCIe slot or card edge. Variants are ordered from narrowest to widest.",
+      "type": "string",
+      "enum": [
+        "x1",
+        "x4",
+        "x8",
+        "x16"
+      ]
+    },
+    "Protocol": {
+      "type": "string",
+      "enum": [
+        "pcie",
+        "sata",
+        "usb4",
+        "usb3_gen1x1",
+        "displayport"
+      ]
+    },
+    "ProtocolCondition": {
+      "description": "Holds only while the socket is occupied by a device running `protocol`.",
+      "type": "object",
+      "properties": {
+        "protocol": {
+          "$ref": "#/$defs/Protocol"
+        },
+        "socket": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "socket",
+        "protocol"
+      ]
+    },
+    "Root": {
+      "description": "A resource provider that supplies a fixed number of lanes to its children.",
+      "type": "object",
+      "properties": {
+        "bus": {
+          "type": "string"
+        },
+        "generation": {
+          "type": "integer",
+          "format": "uint8",
+          "maximum": 255,
+          "minimum": 0
+        },
+        "lanes": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "bus",
+        "lanes",
+        "generation"
+      ]
+    },
+    "SocketState": {
+      "type": "string",
+      "enum": [
+        "empty",
+        "occupied"
+      ]
+    },
+    "StateCondition": {
+      "type": "object",
+      "properties": {
+        "is": {
+          "$ref": "#/$defs/SocketState"
+        },
+        "socket": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "socket",
+        "is"
+      ]
+    },
+    "Unknown": {
+      "description": "The value `\"unknown\"`, for a board value its manual does not state.",
+      "type": "string",
+      "enum": [
+        "unknown"
+      ]
+    },
+    "UsbA": {
+      "description": "A Type-A port. Attributes other than `parent` are accepted unchecked.\n\n`parent` is `\"unknown\"` when the board's manual does not state the port's upstream.",
+      "type": "object",
+      "properties": {
+        "parent": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "parent"
+      ]
+    },
+    "UsbC": {
+      "description": "A Type-C port. Attributes not listed here, such as `supported_protocols`, are accepted unchecked.\n\n`parent` is `\"unknown\"` when the board's manual does not state the port's upstream.",
+      "type": "object",
+      "properties": {
+        "dp_alt_max_lanes": {
+          "description": "DisplayPort Alt Mode lanes the port can drive; `None` if it has no DP Alt Mode.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DpAltLanes"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "parent": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "parent"
+      ]
+    }
+  }
+}

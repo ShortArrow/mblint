@@ -1,0 +1,358 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Device",
+  "description": "A device as declared in `devices/**/<id>.toml`.",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "schema_version": {
+      "type": "string"
+    }
+  },
+  "oneOf": [
+    {
+      "type": "object",
+      "properties": {
+        "interface": {
+          "$ref": "#/$defs/Interface"
+        },
+        "physical": {
+          "$ref": "#/$defs/CardShape"
+        },
+        "type": {
+          "type": "string",
+          "const": "card"
+        }
+      },
+      "required": [
+        "type",
+        "interface",
+        "physical"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "interface": {
+          "$ref": "#/$defs/Interface"
+        },
+        "physical": {
+          "$ref": "#/$defs/M2ModuleShape"
+        },
+        "type": {
+          "type": "string",
+          "const": "m2_module"
+        }
+      },
+      "required": [
+        "type",
+        "interface",
+        "physical"
+      ]
+    },
+    {
+      "description": "A device installed into a board socket that exposes sockets of its own.",
+      "type": "object",
+      "properties": {
+        "bridge": {
+          "$ref": "#/$defs/Bridge"
+        },
+        "downstream_sockets": {
+          "description": "Sockets inside the adapter, keyed by the name a rig appends to the adapter's path.",
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/DownstreamSocket"
+          }
+        },
+        "type": {
+          "type": "string",
+          "const": "adapter"
+        },
+        "upstream": {
+          "$ref": "#/$defs/Upstream"
+        }
+      },
+      "required": [
+        "type",
+        "upstream",
+        "bridge"
+      ]
+    },
+    {
+      "description": "A monitor driven over DisplayPort Alt Mode.",
+      "type": "object",
+      "properties": {
+        "display": {
+          "$ref": "#/$defs/DisplaySpec"
+        },
+        "type": {
+          "type": "string",
+          "const": "display"
+        }
+      },
+      "required": [
+        "type",
+        "display"
+      ]
+    }
+  ],
+  "required": [
+    "schema_version",
+    "id",
+    "name"
+  ],
+  "$defs": {
+    "Bridge": {
+      "description": "The protocol translation inside an adapter.",
+      "type": "object",
+      "properties": {
+        "chipset": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "max_tunneling_gbps": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "format": "double"
+        },
+        "sata_generation": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint8",
+          "maximum": 255,
+          "minimum": 0
+        },
+        "translates_to": {
+          "description": "The protocol of the adapter's downstream side.",
+          "$ref": "#/$defs/Protocol"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "translates_to"
+      ]
+    },
+    "CardShape": {
+      "type": "object",
+      "properties": {
+        "edge": {
+          "$ref": "#/$defs/PcieWidth"
+        },
+        "length_mm": {
+          "type": "integer",
+          "format": "uint16",
+          "maximum": 65535,
+          "minimum": 0
+        },
+        "thickness_slots": {
+          "description": "Bracket positions the card covers, its own included.",
+          "type": "integer",
+          "format": "uint8",
+          "maximum": 255,
+          "minimum": 1
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "edge",
+        "thickness_slots",
+        "length_mm"
+      ]
+    },
+    "DisplaySpec": {
+      "description": "What a display needs to show its resolution at its refresh rate.",
+      "type": "object",
+      "properties": {
+        "bandwidth_requirement_gbps": {
+          "type": "number",
+          "format": "double"
+        },
+        "dsc_supported": {
+          "type": "boolean"
+        },
+        "refresh_rate": {
+          "type": "integer",
+          "format": "uint16",
+          "maximum": 65535,
+          "minimum": 0
+        },
+        "required_dp_lanes": {
+          "type": "integer",
+          "format": "uint8",
+          "maximum": 255,
+          "minimum": 0
+        },
+        "resolution": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "resolution",
+        "refresh_rate",
+        "dsc_supported",
+        "required_dp_lanes",
+        "bandwidth_requirement_gbps"
+      ]
+    },
+    "DownstreamSocket": {
+      "description": "A socket inside an adapter, with the attributes of its category.",
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "category": {
+              "type": "string",
+              "const": "pcie_slot"
+            },
+            "generation": {
+              "type": "integer",
+              "format": "uint8",
+              "maximum": 255,
+              "minimum": 0
+            },
+            "max_electrical_lanes": {
+              "type": "integer",
+              "format": "uint8",
+              "maximum": 255,
+              "minimum": 0
+            },
+            "open_ended": {
+              "type": "boolean",
+              "default": false
+            },
+            "physical_form_factor": {
+              "$ref": "#/$defs/PcieWidth"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "category",
+            "physical_form_factor",
+            "max_electrical_lanes",
+            "generation"
+          ]
+        }
+      ]
+    },
+    "Interface": {
+      "description": "The link a device runs: protocol, generation and electrical lane count.",
+      "type": "object",
+      "properties": {
+        "generation": {
+          "type": "integer",
+          "format": "uint8",
+          "maximum": 255,
+          "minimum": 0
+        },
+        "lanes": {
+          "type": "integer",
+          "format": "uint8",
+          "maximum": 255,
+          "minimum": 0
+        },
+        "protocol": {
+          "$ref": "#/$defs/Protocol"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "protocol",
+        "generation",
+        "lanes"
+      ]
+    },
+    "M2Key": {
+      "description": "The key of an M.2 slot, or one of the notches cut in an M.2 module.",
+      "type": "string",
+      "enum": [
+        "B",
+        "E",
+        "M"
+      ]
+    },
+    "M2ModuleShape": {
+      "type": "object",
+      "properties": {
+        "form_factor": {
+          "type": "string"
+        },
+        "keys": {
+          "description": "Notches cut in the module; it fits any slot whose key is listed.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/M2Key"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "keys",
+        "form_factor"
+      ]
+    },
+    "PcieWidth": {
+      "description": "The width of a PCIe slot or card edge. Variants are ordered from narrowest to widest.",
+      "type": "string",
+      "enum": [
+        "x1",
+        "x4",
+        "x8",
+        "x16"
+      ]
+    },
+    "Protocol": {
+      "type": "string",
+      "enum": [
+        "pcie",
+        "sata",
+        "usb4",
+        "usb3_gen1x1",
+        "displayport"
+      ]
+    },
+    "Upstream": {
+      "description": "The side of an adapter that plugs into the board.",
+      "type": "object",
+      "properties": {
+        "connector": {
+          "$ref": "#/$defs/UpstreamConnector"
+        },
+        "max_gbps": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "format": "double"
+        },
+        "protocol": {
+          "$ref": "#/$defs/Protocol"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "connector",
+        "protocol"
+      ]
+    },
+    "UpstreamConnector": {
+      "description": "The plug an adapter uses towards the board.",
+      "type": "string",
+      "enum": [
+        "type_c",
+        "type_a"
+      ]
+    }
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Rig",
+  "description": "A build as declared in `rigs/<name>.toml`. Paths are relative to the data root.",
+  "type": "object",
+  "properties": {
+    "bindings": {
+      "description": "Device file installed in each socket, keyed by socket path: a board socket id, or\n`<adapter path>.<socket name>` for a socket inside an adapter.",
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      },
+      "default": {}
+    },
+    "board": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "schema_version": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "name",
+    "board"
+  ]
+}
