@@ -131,4 +131,6 @@ Wasm モジュールは、`mblint-wasm` を `wasm32-unknown-unknown` 向けに�
 
 ページは、`web/dist` の静的アセットを配る Cloudflare Worker として mblint.shortarrow.jp に公開する。設定は `web/wrangler.jsonc` にある。Cloudflare Workers Builds は `main` を公開し、ほかのブランチを preview としてビルドする。そのとき `web/scripts/cloudflare-build.sh` を実行し、ページをビルドする前に Rust と `wasm-bindgen` コマンドラインを入れる。
 
+すべての応答に、`web/public/_headers` にある Content Security Policy を付ける。スクリプトと Wasm はページと同じオリジンのものだけを動かすので、`index.html` にはスクリプトを直接書かない。スタイルはページと Google Fonts から、フォントは Google Fonts から読み、ほかのサイトがページを枠の中に表示することを許さない。
+
 レポート、カタログ、レイアウトの TypeScript の型は、コアの Rust の型から ts-rs で、型ごとに一つのファイルとして `web/src/report/` に生成する。`cargo test -p mblint-core --features ts` がこれを書き出し、そこにコミットされたファイルが書き出したものと異なるとき、CI は失敗する。各パスの診断の型は、パスの名前を冠して `PhysicalDiagnostic`、`LanesDiagnostic`、`TunnelsDiagnostic`、`ThroughputDiagnostic` と呼ぶ。
