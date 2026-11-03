@@ -27,12 +27,9 @@ export function resolveRig(
 ): { board: string; bindings: Record<string, string>; missing: string[] } {
   const missing: string[] = [];
   const resolve = (path: string): string | null => {
-    if (root !== "" && `${root}${path}` in files) return `${root}${path}`;
-    if (path in files) return path;
-    const name = path.slice(path.lastIndexOf("/") + 1);
-    if (`local/${name}` in files) return `local/${name}`;
-    missing.push(path);
-    return null;
+    const found = resolvePath(path, files, root);
+    if (found === null) missing.push(path);
+    return found;
   };
   const resolvedBoard = resolve(board) ?? board;
   const resolvedBindings: Record<string, string> = {};
@@ -41,6 +38,19 @@ export function resolveRig(
     if (path !== null) resolvedBindings[socket] = path;
   }
   return { board: resolvedBoard, bindings: resolvedBindings, missing };
+}
+
+/**
+ * The path in `files` that a rig from the repository whose prefix is `root` means by `path`: under
+ * `root` first, then as it is, then the loaded file `local/<name>` whose name is its last segment;
+ * null when none is in `files`.
+ */
+function resolvePath(path: string, files: Files, root: string): string | null {
+  if (root !== "" && `${root}${path}` in files) return `${root}${path}`;
+  if (path in files) return path;
+  const name = path.slice(path.lastIndexOf("/") + 1);
+  if (`local/${name}` in files) return `local/${name}`;
+  return null;
 }
 
 /** A board with the device installed in each socket. */
