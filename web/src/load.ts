@@ -3,6 +3,11 @@ import type { Files } from "./mblint";
 /** A file the user loaded, by its name on disk. */
 export type Loaded = { name: string; contents: string };
 
+/** Whether a file of this name may be added under `local/`: a name that stays in that folder and names a file. */
+export function isLoadableName(name: string): boolean {
+  return name !== "" && name !== "." && name !== ".." && !/[/\\]/.test(name);
+}
+
 /** `files` with each loaded file under `local/<name>`, replacing a loaded file of the same name. */
 export function addLoaded(files: Files, loaded: Loaded[]): Files {
   return { ...files, ...Object.fromEntries(loaded.map((file) => [`local/${file.name}`, file.contents])) };
