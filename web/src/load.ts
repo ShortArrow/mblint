@@ -27,12 +27,9 @@ export function resolveRig(
 ): { board: string; bindings: Record<string, string>; missing: string[] } {
   const missing: string[] = [];
   const resolve = (path: string): string | null => {
-    if (root !== "" && `${root}${path}` in files) return `${root}${path}`;
-    if (path in files) return path;
-    const name = path.slice(path.lastIndexOf("/") + 1);
-    if (`local/${name}` in files) return `local/${name}`;
-    missing.push(path);
-    return null;
+    const found = resolvePath(path, files, root);
+    if (found === null) missing.push(path);
+    return found;
   };
   const resolvedBoard = resolve(board) ?? board;
   const resolvedBindings: Record<string, string> = {};
@@ -41,6 +38,19 @@ export function resolveRig(
     if (path !== null) resolvedBindings[socket] = path;
   }
   return { board: resolvedBoard, bindings: resolvedBindings, missing };
+}
+
+/**
+ * The path in `files` that a rig from the repository whose prefix is `root` means by `path`: under
+ * `root` first, then as it is, then the loaded file `local/<name>` whose name is its last segment;
+ * null when none is in `files`.
+ */
+function resolvePath(path: string, files: Files, root: string): string | null {
+  if (root !== "" && `${root}${path}` in files) return `${root}${path}`;
+  if (path in files) return path;
+  const name = path.slice(path.lastIndexOf("/") + 1);
+  if (`local/${name}` in files) return `local/${name}`;
+  return null;
 }
 
 /** A board with the device installed in each socket. */
@@ -54,4 +64,24 @@ export function sameRig(a: Rig, b: Rig): boolean {
     sockets.length === Object.keys(b.bindings).length &&
     sockets.every((socket) => a.bindings[socket] === b.bindings[socket])
   );
+}
+
+/**
+ * The board and bindings to write into a rig file that names `named`, from the repository whose
+ * prefix is `root`, so that it holds `built`, a rig as paths in `files`. A path the change leaves
+ * alone keeps the rig's spelling, and a binding whose file is not in `files` stays when
+ * `keepUnloaded`; a new path is written without `root`.
+ */
+export function toWrite(named: Rig, built: Rig, files: Files, root: string, keepUnloaded: boolean): Rig {
+  const spell = (path: string) => (root !== "" && path.startsWith(root) ? path.slice(root.length) : path);
+  const bindings: Record<string, string> = {};
+  for (const [socket, path] of Object.entries(named.bindings)) {
+    const resolved = resolvePath(path, files, root);
+    if (resolved === null ? keepUnloaded && !(socket in built.bindings) : built.bindings[socket] === resolved) {
+      bindings[socket] = path;
+    }
+  }
+  for (const [socket, path] of Object.entries(built.bindings)) bindings[socket] ??= spell(path);
+  const board = resolvePath(named.board, files, root) === built.board ? named.board : spell(built.board);
+  return { board, bindings };
 }
