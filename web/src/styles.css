@@ -937,6 +937,40 @@ dialog input {
   accent-color: var(--accent);
   margin: 0;
 }
+dialog:has(.address) {
+  width: min(480px, calc(100vw - 32px));
+}
+dialog .address {
+  display: grid;
+  gap: 8px;
+  padding: 12px 16px 16px;
+}
+dialog .address label {
+  cursor: default;
+  font-size: 13px;
+  color: var(--muted);
+}
+dialog .address input {
+  font: inherit;
+  font-size: 13px;
+  color: var(--ink);
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 7px 10px;
+}
+dialog .address .error {
+  margin: 0;
+  font-size: 13px;
+  color: var(--err);
+}
+dialog .address .button {
+  justify-self: end;
+}
+dialog .address .button:disabled {
+  cursor: progress;
+  opacity: 0.6;
+}
 
 .sidebar.picker {
   border-right: 1px solid var(--line);

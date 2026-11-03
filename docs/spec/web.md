@@ -93,6 +93,8 @@ One control loads TOML files, chosen from disk or dropped anywhere on the page. 
 | Rig | Added to the rigs and applied |
 | Invalid | Its message is reported with the file name |
 
+Another control loads a data root from a public GitHub repository, at an address the user gives: `https://github.com/<owner>/<repo>` for the root of its default branch, or `https://github.com/<owner>/<repo>/tree/<ref>/<path>` for the folder `<path>` at the branch, tag or commit `<ref>`, where `<ref>` contains no `/`. Every file in that folder or below whose name ends in `.toml` is added under `github/<owner>/<repo>/`, followed by its path from that folder, replacing the files loaded from that repository before. A path that a rig from the repository names is read from the repository's files first, so the repository may hold any number of boards, devices and rigs, and files of the same name in different folders. The boards and devices are added to their lists, and the rigs to theirs without being applied, unless the repository holds exactly one rig. A file longer than 1 MiB, or whose path contains `\`, `:` or a control character, is not added, and the page names it. When the address names no public repository, when the folder holds no TOML file or more than 200, or when GitHub refuses because the page has asked it too often, the page says so and adds nothing. The page asks GitHub without signing in, and remembers neither the address nor the files.
+
 ### The rig
 
 The page keeps the rig being built as a rig file at `local/rig.toml` in `files`, on the board chosen, and evaluates it with `check` and `layout` on every change. Choosing another board empties the rig.
@@ -131,7 +133,7 @@ The page shows the status of the report, each diagnostic with its severity, mess
 
 The boards, the parts and the rigs are listed in a sidebar on the left, the report is in a sidebar on the right, and the bracket takes the space between them. The header colours a frame around the window, and the two sidebars and the bracket each lie in an inset with small rounded corners sunk into that frame. Each inset fills the height below the header and scrolls within itself, so that the page does not scroll and the header and the other insets stay in place. Dragging the inner edge of a sidebar, or moving it with the arrow keys, changes the sidebar's width between 180 and 480 pixels, and the browser remembers the width; a double click on the edge restores the width it starts with. A control at the foot of each sidebar collapses it to a narrow rail of icons, and the rail opens it again; the browser remembers whether each sidebar is open. On a narrow screen the three are stacked in that order and the page scrolls through them, a collapsed sidebar is one row of its icons, and the header shows its controls as icons alone.
 
-The controls in the header are icons, each named in its tooltip: loading files, clearing the rig, exporting the rig, switching between the light and the dark theme, and a cog that opens the settings.
+The controls in the header are icons, each named in its tooltip: loading files, loading files from GitHub, clearing the rig, exporting the rig, switching between the light and the dark theme, and a cog that opens the settings.
 
 The settings choose the theme, which is the system's light or dark theme, light, or dark, and whether the header shows the names of its controls beside their icons. The browser remembers both. Switching or choosing a theme reveals it in a circle growing from the control, or at once when the system asks for reduced motion. The page is drawn in its theme from the first paint, and the sidebars and the bracket hold their places while the module loads, so that loading the page neither flashes another theme nor rearranges it. The page does not scroll sideways; a part of it that must scroll has a thin scrollbar in the theme's colours, shown while the pointer is over that part.
 
@@ -141,7 +143,7 @@ The Wasm module is `mblint-wasm` built for `wasm32-unknown-unknown`, then wrappe
 
 The page is published at mblint.shortarrow.jp as a Cloudflare Worker serving the static assets in `web/dist`, configured in `web/wrangler.jsonc`. Cloudflare Workers Builds deploys `main` and builds other branches as previews, running `web/scripts/cloudflare-build.sh`, which installs Rust and the `wasm-bindgen` command line before building the page.
 
-Every response carries the Content Security Policy in `web/public/_headers`. It runs scripts and Wasm only from the page's own origin, so `index.html` holds no inline script; takes styles from the page and Google Fonts, and fonts from Google Fonts; and lets no other site frame the page.
+Every response carries the Content Security Policy in `web/public/_headers`. It runs scripts and Wasm only from the page's own origin, so `index.html` holds no inline script; takes styles from the page and Google Fonts, and fonts from Google Fonts; fetches only from the page, GitHub's API and its host of raw files; and lets no other site frame the page.
 
 The keys and the listed values the editor offers are generated from the core's Rust types of the board, the device and the rig, and CI fails when the ones committed differ from what is generated.
 

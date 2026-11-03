@@ -22,6 +22,10 @@ describe("the Content Security Policy", () => {
     expect(policy().get("script-src")).toEqual(["'self'", "'wasm-unsafe-eval'"]);
   });
 
+  it("fetches only from the page, GitHub's API and its host of raw files", () => {
+    expect(policy().get("connect-src")).toEqual(["'self'", "https://api.github.com", "https://raw.githubusercontent.com"]);
+  });
+
   it("takes fonts only from Google Fonts and lets no site frame the page", () => {
     expect(policy().get("font-src")).toEqual(["https://fonts.gstatic.com"]);
     expect(policy().get("frame-ancestors")).toEqual(["'none'"]);

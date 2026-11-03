@@ -22,6 +22,10 @@
         <span class="label">Load</span>
         <input id="file" type="file" accept=".toml" multiple hidden />
       </label>
+      <button id="github-open" class="tool" type="button" title="Load a data root from a public GitHub repository">
+        <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="4.5" cy="3.5" r="1.5" /><circle cx="4.5" cy="12.5" r="1.5" /><circle cx="11.5" cy="5.5" r="1.5" /><path d="M4.5 5v6M11.5 7c0 2.5-7 1.5-7 4" /></svg>
+        <span class="label">GitHub</span>
+      </button>
       <button id="clear" class="tool" type="button" title="Remove every device from the rig">
         <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 4.5h11M6.5 4.5v-2h3v2M4 4.5l.7 9h6.6l.7-9M6.8 7v4M9.2 7v4" /></svg>
         <span class="label">Clear</span>
@@ -140,6 +144,29 @@
           <legend>Header</legend>
           <label><input id="labels" type="checkbox" /> Show the names of the controls</label>
         </fieldset>
+      </form>
+    </dialog>
+    <dialog id="github" aria-labelledby="github-title">
+      <form id="github-form" method="dialog">
+        <div class="dialog-head">
+          <h2 id="github-title">Load from GitHub</h2>
+          <button id="github-close" class="tool" type="button" title="Close">
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" /></svg>
+          </button>
+        </div>
+        <div class="address">
+          <label for="github-address">Address of a public repository, or of a folder in it</label>
+          <input
+            id="github-address"
+            type="url"
+            required
+            autocomplete="off"
+            spellcheck="false"
+            placeholder="https://github.com/owner/repo/tree/main/data"
+          />
+          <p id="github-error" class="error" role="alert" hidden></p>
+          <button id="github-load" class="button">Load</button>
+        </div>
       </form>
     </dialog>
     <script type="module" src="/src/main.ts"></script>

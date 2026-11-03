@@ -14,17 +14,20 @@ export function addLoaded(files: Files, loaded: Loaded[]): Files {
 }
 
 /**
- * A rig's board and bindings as paths in `files`: a path absent from `files` is taken from the
- * loaded file `local/<name>` whose name is its last segment. Paths neither supplies are `missing`,
- * board first, and their bindings dropped.
+ * A rig's board and bindings as paths in `files`: a path is read first under `root`, the prefix of
+ * the repository the rig was loaded from, then as it is, then from the loaded file `local/<name>`
+ * whose name is its last segment. Paths none supplies are `missing`, board first, and their
+ * bindings dropped.
  */
 export function resolveRig(
   board: string,
   bindings: Record<string, string>,
   files: Files,
+  root = "",
 ): { board: string; bindings: Record<string, string>; missing: string[] } {
   const missing: string[] = [];
   const resolve = (path: string): string | null => {
+    if (root !== "" && `${root}${path}` in files) return `${root}${path}`;
     if (path in files) return path;
     const name = path.slice(path.lastIndexOf("/") + 1);
     if (`local/${name}` in files) return `local/${name}`;
