@@ -65,3 +65,23 @@ export function sameRig(a: Rig, b: Rig): boolean {
     sockets.every((socket) => a.bindings[socket] === b.bindings[socket])
   );
 }
+
+/**
+ * The board and bindings to write into a rig file that names `named`, from the repository whose
+ * prefix is `root`, so that it holds `built`, a rig as paths in `files`. A path the change leaves
+ * alone keeps the rig's spelling, and a binding whose file is not in `files` stays when
+ * `keepUnloaded`; a new path is written without `root`.
+ */
+export function toWrite(named: Rig, built: Rig, files: Files, root: string, keepUnloaded: boolean): Rig {
+  const spell = (path: string) => (root !== "" && path.startsWith(root) ? path.slice(root.length) : path);
+  const bindings: Record<string, string> = {};
+  for (const [socket, path] of Object.entries(named.bindings)) {
+    const resolved = resolvePath(path, files, root);
+    if (resolved === null ? keepUnloaded && !(socket in built.bindings) : built.bindings[socket] === resolved) {
+      bindings[socket] = path;
+    }
+  }
+  for (const [socket, path] of Object.entries(built.bindings)) bindings[socket] ??= spell(path);
+  const board = resolvePath(named.board, files, root) === built.board ? named.board : spell(built.board);
+  return { board, bindings };
+}

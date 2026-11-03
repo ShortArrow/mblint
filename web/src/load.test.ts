@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { addLoaded, isLoadableName, resolveRig, sameRig } from "./load";
+import { addLoaded, isLoadableName, resolveRig, sameRig, toWrite } from "./load";
 
 describe("addLoaded", () => {
   it("adds each loaded file under local/ by its name, replacing one of the same name", () => {
@@ -76,5 +76,43 @@ describe("isLoadableName", () => {
     for (const name of ["../x.toml", "a/x.toml", "..\\..\\x.toml", "a\\x.toml", ".", "..", ""]) {
       expect(isLoadableName(name), name).toBe(false);
     }
+  });
+});
+
+describe("toWrite", () => {
+  const named = {
+    board: "boards/a.toml",
+    bindings: { PCIE1: "devices/gpu.toml", M2_1: "devices/unloaded.toml", M2_2: "devices/ssd.toml" },
+  };
+  const files = {
+    "github/o/r/boards/a.toml": "",
+    "github/o/r/devices/gpu.toml": "",
+    "github/o/r/devices/ssd.toml": "",
+    "local/new.toml": "",
+    "local/b.toml": "",
+  };
+
+  it("keeps the paths the rig names for what is unchanged, and writes new paths as in its repository or the page", () => {
+    const built = {
+      board: "github/o/r/boards/a.toml",
+      bindings: { PCIE1: "github/o/r/devices/gpu.toml", M2_2: "local/new.toml", PCIE2: "github/o/r/devices/ssd.toml" },
+    };
+
+    expect(toWrite(named, built, files, "github/o/r/", true)).toEqual({
+      board: "boards/a.toml",
+      bindings: {
+        PCIE1: "devices/gpu.toml",
+        M2_1: "devices/unloaded.toml",
+        M2_2: "local/new.toml",
+        PCIE2: "devices/ssd.toml",
+      },
+    });
+  });
+
+  it("drops a binding whose file was not loaded when the rig is emptied", () => {
+    expect(toWrite(named, { board: "local/b.toml", bindings: {} }, files, "github/o/r/", false)).toEqual({
+      board: "local/b.toml",
+      bindings: {},
+    });
   });
 });
