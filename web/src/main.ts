@@ -293,9 +293,14 @@ async function load(fileList: FileList | File[]): Promise<void> {
       .map(async (file) => ({ name: file.name, contents: await file.text() })),
   );
   if (chosen.length === 0) return;
+  notices = refused.map((file) => `${file.name}: not loaded, as its name is not a plain file name`);
+  add(loaded);
+}
+
+/** Adds `loaded` under `local/`, each file taking the effect of its kind, and shows the change. */
+function add(loaded: Loaded[]): void {
   files = addLoaded(files, loaded);
   entries = catalog(files);
-  notices = refused.map((file) => `${file.name}: not loaded, as its name is not a plain file name`);
   for (const { name } of loaded) {
     const entry = entries[`local/${name}`]!;
     if (entry.kind === "invalid") {
