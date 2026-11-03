@@ -68,3 +68,11 @@ test("an edit to the rig open in the editor applies it", async ({ page }) => {
 
   await expect(page.locator('[data-socket="PCIE1"]')).toContainText("New card");
 });
+
+test("dragging a part onto a socket writes it into the rig open in the editor", async ({ page }) => {
+  await cardAndRig(page);
+
+  await page.locator('[data-part="local/new-card.toml"]').dragTo(page.locator('[data-socket="PCIE1"]'));
+
+  await expect.poll(() => editorText(page)).toContain('PCIE1 = "local/new-card.toml"');
+});
