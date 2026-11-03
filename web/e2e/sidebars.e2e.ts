@@ -63,3 +63,18 @@ for (const side of [".picker", ".report-panel"] as const) {
     expect(faults).toEqual([]);
   });
 }
+
+for (const side of [".picker", ".report-panel"] as const) {
+  test(`a ${side} collapsed by its control stays collapsed under the pointer until the pointer leaves it`, async ({ page }) => {
+    const width = async () => (await page.locator(side).boundingBox())!.width;
+
+    await page.locator(`${side} > .foot`).click();
+    await page.waitForTimeout(500);
+    expect(await width()).toBe(40);
+
+    await page.mouse.move(720, 450);
+    const box = (await page.locator(side).boundingBox())!;
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    await expect.poll(width).toBeGreaterThan(200);
+  });
+}

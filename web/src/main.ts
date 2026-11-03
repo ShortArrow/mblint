@@ -419,6 +419,13 @@ type Flag = "labels" | "left" | "report";
 const FLAG_KEYS: Record<Flag, string> = { labels: LABELS_KEY, left: LEFT_KEY, report: REPORT_KEY };
 
 /** Sets the flag that the document attribute `data-<name>` shows, and stores it. */
+/** Keeps `sidebar`, just collapsed under the pointer, from opening on hover until the pointer leaves it. */
+function holdCollapsed(sidebar: HTMLElement | null): void {
+  if (sidebar === null || !sidebar.matches(":hover")) return;
+  sidebar.classList.add("held");
+  sidebar.addEventListener("pointerleave", () => sidebar.classList.remove("held"), { once: true });
+}
+
 function setFlag(name: Flag, on: boolean): void {
   document.documentElement.dataset[name] = flagValue(on);
   writePref(FLAG_KEYS[name], flagValue(on));
@@ -535,7 +542,9 @@ document.addEventListener("click", (event) => {
   const toggle = target.closest<HTMLElement>("[data-toggle]");
   if (toggle) {
     const name = toggle.dataset.toggle as Flag;
-    setFlag(name, document.documentElement.dataset[name] !== "on");
+    const on = document.documentElement.dataset[name] !== "on";
+    setFlag(name, on);
+    if (!on) holdCollapsed(toggle.closest<HTMLElement>(".sidebar"));
     return;
   }
   const choice = target.closest<HTMLElement>("[data-board]");
