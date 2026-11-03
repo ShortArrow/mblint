@@ -300,6 +300,15 @@ function chooseBoard(path: string): void {
   render();
 }
 
+/** Hands `blob` to the browser as a download named `name`. */
+function save(blob: Blob, name: string): void {
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = name;
+  link.click();
+  URL.revokeObjectURL(link.href);
+}
+
 type Flag = "labels" | "left" | "report";
 
 const FLAG_KEYS: Record<Flag, string> = { labels: LABELS_KEY, left: LEFT_KEY, report: REPORT_KEY };
@@ -471,12 +480,7 @@ $("export").addEventListener("click", () => {
   if (board === null) return;
   const marked = rigs().find(([, entry]) => isApplied(entry));
   const name = (marked?.[1].name ?? "rig").replace(/[^\w.-]/g, "_");
-  const archive = zip(rigBundle(files, board, bindings, name));
-  const link = document.createElement("a");
-  link.href = URL.createObjectURL(new Blob([archive], { type: "application/zip" }));
-  link.download = `${name}.zip`;
-  link.click();
-  URL.revokeObjectURL(link.href);
+  save(new Blob([zip(rigBundle(files, board, bindings, name))], { type: "application/zip" }), `${name}.zip`);
 });
 
 $("clear").addEventListener("click", () => {
