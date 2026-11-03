@@ -74,10 +74,10 @@ cargo clippy --all-targets -- -D warnings
 cargo test
 cargo test -p mblint-core --features ts export_bindings && test -z "$(git status --porcelain web/src/report)"
 for board in data/boards/*/*.toml; do cargo run -q -p mblint -- lint --data-root data "${board#data/}"; done
-(cd web && npm ci && npm run build:wasm && npm test && npm run build)
+(cd web && npm ci && npm run build:wasm && npm test && npm run test:e2e && npm run build)
 ```
 
-最後の行には、`wasm32-unknown-unknown` ターゲット（`rustup target add wasm32-unknown-unknown`）、`Cargo.lock` にある版の `wasm-bindgen` コマンドライン（`cargo install wasm-bindgen-cli --version <版>`）、Node.js 26 が必要です。
+最後の行には、`wasm32-unknown-unknown` ターゲット（`rustup target add wasm32-unknown-unknown`）、`Cargo.lock` にある版の `wasm-bindgen` コマンドライン（`cargo install wasm-bindgen-cli --version <版>`）、Node.js 26 が必要です。`npm run test:e2e` は、ブラウザのレイアウトが要るテストを Chromium で実行します。Chromium は `npx playwright install chromium` で一度だけダウンロードします。
 
 ## リポジトリ構成
 

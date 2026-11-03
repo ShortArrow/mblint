@@ -74,10 +74,10 @@ cargo clippy --all-targets -- -D warnings
 cargo test
 cargo test -p mblint-core --features ts export_bindings && test -z "$(git status --porcelain web/src/report)"
 for board in data/boards/*/*.toml; do cargo run -q -p mblint -- lint --data-root data "${board#data/}"; done
-(cd web && npm ci && npm run build:wasm && npm test && npm run build)
+(cd web && npm ci && npm run build:wasm && npm test && npm run test:e2e && npm run build)
 ```
 
-The last line needs the `wasm32-unknown-unknown` target (`rustup target add wasm32-unknown-unknown`), the `wasm-bindgen` command line of the version in `Cargo.lock` (`cargo install wasm-bindgen-cli --version <version>`), and Node.js 26.
+The last line needs the `wasm32-unknown-unknown` target (`rustup target add wasm32-unknown-unknown`), the `wasm-bindgen` command line of the version in `Cargo.lock` (`cargo install wasm-bindgen-cli --version <version>`), and Node.js 26. `npm run test:e2e` runs the tests that need a browser's layout in Chromium, which `npx playwright install chromium` downloads once.
 
 ## Repository layout
 

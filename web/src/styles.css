@@ -417,17 +417,22 @@ body.resizing {
 }
 @media (hover: hover) and (min-width: 1101px) {
   .panel.sidebar {
-    transition: width 120ms ease;
+    transition:
+      width 120ms ease,
+      z-index 0s 120ms,
+      background-color 0s 120ms,
+      box-shadow 0s 120ms;
   }
   :root[data-left="off"] .picker,
   :root[data-report="off"] .report-panel {
     width: 40px;
     overflow: hidden;
+    z-index: 0;
   }
-  .picker {
+  :root[data-left="off"] .picker {
     justify-self: start;
   }
-  .report-panel {
+  :root[data-report="off"] .report-panel {
     justify-self: end;
   }
   :root[data-left="off"] .picker:hover,
@@ -435,7 +440,11 @@ body.resizing {
     z-index: 10;
     background: var(--panel);
     box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
-    transition-delay: 150ms;
+    transition:
+      width 120ms ease 150ms,
+      z-index 0s,
+      background-color 0s 150ms,
+      box-shadow 0s 150ms;
   }
   :root[data-left="off"] .picker:hover {
     width: var(--left-w, 230px);
@@ -446,6 +455,13 @@ body.resizing {
   :root[data-left="off"] .picker:hover > .full,
   :root[data-report="off"] .report-panel:hover > .full {
     display: flex;
+  }
+  :root[data-left="off"] .picker:hover > .full {
+    min-width: var(--left-w, 230px);
+  }
+  :root[data-report="off"] .report-panel:hover > .full {
+    min-width: var(--right-w, 280px);
+    align-self: flex-end;
   }
   :root[data-left="off"] .picker:hover > .rail,
   :root[data-report="off"] .report-panel:hover > .rail {
