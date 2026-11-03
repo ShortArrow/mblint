@@ -515,7 +515,11 @@ body.resizing {
   color: var(--muted);
   cursor: pointer;
 }
-.tool.new:hover,
+.tool.new:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.tool.new:not(:disabled):hover,
 .new-menu[open] > .tool.new {
   color: var(--accent);
   background: var(--panel);
