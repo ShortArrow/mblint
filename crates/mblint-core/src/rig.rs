@@ -11,6 +11,7 @@ use crate::parse::ParseError;
 
 /// A build as declared in `rigs/<name>.toml`. Paths are relative to the data root.
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 pub struct Rig {
     pub schema_version: String,
     pub name: String,

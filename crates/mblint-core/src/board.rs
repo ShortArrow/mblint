@@ -14,6 +14,7 @@ use crate::protocol::Protocol;
 /// Nodes are keyed by their id, which contains no `.`; every non-root node names its upstream
 /// node in `parent`.
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 pub struct Board {
     pub schema_version: String,
     pub vendor: String,
@@ -37,6 +38,7 @@ impl Board {
 }
 
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 #[serde(tag = "type", rename_all = "snake_case")]
 pub enum Node {
     Root(Root),
@@ -60,6 +62,7 @@ impl Node {
 
 /// A resource provider that supplies a fixed number of lanes to its children.
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 pub struct Root {
     pub bus: String,
     pub lanes: u32,
@@ -70,6 +73,7 @@ pub struct Root {
 ///
 /// Every subtype is evaluated the same way; `subtype` only describes the hardware.
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 pub struct Mux {
     pub parent: String,
     pub subtype: MuxSubtype,
@@ -92,6 +96,7 @@ impl Mux {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize)]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 #[serde(rename_all = "snake_case")]
 pub enum MuxSubtype {
     Bifurcation,
@@ -100,6 +105,7 @@ pub enum MuxSubtype {
 
 /// One configuration of a mux, applied while `when` holds.
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 pub struct Mode {
     pub when: Condition,
     /// Lanes each socket or bridge receives from the mux's parent, keyed by its id.
@@ -112,6 +118,7 @@ pub struct Mode {
 
 /// A test on one socket: either its occupancy or the protocol of the device in it.
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 #[serde(untagged)]
 pub enum Condition {
     State(StateCondition),
@@ -136,6 +143,7 @@ impl Condition {
 }
 
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 #[serde(deny_unknown_fields)]
 pub struct StateCondition {
     pub socket: String,
@@ -144,6 +152,7 @@ pub struct StateCondition {
 
 /// Holds only while the socket is occupied by a device running `protocol`.
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 #[serde(deny_unknown_fields)]
 pub struct ProtocolCondition {
     pub socket: String,
@@ -151,6 +160,7 @@ pub struct ProtocolCondition {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize)]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 #[serde(rename_all = "snake_case")]
 pub enum SocketState {
     Empty,
@@ -160,6 +170,7 @@ pub enum SocketState {
 /// A protocol bridge. Under a root it consumes `upstream_lanes`; under a mux it receives the
 /// lanes the selected mode allocates to it.
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 pub struct Bridge {
     pub parent: String,
     pub upstream_lanes: u32,
@@ -167,6 +178,7 @@ pub struct Bridge {
 
 /// An onboard controller with an IOMMU group of its own. Other fields are accepted unchecked.
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 pub struct Controller {
     pub iommu_group: u32,
 }
@@ -185,6 +197,7 @@ pub enum SocketCategory {
 
 /// A physical socket that devices are installed into, with the attributes of its category.
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 #[serde(tag = "category", rename_all = "snake_case")]
 pub enum Socket {
     PcieSlot(PcieSlot),
@@ -236,6 +249,7 @@ impl Socket {
 }
 
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 #[serde(deny_unknown_fields)]
 pub struct PcieSlot {
     pub parent: String,
@@ -253,6 +267,7 @@ pub struct PcieSlot {
 }
 
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 #[serde(deny_unknown_fields)]
 pub struct M2Slot {
     pub parent: String,
@@ -269,6 +284,7 @@ pub struct M2Slot {
 }
 
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 #[serde(deny_unknown_fields)]
 pub struct SataPort {
     pub parent: String,
@@ -279,6 +295,7 @@ pub struct SataPort {
 ///
 /// `parent` is `"unknown"` when the board's manual does not state the port's upstream.
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 pub struct UsbC {
     pub parent: String,
     /// DisplayPort Alt Mode lanes the port can drive; `None` if it has no DP Alt Mode.
@@ -287,6 +304,7 @@ pub struct UsbC {
 
 /// The DP Alt Mode lanes of a Type-C port that has DP Alt Mode, written as a count or `"unknown"`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize)]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 #[serde(untagged)]
 pub enum DpAltLanes {
     Count(u8),
@@ -296,6 +314,7 @@ pub enum DpAltLanes {
 
 /// The value `"unknown"`, for a board value its manual does not state.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize)]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 #[serde(rename_all = "snake_case")]
 pub enum Unknown {
     Unknown,
@@ -305,6 +324,7 @@ pub enum Unknown {
 ///
 /// `parent` is `"unknown"` when the board's manual does not state the port's upstream.
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 pub struct UsbA {
     pub parent: String,
 }
