@@ -2,6 +2,7 @@ import "./styles.css";
 import init from "./wasm/mblint_wasm";
 import { type Block, linkGbps, rootBars, scaleFor, socketBars } from "./bars";
 import { rigBundle, zip } from "./export";
+import { downloadName, edit } from "./editor";
 import { dataFiles } from "./files";
 import { addLoaded, isLoadableName, type Loaded, resolveRig, sameRig } from "./load";
 import { catalog, check, type Files, layout } from "./mblint";
@@ -47,6 +48,8 @@ let bindings: Record<string, string> = {};
 let selected: string | null = null;
 let notices: string[] = [];
 let scale = { gbps: 0, lane: 0 };
+let editing: string | null = null;
+let pendingEdit: ReturnType<typeof setTimeout> | undefined;
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 
@@ -74,6 +77,13 @@ function rigs(): [string, RigEntry][] {
 function isApplied(entry: RigEntry): boolean {
   const resolved = resolveRig(entry.board, entry.bindings, files);
   return board !== null && resolved.missing.length === 0 && sameRig(resolved, { board, bindings });
+}
+
+/** The list item `item` with the control that opens the file at `path` in the editor. */
+function editable(item: string, path: string): string {
+  return `<div class="item">${item}<button type="button" class="tool edit ${path === editing ? "selected" : ""}" data-edit="${escape(path)}" title="Edit ${escape(downloadName(path))}">
+    <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M10.5 2.5l3 3-8 8h-3v-3zM9 4l3 3" /></svg>
+  </button></div>`;
 }
 
 function colour(path: string): string {
@@ -210,27 +220,42 @@ function render(): void {
   board ??= boards()[0]?.[0] ?? null;
 
   $("boards").innerHTML = boards()
-    .map(([path, entry]) => `<button type="button" class="board-item ${path === board ? "selected" : ""}" data-board="${escape(path)}">
+    .map(([path, entry]) =>
+      editable(
+        `<button type="button" class="board-item ${path === board ? "selected" : ""}" data-board="${escape(path)}">
           <small>${escape(entry.vendor)}${path.startsWith("local/") ? " · loaded" : ""}</small><b>${escape(entry.model)}</b>
-        </button>`)
+        </button>`,
+        path,
+      ),
+    )
     .join("");
 
   const parts = devices();
   $("parts").innerHTML = parts.length
     ? parts
-        .map(([path, device]) => `<button type="button" class="part ${selected === path ? "selected" : ""}" draggable="true" data-part="${escape(path)}">
+        .map(([path, device]) =>
+          editable(
+            `<button type="button" class="part ${selected === path ? "selected" : ""}" draggable="true" data-part="${escape(path)}">
           <span class="chip" style="background:${colour(path)}"></span>
           <span><b>${escape(device.name)}</b><small class="mono">${escape(interfaceText(device))}${path.startsWith("local/") ? " · loaded" : ""}</small></span>
-        </button>`)
+        </button>`,
+            path,
+          ),
+        )
         .join("")
     : `<p class="empty">No parts yet. Load device TOML files to add some.</p>`;
 
   const rigList = rigs();
   $("rigs").innerHTML = rigList.length
     ? rigList
-        .map(([path, entry]) => `<button type="button" class="board-item ${isApplied(entry) ? "selected" : ""}" data-rig="${escape(path)}">
+        .map(([path, entry]) =>
+          editable(
+            `<button type="button" class="board-item ${isApplied(entry) ? "selected" : ""}" data-rig="${escape(path)}">
           <small>${escape(path.slice(path.lastIndexOf("/") + 1))}</small><b>${escape(entry.name)}</b>
-        </button>`)
+        </button>`,
+            path,
+          ),
+        )
         .join("")
     : `<p class="empty">No rigs yet. Load rig TOML files to add some.</p>`;
 
@@ -280,7 +305,8 @@ async function load(fileList: FileList | File[]): Promise<void> {
       applyRig(name, entry);
     }
   }
-  render();
+  if (loaded.some(({ name }) => `local/${name}` === editing)) openEditor(editing);
+  else render();
 }
 
 /** Chooses the board of the rig in the file `name` and installs its bindings, noting the paths no file supplies. */
@@ -298,6 +324,47 @@ function chooseBoard(path: string): void {
   bindings = {};
   notices = [];
   render();
+}
+
+/** Opens the file at `path` in the editor, or closes the editor when `path` is null. */
+function openEditor(path: string | null): void {
+  clearTimeout(pendingEdit);
+  editing = path;
+  $("editor").hidden = path === null;
+  $("editor-path").textContent = path ?? "";
+  $<HTMLTextAreaElement>("editor-text").value = path === null ? "" : (files[path] ?? "");
+  showRefusal(null);
+  render();
+}
+
+/** Shows why the editor's text is not taken, or hides the reason when `reason` is null. */
+function showRefusal(reason: string | null): void {
+  const error = $("editor-error");
+  error.hidden = reason === null;
+  error.textContent = reason ?? "";
+}
+
+/** Takes the editor's text as the file being edited and evaluates it, or says why the text is not taken. */
+function takeEdit(): void {
+  if (editing === null) return;
+  const result = edit(files, editing, $<HTMLTextAreaElement>("editor-text").value);
+  if ("refused" in result) {
+    showRefusal(result.refused);
+    return;
+  }
+  showRefusal(null);
+  files = result.files;
+  notices = [];
+  render();
+}
+
+/** Hands `blob` to the browser as a download named `name`. */
+function save(blob: Blob, name: string): void {
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = name;
+  link.click();
+  URL.revokeObjectURL(link.href);
 }
 
 type Flag = "labels" | "left" | "report";
@@ -401,6 +468,11 @@ document.addEventListener("click", (event) => {
     render();
     return;
   }
+  const open = target.closest<HTMLElement>("[data-edit]");
+  if (open) {
+    openEditor(open.dataset.edit === editing ? null : open.dataset.edit!);
+    return;
+  }
   const toggle = target.closest<HTMLElement>("[data-toggle]");
   if (toggle) {
     const name = toggle.dataset.toggle as Flag;
@@ -471,12 +543,18 @@ $("export").addEventListener("click", () => {
   if (board === null) return;
   const marked = rigs().find(([, entry]) => isApplied(entry));
   const name = (marked?.[1].name ?? "rig").replace(/[^\w.-]/g, "_");
-  const archive = zip(rigBundle(files, board, bindings, name));
-  const link = document.createElement("a");
-  link.href = URL.createObjectURL(new Blob([archive], { type: "application/zip" }));
-  link.download = `${name}.zip`;
-  link.click();
-  URL.revokeObjectURL(link.href);
+  save(new Blob([zip(rigBundle(files, board, bindings, name))], { type: "application/zip" }), `${name}.zip`);
+});
+
+$("editor-text").addEventListener("input", () => {
+  clearTimeout(pendingEdit);
+  pendingEdit = setTimeout(takeEdit, 250);
+});
+$("editor-close").addEventListener("click", () => openEditor(null));
+$("editor-download").addEventListener("click", () => {
+  clearTimeout(pendingEdit);
+  takeEdit();
+  if (editing !== null) save(new Blob([files[editing] ?? ""], { type: "application/toml" }), downloadName(editing));
 });
 
 $("clear").addEventListener("click", () => {

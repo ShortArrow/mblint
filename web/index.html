@@ -17,7 +17,7 @@
       <h1>mblint <span>web simulator</span></h1>
       <span class="spacer"></span>
       <span id="status" class="status"></span>
-      <label class="tool" title="Load board, device or rig TOML files">
+      <label class="tool button" title="Load board, device or rig TOML files">
         <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 10.5V2.5M4.5 6 8 2.5 11.5 6M2.5 10v3.5h11V10" /></svg>
         <span class="label">Load</span>
         <input id="file" type="file" accept=".toml" multiple hidden />
@@ -69,7 +69,22 @@
       </aside>
       <section class="panel stage">
         <h2>Lane bracket</h2>
-        <div id="bracket" class="bracket"></div>
+        <div class="stage-body">
+          <div id="bracket" class="bracket"></div>
+          <section id="editor" class="editor" aria-label="Editor" hidden>
+            <div class="editor-head">
+              <b id="editor-path" class="mono"></b>
+              <button id="editor-download" class="tool" type="button" title="Download the file">
+                <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2.5v8M4.5 7 8 10.5 11.5 7M2.5 10v3.5h11V10" /></svg>
+              </button>
+              <button id="editor-close" class="tool" type="button" title="Close the editor">
+                <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" /></svg>
+              </button>
+            </div>
+            <textarea id="editor-text" class="mono" spellcheck="false" autocomplete="off" aria-label="Text of the file"></textarea>
+            <pre id="editor-error" class="editor-error" role="status" hidden></pre>
+          </section>
+        </div>
         <p class="hint">Select a part, then a highlighted socket, or drag the part onto one. Drop TOML files anywhere to load them.</p>
       </section>
       <aside class="panel sidebar report-panel" aria-label="Report">

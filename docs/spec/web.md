@@ -82,7 +82,7 @@ The page builds a rig on a board and shows what the board makes of it.
 
 ### Files
 
-The page carries every file under `data/` as `files`, keyed by its path under `data/`. Files the user loads are added under `local/<file name>`, replacing a loaded file of the same name. A file whose name contains `/` or `\`, or is `.` or `..`, is not added, and the page says so. Loaded files stay in the browser and are sent nowhere.
+The page carries every file under `data/` as `files`, keyed by its path under `data/`. Files the user loads are added under `local/<file name>`, replacing a loaded file of the same name. A file whose name contains `/` or `\`, or is `.` or `..`, is not added, and the page says so. Loaded files stay in the browser and are sent nowhere. Text from a file, whether carried, loaded or edited, reaches the page only as text and is never interpreted as HTML.
 
 One control loads TOML files, chosen from disk or dropped anywhere on the page. `catalog` decides what each file is:
 
@@ -102,6 +102,10 @@ The parts are the devices in `files`, each shown with its name and its interface
 The rigs are the rig files in `files`, each shown with its name. A rig is applied when it is loaded or chosen from the rigs: its board is chosen and its bindings installed. A path it names that is not in `files` is taken from the loaded file whose name is the path's last segment, whenever that file was loaded; a path neither supplies is reported by name. A listed rig is marked while the rig being built has its board and bindings.
 
 The rig being built is exported as a zip archive that unpacks into a data root: the rig at `rigs/<name>.toml`, and each file it names at its path in `files`, except that a loaded board is placed at `boards/<file name>` and a loaded device at `devices/<file name>`, where the exported rig names them. The rig's name is that of the marked rig, or `rig` if none is marked, and names the archive. Its files are stored uncompressed.
+
+### The editor
+
+A control on each board, part and rig in the lists opens its file in an editor beside the bracket, as plain text. Each edit replaces the file's text in `files` under its path, and the page evaluates the change as it evaluates any other. A text longer than 1 MiB, or one that `catalog` cannot read, is not taken: the page says why, with the line at fault when there is one, and the bracket and the report keep what they last showed. An edited file is saved as a download of that file, or with the rig in the exported archive; otherwise its edits last only while the page is open.
 
 ### The bracket
 

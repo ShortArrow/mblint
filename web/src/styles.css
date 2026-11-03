@@ -321,10 +321,98 @@ body.resizing {
   flex-direction: column;
   overflow: hidden;
 }
-.stage > .bracket {
+.stage-body {
   flex: 1 1 0;
   min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+}
+.stage-body:has(> .editor:not([hidden])) {
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 42%);
+}
+.stage-body > .bracket {
+  min-height: 0;
   overflow: auto;
+}
+.editor:not([hidden]) {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 0;
+  padding: 10px 12px 12px;
+  border-left: 1px solid var(--line);
+}
+.editor-head {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.editor-head b {
+  flex: 1;
+  min-width: 0;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+.editor textarea {
+  flex: 1 1 0;
+  min-height: 240px;
+  resize: none;
+  font-size: 12px;
+  line-height: 18px;
+  color: inherit;
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 8px;
+  tab-size: 2;
+  white-space: pre;
+}
+.editor-error {
+  margin: 0;
+  max-height: 30%;
+  overflow: auto;
+  padding: 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  white-space: pre-wrap;
+  color: var(--err);
+  background: var(--panel-2);
+  border: 1px solid var(--err);
+}
+.item {
+  position: relative;
+}
+.item > .board-item,
+.item > .part {
+  padding-right: 36px;
+}
+.tool.edit {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  height: 26px;
+  min-width: 26px;
+  padding: 0 5px;
+  border-color: transparent;
+  background: transparent;
+  color: var(--muted);
+  opacity: 0;
+}
+.item:hover > .tool.edit,
+.tool.edit:focus-visible,
+.tool.edit.selected {
+  opacity: 1;
+}
+.tool.edit:hover,
+.tool.edit.selected {
+  color: var(--accent);
+  background: var(--panel);
+  border-color: var(--line);
+}
+@media (hover: none) {
+  .tool.edit {
+    opacity: 1;
+  }
 }
 @media (max-width: 1100px) {
   main {
@@ -370,8 +458,19 @@ body.resizing {
     margin: 0 8px 8px;
     display: block;
   }
-  .stage > .bracket {
+  .stage-body > .bracket {
     overflow-y: hidden;
+  }
+  .stage-body:has(> .editor:not([hidden])) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .editor:not([hidden]) {
+    border-left: none;
+    border-top: 1px solid var(--line);
+  }
+  .editor textarea {
+    flex: none;
+    height: 360px;
   }
 }
 
