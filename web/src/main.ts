@@ -9,7 +9,7 @@ import type { CatalogEntry } from "./report/CatalogEntry";
 import type { LayoutNode } from "./report/LayoutNode";
 import type { LinkWidth } from "./report/LinkWidth";
 import type { Report } from "./report/Report";
-import { rigToml } from "./rig";
+import { rigToml, takes } from "./rig";
 import { flag, flagValue, readPref, removePref, writePref } from "./prefs";
 import { dragWidth, type Side, storedWidth } from "./resize";
 import {
@@ -110,8 +110,7 @@ function socketHtml(id: string, socket: Socket, report: Report | null): string {
   ].join("");
   const finding = report?.diagnostics.find((d) => "socket" in d && d.socket === id);
   const link = report?.links[id];
-  const part = selected === null ? undefined : entries[selected];
-  const target = part?.kind === "device" && part.socket_category === socket.category;
+  const target = takes(entries, selected, socket.category);
   return `<div class="node socket ${socket.disabled ? "disabled" : ""} ${finding ? `flag-${finding.severity}` : ""} ${target ? "target" : ""}" data-socket="${escape(id)}">
     <div class="title"><b class="mono">${escape(id)}</b><span class="meta">${socket.category.replace("_", " ")}${socket.slot_index === null ? "" : ` · slot ${socket.slot_index}`}</span></div>
     ${
