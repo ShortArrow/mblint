@@ -84,13 +84,18 @@ bandwidth_requirement_gbps = 12.54
 `,
 };
 
-/**
- * A new file from `template`, named `new-<template>.toml`, or `new-<template>-<n>.toml` with the
- * smallest `n` from 2 when that name is taken under `local/` in `files`.
- */
+/** A new file from `template`, named as `freeName` names a new file of that kind. */
 export function newFile(files: Files, template: Template): Loaded {
+  return { name: freeName(files, template), contents: TEMPLATES[template] };
+}
+
+/**
+ * `new-<kind>.toml`, or `new-<kind>-<n>.toml` with the smallest `n` from 2 when that name is
+ * taken under `local/` in `files`.
+ */
+function freeName(files: Files, kind: string): string {
   const free = (name: string) => !(`local/${name}` in files);
-  let name = `new-${template}.toml`;
-  for (let n = 2; !free(name); n++) name = `new-${template}-${n}.toml`;
-  return { name, contents: TEMPLATES[template] };
+  let name = `new-${kind}.toml`;
+  for (let n = 2; !free(name); n++) name = `new-${kind}-${n}.toml`;
+  return name;
 }
