@@ -380,23 +380,39 @@ body.resizing {
   border: 1px solid var(--err);
 }
 .item {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 4px;
+  position: relative;
+}
+.item > .board-item,
+.item > .part {
+  padding-right: 36px;
 }
 .tool.edit {
-  height: 28px;
-  min-width: 28px;
-  padding: 0 6px;
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  height: 26px;
+  min-width: 26px;
+  padding: 0 5px;
   border-color: transparent;
   background: transparent;
   color: var(--muted);
+  opacity: 0;
+}
+.item:hover > .tool.edit,
+.tool.edit:focus-visible,
+.tool.edit.selected {
+  opacity: 1;
 }
 .tool.edit:hover,
 .tool.edit.selected {
   color: var(--accent);
+  background: var(--panel);
   border-color: var(--line);
+}
+@media (hover: none) {
+  .tool.edit {
+    opacity: 1;
+  }
 }
 @media (max-width: 1100px) {
   main {
