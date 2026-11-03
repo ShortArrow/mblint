@@ -13,6 +13,7 @@ import type { LinkWidth } from "./report/LinkWidth";
 import type { Report } from "./report/Report";
 import type { SocketCategory } from "./report/SocketCategory";
 import { rigToml, takes } from "./rig";
+import { newFile, type Template } from "./templates";
 import { flag, flagValue, readPref, removePref, writePref } from "./prefs";
 import { dragWidth, type Side, storedWidth } from "./resize";
 import {
@@ -491,11 +492,21 @@ matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {
 
 document.addEventListener("click", (event) => {
   const target = event.target as HTMLElement;
+  for (const menu of document.querySelectorAll(".new-menu[open]")) if (!menu.contains(target)) menu.removeAttribute("open");
   const remove = target.closest<HTMLElement>("[data-remove]");
   if (remove) {
     const { [remove.dataset.remove!]: _, ...rest } = bindings;
     bindings = rest;
     render();
+    return;
+  }
+  const create = target.closest<HTMLElement>("[data-new]");
+  if (create) {
+    create.closest("details")?.removeAttribute("open");
+    const file = newFile(files, create.dataset.new as Template);
+    notices = [];
+    add([file]);
+    void openEditor(`local/${file.name}`);
     return;
   }
   const open = target.closest<HTMLElement>("[data-edit]");

@@ -499,6 +499,67 @@ body.resizing {
   padding: 12px 14px;
   border-bottom: 1px solid var(--line);
 }
+.panel h2:has(.new) {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-block: 6px;
+}
+.tool.new {
+  height: 26px;
+  min-width: 26px;
+  padding: 0 5px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+}
+.tool.new:hover,
+.new-menu[open] > .tool.new {
+  color: var(--accent);
+  background: var(--panel);
+  border-color: var(--line);
+}
+.new-menu {
+  position: relative;
+}
+.new-menu > summary {
+  list-style: none;
+}
+.new-menu > summary::-webkit-details-marker {
+  display: none;
+}
+.new-menu .menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 4px);
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  min-width: 140px;
+  padding: 4px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  box-shadow: var(--shadow);
+}
+.new-menu .menu button {
+  text-align: left;
+  text-transform: none;
+  letter-spacing: normal;
+  font-size: 13px;
+  color: var(--ink);
+  background: none;
+  border: 0;
+  padding: 6px 8px;
+  border-radius: 4px;
+}
+.new-menu .menu button:hover,
+.new-menu .menu button:focus-visible {
+  background: var(--panel-2);
+  color: var(--accent);
+}
 .hint {
   color: var(--muted);
   font-size: 12px;
