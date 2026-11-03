@@ -2,6 +2,7 @@ import "./styles.css";
 import init from "./wasm/mblint_wasm";
 import { type Block, linkGbps, rootBars, scaleFor, socketBars } from "./bars";
 import { rigBundle, zip } from "./export";
+import type { CodeEditor } from "./code";
 import { downloadName, edit } from "./editor";
 import { dataFiles } from "./files";
 import { addLoaded, isLoadableName, type Loaded, resolveRig, sameRig } from "./load";
@@ -50,6 +51,7 @@ let notices: string[] = [];
 let scale = { gbps: 0, lane: 0 };
 let editing: string | null = null;
 let pendingEdit: ReturnType<typeof setTimeout> | undefined;
+let code: CodeEditor | null = null;
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 
@@ -305,7 +307,7 @@ async function load(fileList: FileList | File[]): Promise<void> {
       applyRig(name, entry);
     }
   }
-  if (loaded.some(({ name }) => `local/${name}` === editing)) openEditor(editing);
+  if (loaded.some(({ name }) => `local/${name}` === editing)) void openEditor(editing);
   else render();
 }
 
@@ -326,13 +328,17 @@ function chooseBoard(path: string): void {
   render();
 }
 
-/** Opens the file at `path` in the editor, or closes the editor when `path` is null. */
-function openEditor(path: string | null): void {
+/** Opens the file at `path` in the editor, loading the editor the first time, or closes it when `path` is null. */
+async function openEditor(path: string | null): Promise<void> {
+  if (path !== null && code === null) {
+    const { codeEditor } = await import("./code");
+    code = codeEditor($("editor-text"), () => (editing === null ? null : (entries[editing]?.kind ?? null)), scheduleEdit);
+  }
   clearTimeout(pendingEdit);
   editing = path;
   $("editor").hidden = path === null;
   $("editor-path").textContent = path ?? "";
-  $<HTMLTextAreaElement>("editor-text").value = path === null ? "" : (files[path] ?? "");
+  code?.show(path === null ? "" : (files[path] ?? ""));
   showRefusal(null);
   render();
 }
@@ -342,12 +348,19 @@ function showRefusal(reason: string | null): void {
   const error = $("editor-error");
   error.hidden = reason === null;
   error.textContent = reason ?? "";
+  code?.mark(reason);
+}
+
+/** Takes the editor's text as the file being edited after a quarter of a second without another edit. */
+function scheduleEdit(): void {
+  clearTimeout(pendingEdit);
+  pendingEdit = setTimeout(takeEdit, 250);
 }
 
 /** Takes the editor's text as the file being edited and evaluates it, or says why the text is not taken. */
 function takeEdit(): void {
-  if (editing === null) return;
-  const result = edit(files, editing, $<HTMLTextAreaElement>("editor-text").value);
+  if (editing === null || code === null) return;
+  const result = edit(files, editing, code.text());
   if ("refused" in result) {
     showRefusal(result.refused);
     return;
@@ -470,7 +483,7 @@ document.addEventListener("click", (event) => {
   }
   const open = target.closest<HTMLElement>("[data-edit]");
   if (open) {
-    openEditor(open.dataset.edit === editing ? null : open.dataset.edit!);
+    void openEditor(open.dataset.edit === editing ? null : open.dataset.edit!);
     return;
   }
   const toggle = target.closest<HTMLElement>("[data-toggle]");
@@ -546,11 +559,7 @@ $("export").addEventListener("click", () => {
   save(new Blob([zip(rigBundle(files, board, bindings, name))], { type: "application/zip" }), `${name}.zip`);
 });
 
-$("editor-text").addEventListener("input", () => {
-  clearTimeout(pendingEdit);
-  pendingEdit = setTimeout(takeEdit, 250);
-});
-$("editor-close").addEventListener("click", () => openEditor(null));
+$("editor-close").addEventListener("click", () => void openEditor(null));
 $("editor-download").addEventListener("click", () => {
   clearTimeout(pendingEdit);
   takeEdit();

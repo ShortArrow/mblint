@@ -353,19 +353,25 @@ body.resizing {
   font-size: 12px;
   overflow-wrap: anywhere;
 }
-.editor textarea {
+.editor .code {
   flex: 1 1 0;
   min-height: 240px;
-  resize: none;
-  font-size: 12px;
-  line-height: 18px;
-  color: inherit;
-  background: var(--panel-2);
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  padding: 8px;
-  tab-size: 2;
-  white-space: pre;
+}
+.tok-propertyName {
+  color: var(--accent);
+}
+.tok-string,
+.tok-string2 {
+  color: var(--ok);
+}
+.tok-number,
+.tok-atom,
+.tok-bool {
+  color: var(--warn);
+}
+.tok-comment {
+  color: var(--muted);
+  font-style: italic;
 }
 .editor-error {
   margin: 0;
@@ -468,7 +474,7 @@ body.resizing {
     border-left: none;
     border-top: 1px solid var(--line);
   }
-  .editor textarea {
+  .editor .code {
     flex: none;
     height: 360px;
   }
