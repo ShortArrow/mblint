@@ -4,6 +4,7 @@ use std::collections::BTreeMap;
 use std::fmt;
 
 use serde::Deserialize;
+use toml_edit::{DocumentMut, Item, Value};
 
 use crate::board::Board;
 use crate::device::Device;
@@ -26,6 +27,62 @@ impl Rig {
     pub fn from_toml(source: &str) -> Result<Self, ParseError> {
         toml::from_str(source).map_err(ParseError::from_toml)
     }
+}
+
+/// `source`, a rig file, with `board` and `bindings` in place of the rig's, changing only the
+/// values that differ and keeping the rest of the text, its comments, order and layout included.
+pub fn rebind(
+    source: &str,
+    board: &str,
+    bindings: &BTreeMap<String, String>,
+) -> Result<String, ParseError> {
+    Rig::from_toml(source)?;
+    let mut document: DocumentMut = source
+        .parse()
+        .expect("a text that parses as a rig parses as a TOML document");
+    set_string(&mut document["board"], board);
+    if !document.contains_key("bindings") {
+        document["bindings"] = toml_edit::table();
+    }
+    let table = document["bindings"]
+        .as_table_like_mut()
+        .expect("a rig's bindings are a table");
+    let gone: Vec<String> = table
+        .iter()
+        .map(|(socket, _)| socket.to_string())
+        .filter(|socket| !bindings.contains_key(socket))
+        .collect();
+    let mut reshaped = !gone.is_empty();
+    for socket in gone {
+        table.remove(&socket);
+    }
+    for (socket, device) in bindings {
+        match table.get_mut(socket) {
+            Some(item) => set_string(item, device),
+            None => {
+                table.insert(socket, Item::Value(Value::from(device.as_str())));
+                reshaped = true;
+            }
+        }
+    }
+    if let Some(inline) = document["bindings"].as_inline_table_mut()
+        && reshaped
+    {
+        inline.fmt();
+    }
+    Ok(document.to_string())
+}
+
+/// Puts the string `text` in `item` unless it already holds it, keeping the comments around it.
+fn set_string(item: &mut Item, text: &str) {
+    if item.as_str() == Some(text) {
+        return;
+    }
+    let mut value = Value::from(text);
+    if let Some(old) = item.as_value() {
+        *value.decor_mut() = old.decor().clone();
+    }
+    *item = Item::Value(value);
 }
 
 /// A rig with its board and every bound device parsed.
