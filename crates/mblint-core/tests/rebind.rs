@@ -39,16 +39,22 @@ fn changes_a_value_in_place_keeping_its_comments() {
 }
 
 #[test]
-fn removes_a_binding_with_the_comments_on_its_line() {
+fn removes_a_binding_with_the_comment_on_its_line_keeping_those_above_it() {
     let fewer = bindings(&[("M2_1", "devices/ssd.toml")]);
 
-    let text = rebind(RIG, "boards/a.toml", &fewer).unwrap();
+    assert_eq!(
+        rebind(RIG, "boards/a.toml", &fewer).unwrap(),
+        RIG.replace("PCIE1 = \"devices/gpu.toml\" # the big one\n", ""),
+    );
+}
 
-    assert!(!text.contains("PCIE1"), "{text}");
-    assert!(!text.contains("the big one"), "{text}");
-    assert!(!text.contains("# graphics"), "{text}");
-    assert!(text.contains("# The workstation under the desk"), "{text}");
-    assert!(text.contains(r#"M2_1 = "devices/ssd.toml""#), "{text}");
+#[test]
+fn keeps_the_comments_above_the_last_binding_removed_at_the_end() {
+    let rig = "schema_version = \"2.0.0\"\nname = \"x\"\nboard = \"b.toml\"\n\n[bindings]\nPCIE1 = \"g.toml\"\n# storage\nM2_1 = \"s.toml\"\n";
+
+    let text = rebind(rig, "b.toml", &bindings(&[("PCIE1", "g.toml")])).unwrap();
+
+    assert_eq!(text, rig.replace("M2_1 = \"s.toml\"\n", ""));
 }
 
 #[test]
