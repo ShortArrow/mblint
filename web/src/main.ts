@@ -14,6 +14,7 @@ import type { Report } from "./report/Report";
 import type { SocketCategory } from "./report/SocketCategory";
 import { rigToml, takes } from "./rig";
 import { newFile, type Template } from "./templates";
+import { rootOf } from "./github";
 import { flag, flagValue, readPref, removePref, writePref } from "./prefs";
 import { dragWidth, type Side, storedWidth } from "./resize";
 import {
@@ -78,9 +79,9 @@ function rigs(): [string, RigEntry][] {
     .sort(([, a], [, b]) => a.name.localeCompare(b.name));
 }
 
-/** Whether the rig being built is the rig `entry` names, every path it names found. */
-function isApplied(entry: RigEntry): boolean {
-  const resolved = resolveRig(entry.board, entry.bindings, files);
+/** Whether the rig being built is the rig `entry` at `path` names, every path it names found. */
+function isApplied(path: string, entry: RigEntry): boolean {
+  const resolved = resolveRig(entry.board, entry.bindings, files, rootOf(path));
   return board !== null && resolved.missing.length === 0 && sameRig(resolved, { board, bindings });
 }
 
@@ -255,7 +256,7 @@ function render(): void {
     ? rigList
         .map(([path, entry]) =>
           editable(
-            `<button type="button" class="board-item ${isApplied(entry) ? "selected" : ""}" data-rig="${escape(path)}">
+            `<button type="button" class="board-item ${isApplied(path, entry) ? "selected" : ""}" data-rig="${escape(path)}">
           <small>${escape(path.slice(path.lastIndexOf("/") + 1))}</small><b>${escape(entry.name)}</b>
         </button>`,
             path,
@@ -312,16 +313,17 @@ function add(loaded: Loaded[]): void {
       board = `local/${name}`;
       bindings = {};
     } else if (entry.kind === "rig") {
-      applyRig(name, entry);
+      applyRig(`local/${name}`, entry);
     }
   }
   if (loaded.some(({ name }) => `local/${name}` === editing)) void openEditor(editing);
   else render();
 }
 
-/** Chooses the board of the rig in the file `name` and installs its bindings, noting the paths no file supplies. */
-function applyRig(name: string, entry: RigEntry): void {
-  const resolved = resolveRig(entry.board, entry.bindings, files);
+/** Chooses the board of the rig in the file at `path` and installs its bindings, noting the paths no file supplies. */
+function applyRig(path: string, entry: RigEntry): void {
+  const name = path.slice(path.lastIndexOf("/") + 1);
+  const resolved = resolveRig(entry.board, entry.bindings, files, rootOf(path));
   board = resolved.board;
   bindings = resolved.bindings;
   selected = null;
@@ -529,7 +531,7 @@ document.addEventListener("click", (event) => {
   if (rig) {
     const path = rig.dataset.rig!;
     notices = [];
-    applyRig(path.slice(path.lastIndexOf("/") + 1), entries[path] as RigEntry);
+    applyRig(path, entries[path] as RigEntry);
     render();
     return;
   }
@@ -582,7 +584,7 @@ $<HTMLInputElement>("file").addEventListener("change", (event) => {
 });
 $("export").addEventListener("click", () => {
   if (board === null) return;
-  const marked = rigs().find(([, entry]) => isApplied(entry));
+  const marked = rigs().find(([path, entry]) => isApplied(path, entry));
   const name = (marked?.[1].name ?? "rig").replace(/[^\w.-]/g, "_");
   save(new Blob([zip(rigBundle(files, board, bindings, name))], { type: "application/zip" }), `${name}.zip`);
 });
