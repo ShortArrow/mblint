@@ -22,6 +22,11 @@ export function catalog(files: Files): Record<string, CatalogEntry> {
   return wasm.catalog(files) as Record<string, CatalogEntry>;
 }
 
+/** `text`, a rig file, with `board` and `bindings` in place of the rig's, keeping the rest of the text; throws an `Error` when `text` is not a rig. */
+export function rebind(text: string, board: string, bindings: Record<string, string>): string {
+  return wasm.rebind(text, board, bindings);
+}
+
 /** The rig's board as the page draws it, keyed by node id; throws an `Error` naming a file that cannot be loaded. */
 export function layout(files: Files, rig: string): Record<string, LayoutNode> {
   return wasm.layout(files, rig) as Record<string, LayoutNode>;

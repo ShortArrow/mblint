@@ -2,7 +2,7 @@ import { readdirSync, readFileSync } from "node:fs";
 import { join, relative } from "node:path";
 import { beforeAll, describe, expect, it } from "vitest";
 import { initSync } from "./wasm/mblint_wasm";
-import { catalog, check, layout, lint, type Files } from "./mblint";
+import { catalog, check, layout, lint, rebind, type Files } from "./mblint";
 import { boardPaths } from "./files";
 
 const repo = join(import.meta.dirname, "../..");
@@ -70,5 +70,24 @@ describe("layout", () => {
 
     expect(slot?.kind).toBe("socket");
     expect(slot?.kind === "socket" && slot.device).toBe("devices/card.toml");
+  });
+});
+
+describe("rebind", () => {
+  it("sets a rig's board and bindings, keeping its comments", () => {
+    const rig = `# mine
+schema_version = "2.0.0"
+name = "x"
+board = "a.toml"
+
+[bindings]
+PCIE1 = "g.toml" # big
+`;
+
+    expect(rebind(rig, "b.toml", { PCIE1: "h.toml" })).toBe(rig.replace("a.toml", "b.toml").replace("g.toml", "h.toml"));
+  });
+
+  it("throws on a text that is not a rig", () => {
+    expect(() => rebind('vendor = "x"\n', "b.toml", {})).toThrow();
   });
 });

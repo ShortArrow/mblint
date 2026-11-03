@@ -7,7 +7,7 @@ use mblint_core::evaluate::evaluate;
 use mblint_core::layout::{self, LayoutNode};
 use mblint_core::lint::lint;
 use mblint_core::report::{LintReport, Report, lint_report, report};
-use mblint_core::rig::{LoadError, load_board, load_rig};
+use mblint_core::rig::{self, LoadError, load_board, load_rig};
 use serde::Serialize;
 use wasm_bindgen::prelude::*;
 
@@ -71,6 +71,15 @@ pub fn catalog(files: JsValue) -> Result<JsValue, JsError> {
 pub fn layout(files: JsValue, rig: &str) -> Result<JsValue, JsError> {
     let nodes = layout_files(&from_js(files)?, rig).map_err(|e| JsError::new(&e.to_string()))?;
     to_js(&nodes)
+}
+
+/// `rebind(text, board, bindings)`: `text` with `board` and `bindings` in place of the rig's, or a
+/// thrown `Error` saying why `text` is not a rig.
+#[wasm_bindgen]
+pub fn rebind(text: &str, board: &str, bindings: JsValue) -> Result<String, JsError> {
+    let bindings: BTreeMap<String, String> =
+        serde_wasm_bindgen::from_value(bindings).map_err(|e| JsError::new(&e.to_string()))?;
+    rig::rebind(text, board, &bindings).map_err(|e| JsError::new(&e.to_string()))
 }
 
 fn from_js(files: JsValue) -> Result<Files, JsError> {
