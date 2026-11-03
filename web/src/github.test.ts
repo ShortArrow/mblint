@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { fetchRoot, MAX_ROOT_FILES, parseAddress, rootOf } from "./github";
+import { fetchRoot, MAX_ROOT_FILES, parseAddress, rootOf, withRepository } from "./github";
 
 describe("parseAddress", () => {
   it("reads a repository's default branch", () => {
@@ -30,6 +30,18 @@ describe("rootOf", () => {
   it("is the repository a path was loaded from", () => {
     expect(rootOf("github/acme/rigs/rigs/home.toml")).toBe("github/acme/rigs/");
     expect(rootOf("local/rig.toml")).toBe("");
+  });
+});
+
+describe("withRepository", () => {
+  it("replaces the files loaded from the same repository before, keeping every other", () => {
+    const files = { "boards/b.toml": "b", "github/acme/rigs/old.toml": "old", "github/acme/other/x.toml": "x" };
+
+    expect(withRepository(files, "github/acme/rigs/", { "github/acme/rigs/new.toml": "new" })).toEqual({
+      "boards/b.toml": "b",
+      "github/acme/other/x.toml": "x",
+      "github/acme/rigs/new.toml": "new",
+    });
   });
 });
 

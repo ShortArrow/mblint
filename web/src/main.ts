@@ -14,7 +14,7 @@ import type { Report } from "./report/Report";
 import type { SocketCategory } from "./report/SocketCategory";
 import { rigToml, takes } from "./rig";
 import { newFile, type Template } from "./templates";
-import { rootOf } from "./github";
+import { fetchRoot, parseAddress, rootOf, withRepository } from "./github";
 import { flag, flagValue, readPref, removePref, writePref } from "./prefs";
 import { dragWidth, type Side, storedWidth } from "./resize";
 import {
@@ -320,6 +320,22 @@ function add(loaded: Loaded[]): void {
   else render();
 }
 
+/**
+ * Adds the files `loaded` from the repository whose prefix is `root` in place of those loaded from
+ * it before, applying its rig when it holds exactly one, and shows the change.
+ */
+function addRepository(root: string, loaded: Files, tooLong: string[]): void {
+  files = withRepository(files, root, loaded);
+  entries = catalog(files);
+  notices = tooLong.map((path) => `${path}: not loaded, as it is longer than 1 MiB`);
+  const own = Object.keys(loaded).map((path) => [path, entries[path]!] as const);
+  for (const [path, entry] of own) if (entry.kind === "invalid") notices.push(`${path}: ${entry.message}`);
+  const repositoryRigs = own.filter(([, entry]) => entry.kind === "rig");
+  if (repositoryRigs.length === 1) applyRig(repositoryRigs[0]![0], repositoryRigs[0]![1] as RigEntry);
+  if (editing?.startsWith(root)) void openEditor(editing in files ? editing : null);
+  else render();
+}
+
 /** Chooses the board of the rig in the file at `path` and installs its bindings, noting the paths no file supplies. */
 function applyRig(path: string, entry: RigEntry): void {
   const name = path.slice(path.lastIndexOf("/") + 1);
@@ -604,6 +620,45 @@ $("clear").addEventListener("click", () => {
 $("theme").addEventListener("click", (event) =>
   switchTheme(toggleTheme(document.documentElement.dataset.theme as Theme), event.currentTarget as HTMLElement),
 );
+const github = $<HTMLDialogElement>("github");
+$("github-open").addEventListener("click", () => {
+  $("github-error").hidden = true;
+  github.showModal();
+});
+github.addEventListener("click", (event) => {
+  if (event.target === github) github.close();
+});
+$("github-close").addEventListener("click", () => github.close());
+$<HTMLFormElement>("github-form").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const error = $("github-error");
+  const showError = (message: string) => {
+    error.textContent = message;
+    error.hidden = false;
+  };
+  const address = parseAddress($<HTMLInputElement>("github-address").value);
+  if (address === null) {
+    showError("Give the address of a repository on github.com, such as https://github.com/owner/repo.");
+    return;
+  }
+  const button = $<HTMLButtonElement>("github-load");
+  button.disabled = true;
+  error.hidden = true;
+  try {
+    const root = await fetchRoot(address, (url) => fetch(url));
+    if ("refused" in root) {
+      showError(root.refused);
+      return;
+    }
+    github.close();
+    addRepository(`github/${address.owner}/${address.repo}/`, root.files, root.tooLong);
+  } catch {
+    showError("GitHub could not be reached.");
+  } finally {
+    button.disabled = false;
+  }
+});
+
 const settings = $<HTMLDialogElement>("settings");
 $("settings-open").addEventListener("click", () => {
   const choice = themeChoice(storedTheme());

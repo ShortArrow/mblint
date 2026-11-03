@@ -31,6 +31,11 @@ export function rootOf(path: string): string {
   return /^github\/[^/]+\/[^/]+\//.exec(path)?.[0] ?? "";
 }
 
+/** `files` with `loaded`, the files of the repository whose prefix is `root`, in place of those loaded from it before. */
+export function withRepository(files: Files, root: string, loaded: Files): Files {
+  return { ...Object.fromEntries(Object.entries(files).filter(([path]) => !path.startsWith(root))), ...loaded };
+}
+
 /** Why GitHub's answer `response` gives nothing, or null when it is an answer. */
 function refusal(response: Response): string | null {
   if (response.ok) return null;
