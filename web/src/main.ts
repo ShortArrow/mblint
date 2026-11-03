@@ -52,6 +52,8 @@ let scale = { gbps: 0, lane: 0 };
 let editing: string | null = null;
 let pendingEdit: ReturnType<typeof setTimeout> | undefined;
 let code: CodeEditor | null = null;
+let loadingCode: Promise<CodeEditor> | null = null;
+let openings = 0;
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 
@@ -333,12 +335,22 @@ function chooseBoard(path: string): void {
   render();
 }
 
-/** Opens the file at `path` in the editor, loading the editor the first time, or closes it when `path` is null. */
+/** The editor, created once however often it is asked for while CodeMirror loads. */
+function loadCode(): Promise<CodeEditor> {
+  loadingCode ??= import("./code").then(({ codeEditor }) =>
+    codeEditor($("editor-text"), () => (editing === null ? null : (entries[editing]?.kind ?? null)), scheduleEdit),
+  );
+  return loadingCode;
+}
+
+/**
+ * Opens the file at `path` in the editor, loading the editor the first time, or closes it when
+ * `path` is null. Of the calls made while the editor loads, the last one decides what is open.
+ */
 async function openEditor(path: string | null): Promise<void> {
-  if (path !== null && code === null) {
-    const { codeEditor } = await import("./code");
-    code = codeEditor($("editor-text"), () => (editing === null ? null : (entries[editing]?.kind ?? null)), scheduleEdit);
-  }
+  const opening = ++openings;
+  if (path !== null && code === null) code = await loadCode();
+  if (opening !== openings) return;
   clearTimeout(pendingEdit);
   editing = path;
   $("editor").hidden = path === null;
