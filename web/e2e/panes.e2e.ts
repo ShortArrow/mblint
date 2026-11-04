@@ -3,14 +3,15 @@ import { expect, type Page, test } from "@playwright/test";
 const SIDES = { ".picker": ["#boards", "#parts", "#rigs"], ".report-panel": ["#report", "#links"] } as const;
 type Side = keyof typeof SIDES;
 
-/** The heights inside the padding of the lists of `side`, in CSS pixels. */
+/** The heights inside the border and padding of the lists of `side`, in CSS pixels. */
 async function heights(page: Page, side: Side): Promise<number[]> {
   return page.evaluate(
     (lists) =>
       lists.map((selector) => {
         const list = document.querySelector(selector)!;
         const style = getComputedStyle(list);
-        return Math.round(list.getBoundingClientRect().height - parseFloat(style.paddingTop) - parseFloat(style.paddingBottom));
+        const edges = ["borderTopWidth", "borderBottomWidth", "paddingTop", "paddingBottom"] as const;
+        return Math.round(edges.reduce((height, edge) => height - parseFloat(style[edge]), list.getBoundingClientRect().height));
       }),
     [...SIDES[side]],
   );

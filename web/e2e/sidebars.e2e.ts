@@ -128,20 +128,48 @@ for (const side of [".picker", ".report-panel"] as const) {
     expect(narrower.filter((frame) => frame.lists.some((height) => height > 0.5))).toEqual([]);
   });
 
-  test(`a collapsed ${side} draws no line between its icons`, async ({ page }) => {
+  test(`each list of an open ${side} lies in its own rounded inset, 8 pixels from the next and from the wide control below`, async ({ page }) => {
+    const layout = await page.locator(side).evaluate((sidebar) => {
+      const box = (element: Element) => element.getBoundingClientRect();
+      const headings = [...sidebar.querySelectorAll(":scope > .full > h2")];
+      const foot = sidebar.querySelector(":scope > .foot")!;
+      const last = headings.at(-1)!.nextElementSibling!;
+      return {
+        gaps: headings.slice(1).map((heading) => Math.round(box(heading).top - box(heading.previousElementSibling!).bottom)),
+        corners: headings.map((heading) => [
+          getComputedStyle(heading).borderTopLeftRadius,
+          getComputedStyle(heading.nextElementSibling!).borderBottomRightRadius,
+        ]),
+        footGap: Math.round(box(foot).top - box(last).bottom),
+        footWidth: Math.round(box(foot).width) - Math.round(box(headings[0]).width),
+      };
+    });
+
+    expect(layout.gaps.every((gap) => gap === 8)).toBe(true);
+    expect(layout.corners.flat().every((radius) => radius === "8px")).toBe(true);
+    expect(layout.footGap).toBe(8);
+    expect(layout.footWidth).toBe(0);
+  });
+
+  test(`a collapsed ${side} shrinks each inset to its icon and stretches the control over the height they leave`, async ({ page }) => {
     await toggle(page, side);
 
-    const lines = await page.locator(`${side} > .full > h2`).evaluateAll((headings) =>
-      headings.flatMap((heading) => {
-        const style = getComputedStyle(heading);
-        return [
-          [style.borderTopWidth, style.borderTopColor],
-          [style.borderBottomWidth, style.borderBottomColor],
-        ].filter(([width, color]) => width !== "0px" && !color.endsWith(", 0)") && color !== "transparent");
-      }),
-    );
+    const layout = await page.locator(side).evaluate((sidebar) => {
+      const box = (element: Element) => element.getBoundingClientRect();
+      const headings = [...sidebar.querySelectorAll(":scope > .full > h2")];
+      const foot = sidebar.querySelector(":scope > .foot")!;
+      return {
+        sizes: headings.map((heading) => [Math.round(box(heading).width), Math.round(box(heading).height)]),
+        gaps: headings.slice(1).map((heading, index) => Math.round(box(heading).top - box(headings[index]).bottom)),
+        footGap: Math.round(box(foot).top - box(headings.at(-1)!).bottom),
+        footEnd: Math.round(box(sidebar).bottom - box(foot).bottom),
+      };
+    });
 
-    expect(lines).toEqual([]);
+    expect(layout.sizes.every(([width, height]) => width === 40 && height === 40)).toBe(true);
+    expect(layout.gaps.every((gap) => gap === 8)).toBe(true);
+    expect(layout.footGap).toBe(8);
+    expect(layout.footEnd).toBe(0);
   });
 
   test(`an icon of a collapsed ${side} opens it`, async ({ page }) => {

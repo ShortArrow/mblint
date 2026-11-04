@@ -543,10 +543,11 @@ function listsOf(sidebar: HTMLElement): HTMLElement[] {
   return [...sidebar.querySelectorAll<HTMLElement>(":scope > .full > :not(h2)")];
 }
 
-/** The height of `element` inside its padding, in pixels. */
+/** The height of `element` inside its border and padding, in pixels. */
 function heightInside(element: HTMLElement): number {
   const style = getComputedStyle(element);
-  return element.getBoundingClientRect().height - parseFloat(style.paddingTop) - parseFloat(style.paddingBottom);
+  const edges = ["borderTopWidth", "borderBottomWidth", "paddingTop", "paddingBottom"] as const;
+  return edges.reduce((height, edge) => height - parseFloat(style[edge]), element.getBoundingClientRect().height);
 }
 
 /** Draws the lists of `sidebar` in proportion to `heights`, or as they start when `heights` is null, and stores them when `store` is set. */
@@ -560,7 +561,7 @@ function setHeights(sidebar: HTMLElement, heights: number[] | null, store: boole
 }
 
 /**
- * The heights inside the padding of the lists of `sidebar` as drawn, the last open list taking any height they leave
+ * The heights inside the border and padding of the lists of `sidebar` as drawn, the last open list taking any height they leave
  * empty, keeping the stored height of a collapsed list; and which lists are open.
  */
 function measureLists(sidebar: HTMLElement): { heights: number[]; open: boolean[] } {
@@ -569,7 +570,8 @@ function measureLists(sidebar: HTMLElement): { heights: number[]; open: boolean[
   const stored = storedHeights(readPref(heightsKey(sidebar.dataset.side as Side)), lists.length);
   const open = lists.map((list) => getComputedStyle(list).display !== "none");
   const heights = lists.map((list, index) => (open[index] ? heightInside(list) : (stored?.[index] ?? 2 * PANE_MIN)));
-  const drawn = [...full.children].reduce((sum, child) => sum + child.getBoundingClientRect().height, 0);
+  const shown = [...full.children].filter((child) => getComputedStyle(child).display !== "none");
+  const drawn = shown.at(-1)!.getBoundingClientRect().bottom - shown[0].getBoundingClientRect().top;
   const last = open.lastIndexOf(true);
   if (last >= 0) heights[last] += Math.max(0, full.clientHeight - drawn);
   return { heights, open };

@@ -12,8 +12,8 @@ async function fold(page: Page, name: Heading): Promise<void> {
 async function emptyHeight(page: Page): Promise<number> {
   return page.evaluate(() => {
     const full = document.querySelector(".picker > .full")!;
-    const children = [...full.children].filter((child) => getComputedStyle(child).display !== "none");
-    const filled = children.reduce((sum, child) => sum + child.getBoundingClientRect().height, 0);
+    const shown = [...full.children].filter((child) => getComputedStyle(child).display !== "none");
+    const filled = shown.at(-1)!.getBoundingClientRect().bottom - shown[0].getBoundingClientRect().top;
     return Math.round(full.clientHeight - filled);
   });
 }
