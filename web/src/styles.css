@@ -428,6 +428,37 @@ body.resizing {
     width: 40px;
     overflow: hidden;
     z-index: 0;
+    display: grid;
+    grid-template: minmax(0, 1fr) auto / 100%;
+  }
+  :root[data-left="off"] .picker > *,
+  :root[data-report="off"] .report-panel > * {
+    justify-self: start;
+  }
+  :root[data-report="off"] .report-panel > * {
+    justify-self: end;
+  }
+  :root[data-left="off"] .picker > .full,
+  :root[data-report="off"] .report-panel > .full,
+  :root[data-left="off"] .picker > .rail,
+  :root[data-report="off"] .report-panel > .rail {
+    grid-area: 1 / 1;
+    display: flex;
+    transition: visibility 0s 120ms;
+  }
+  :root[data-left="off"] .picker > .full,
+  :root[data-report="off"] .report-panel > .full {
+    visibility: hidden;
+  }
+  :root[data-left="off"] .picker > .full {
+    min-width: var(--left-w, 230px);
+  }
+  :root[data-report="off"] .report-panel > .full {
+    min-width: var(--right-w, 280px);
+  }
+  :root[data-left="off"] .picker > .rail,
+  :root[data-report="off"] .report-panel > .rail {
+    width: 40px;
   }
   :root[data-left="off"] .picker {
     justify-self: start;
@@ -454,18 +485,13 @@ body.resizing {
   }
   :root[data-left="off"] .picker:not(.held):hover > .full,
   :root[data-report="off"] .report-panel:not(.held):hover > .full {
-    display: flex;
-  }
-  :root[data-left="off"] .picker:not(.held):hover > .full {
-    min-width: var(--left-w, 230px);
-  }
-  :root[data-report="off"] .report-panel:not(.held):hover > .full {
-    min-width: var(--right-w, 280px);
-    align-self: flex-end;
+    visibility: visible;
+    transition: visibility 0s 270ms;
   }
   :root[data-left="off"] .picker:not(.held):hover > .rail,
   :root[data-report="off"] .report-panel:not(.held):hover > .rail {
-    display: none;
+    visibility: hidden;
+    transition: visibility 0s 270ms;
   }
 }
 @media (hover: none) {
