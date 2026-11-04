@@ -457,9 +457,18 @@ function save(blob: Blob, name: string): void {
   URL.revokeObjectURL(link.href);
 }
 
-type Flag = "labels" | "left" | "report";
+type List = "boards" | "parts" | "rigs";
+type Flag = "labels" | "left" | "report" | List;
 
-const FLAG_KEYS: Record<Flag, string> = { labels: LABELS_KEY, left: LEFT_KEY, report: REPORT_KEY };
+const LISTS: List[] = ["boards", "parts", "rigs"];
+const FLAG_KEYS: Record<Flag, string> = {
+  labels: LABELS_KEY,
+  left: LEFT_KEY,
+  report: REPORT_KEY,
+  boards: "mblint-boards",
+  parts: "mblint-parts",
+  rigs: "mblint-rigs",
+};
 
 /** Keeps `sidebar`, just collapsed under the pointer, from opening on hover until the pointer leaves it. */
 function holdCollapsed(sidebar: HTMLElement | null): void {
@@ -472,6 +481,12 @@ function holdCollapsed(sidebar: HTMLElement | null): void {
 function setFlag(name: Flag, on: boolean): void {
   document.documentElement.dataset[name] = flagValue(on);
   writePref(FLAG_KEYS[name], flagValue(on));
+}
+
+/** Shows the list `name` of the left sidebar open or collapsed, and tells the control in its heading. */
+function showList(name: List, open: boolean): void {
+  document.documentElement.dataset[name] = flagValue(open);
+  document.querySelector(`[data-fold="${name}"]`)?.setAttribute("aria-expanded", String(open));
 }
 
 const widthKey = (side: Side) => `mblint-${side}-width`;
@@ -547,6 +562,7 @@ document.documentElement.dataset.theme = resolveTheme(storedTheme(), prefersDark
 document.documentElement.dataset.labels = flagValue(flag(readPref(LABELS_KEY), false));
 document.documentElement.dataset.left = flagValue(flag(readPref(LEFT_KEY), true));
 document.documentElement.dataset.report = flagValue(flag(readPref(REPORT_KEY), true));
+for (const name of LISTS) showList(name, flag(readPref(FLAG_KEYS[name]), true));
 for (const side of ["left", "right"] as const) {
   const stored = readPref(widthKey(side));
   if (stored !== null) setWidth(side, storedWidth(stored, DEFAULT_WIDTH[side]), false);
@@ -582,6 +598,14 @@ document.addEventListener("click", (event) => {
   const open = target.closest<HTMLElement>("[data-edit]");
   if (open) {
     void openEditor(open.dataset.edit === editing ? null : open.dataset.edit!);
+    return;
+  }
+  const fold = target.closest<HTMLElement>("[data-fold]");
+  if (fold) {
+    const name = fold.dataset.fold as List;
+    const open = document.documentElement.dataset[name] !== "on";
+    showList(name, open);
+    writePref(FLAG_KEYS[name], flagValue(open));
     return;
   }
   const toggle = target.closest<HTMLElement>("[data-toggle]");

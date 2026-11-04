@@ -310,6 +310,46 @@ body.resizing {
 .picker .list.rigs {
   max-height: 30%;
 }
+:root[data-boards="off"] #boards,
+:root[data-parts="off"] #parts,
+:root[data-rigs="off"] #rigs {
+  display: none;
+}
+@media (min-width: 1101px) {
+  :root[data-parts="off"] .picker .list {
+    flex: 1 1 0;
+    max-height: none;
+  }
+}
+.fold {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 26px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  cursor: pointer;
+}
+.fold-mark {
+  width: 12px;
+  height: 12px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  transition: transform 120ms ease;
+}
+.fold[aria-expanded="false"] .fold-mark {
+  transform: rotate(-90deg);
+}
+.picker h2:has(.fold[aria-expanded="false"]) {
+  border-bottom: 0;
+}
 .panel.stage {
   position: sticky;
   top: var(--header-h);
