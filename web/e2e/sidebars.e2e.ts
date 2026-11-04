@@ -180,11 +180,11 @@ for (const side of [".picker", ".report-panel"] as const) {
 
     const drawn = await page.locator(side).evaluate((sidebar) => {
       const style = getComputedStyle(sidebar);
-      return { width: sidebar.getBoundingClientRect().width, background: style.backgroundColor, shadow: style.boxShadow };
+      return { width: sidebar.getBoundingClientRect().width, image: style.backgroundImage, shadow: style.boxShadow };
     });
 
     expect(drawn.width).toBeGreaterThan(200);
-    expect(drawn.background).toBe("rgba(0, 0, 0, 0)");
+    expect(drawn.image).toMatch(side === ".picker" ? /^linear-gradient\(to right, .+ 48px, rgba\(0, 0, 0, 0\)\)$/ : /^linear-gradient\(to left, .+ 48px, rgba\(0, 0, 0, 0\)\)$/);
     expect(drawn.shadow).toBe("none");
   });
 

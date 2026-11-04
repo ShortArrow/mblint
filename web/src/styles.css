@@ -638,9 +638,11 @@ body.resizing:has(.splitter.active) {
   }
   :root[data-left="off"] .picker:not(.held):hover {
     width: var(--left-w, 230px);
+    background: linear-gradient(to right, var(--panel) 48px, transparent);
   }
   :root[data-report="off"] .report-panel:not(.held):hover {
     width: var(--right-w, 280px);
+    background: linear-gradient(to left, var(--panel) 48px, transparent);
   }
 }
 @media (hover: none) {
