@@ -608,6 +608,11 @@ document.addEventListener("click", (event) => {
     writePref(FLAG_KEYS[name], flagValue(open));
     return;
   }
+  const opener = target.closest<HTMLElement>("[data-open]");
+  if (opener) {
+    setFlag(opener.dataset.open as Flag, true);
+    return;
+  }
   const toggle = target.closest<HTMLElement>("[data-toggle]");
   if (toggle) {
     const name = toggle.dataset.toggle as Flag;
