@@ -1,6 +1,5 @@
 import "./styles.css";
 import init from "./wasm/mblint_wasm";
-import { type Block, linkGbps, rootBars, scaleFor, socketBars } from "./bars";
 import { rigBundle, zip } from "./export";
 import type { CodeEditor } from "./code";
 import { downloadName, edit } from "./editor";
@@ -10,7 +9,6 @@ import { addLoaded, isLoadableName, type Loaded, resolveRig, sameRig, toWrite } 
 import { catalog, check, type Files, layout, rebind } from "./mblint";
 import type { CatalogEntry } from "./report/CatalogEntry";
 import type { LayoutNode } from "./report/LayoutNode";
-import type { LinkWidth } from "./report/LinkWidth";
 import type { Report } from "./report/Report";
 import type { SocketCategory } from "./report/SocketCategory";
 import { rigToml, takes } from "./rig";
@@ -29,10 +27,9 @@ import {
   themeChoice,
   toggleTheme,
 } from "./theme";
-import { bracket, type TreeNode } from "./tree";
+import { bracketHtml, colour, diagnosticsHtml, editable, interfaceText, linksHtml, noticesHtml } from "./view";
 
 const RIG_PATH = "local/rig.toml";
-const BAR_PX = 112;
 const LABELS_KEY = "mblint-labels";
 const LEFT_KEY = "mblint-left";
 const REPORT_KEY = "mblint-report";
@@ -40,7 +37,6 @@ const DEFAULT_WIDTH: Record<Side, number> = { left: 230, right: 280 };
 
 type Device = Extract<CatalogEntry, { kind: "device" }>;
 type RigEntry = Extract<CatalogEntry, { kind: "rig" }>;
-type Socket = Extract<LayoutNode, { kind: "socket" }>;
 
 let files: Files = dataFiles(
   import.meta.glob<string>("../../data/**/*.toml", { query: "?raw", import: "default", eager: true }),
@@ -51,7 +47,6 @@ let board: string | null = null;
 let bindings: Record<string, string> = {};
 let selected: string | null = null;
 let notices: string[] = [];
-let scale = { gbps: 0, lane: 0 };
 let editing: string | null = null;
 let pendingEdit: ReturnType<typeof setTimeout> | undefined;
 let code: CodeEditor | null = null;
@@ -82,139 +77,12 @@ function isApplied(path: string, entry: RigEntry): boolean {
   return board !== null && resolved.missing.length === 0 && sameRig(resolved, { board, bindings });
 }
 
-/** The list item `item` with the control that opens the file at `path` in the editor. */
-function editable(item: string, path: string): string {
-  return `<div class="item">${item}<button type="button" class="tool edit ${path === editing ? "selected" : ""}" data-edit="${escape(path)}" title="Edit ${escape(downloadName(path))}">
-    <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M10.5 2.5l3 3-8 8h-3v-3zM9 4l3 3" /></svg>
-  </button></div>`;
-}
-
-function colour(path: string): string {
-  let hash = 0;
-  for (const c of path) hash = (hash * 31 + c.charCodeAt(0)) >>> 0;
-  return `hsl(${hash % 360} 62% 50%)`;
-}
-
-function linkText(link: LinkWidth): string {
-  return `Gen${link.generation} x${link.lanes}`;
-}
-
-function interfaceText(device: Device): string {
-  return device.interface ? `${device.interface.protocol.toUpperCase()} ${linkText(device.interface)}` : device.type;
-}
-
-function blocks(row: Block[], px: number, colourOf: (block: Block) => string): string {
-  return row
-    .map((block) => `<span class="blk ${block.mark ?? ""}" style="width:${block.width * px}px;background:${colourOf(block)}"></span>`)
-    .join("");
-}
-
-function barRow(label: string, bar: string, text: string): string {
-  return `<div class="bar-row"><span class="bar-label">${label}</span><span class="bar">${bar}</span><span class="bar-text mono">${escape(text)}</span></div>`;
-}
-
-function socketHtml(id: string, socket: Socket, report: Report | null): string {
-  const device = socket.device === null ? null : entries[socket.device];
-  const name = device?.kind === "device" ? device.name : socket.device;
-  const tint = socket.device === null ? "var(--supply)" : colour(socket.device);
-  const bars = socketBars(socket.needs, socket.offers);
-  const rows = [
-    bars.needs ? barRow("needs", blocks(bars.needs, scale.gbps, () => tint), linkText(socket.needs!)) : "",
-    bars.offers ? barRow("offers", blocks(bars.offers, scale.gbps, () => "var(--supply)"), linkText(socket.offers!)) : "",
-  ].join("");
-  const finding = report?.diagnostics.find((d) => "socket" in d && d.socket === id);
-  const link = report?.links[id];
-  const target = takes(entries, selected, socket.category);
-  return `<div class="node socket ${socket.disabled ? "disabled" : ""} ${finding ? `flag-${finding.severity}` : ""} ${target ? "target" : ""}" data-socket="${escape(id)}" data-category="${socket.category}">
-    <div class="title"><b class="mono">${escape(id)}</b><span class="meta">${socket.category.replace("_", " ")}${socket.slot_index === null ? "" : ` · slot ${socket.slot_index}`}</span></div>
-    ${
-      name === null
-        ? `<div class="device meta">${socket.disabled ? "disabled by a mux" : "empty"}</div>`
-        : `<div class="device"><span class="dot" style="background:${tint}"></span>${escape(name)}<button class="remove" type="button" data-remove="${escape(id)}" aria-label="Remove">✕</button></div>`
-    }
-    ${rows ? `<div class="bars">${rows}</div>` : ""}
-    ${link ? `<div class="meta mono">link ${linkText(link)} · ${link.gbps.toFixed(2)} Gbps</div>` : ""}
-  </div>`;
-}
-
-function nodeHtml(tree: TreeNode, report: Report | null): string {
-  const { id, node } = tree;
-  switch (node.kind) {
-    case "socket":
-      return socketHtml(id, node, report);
-    case "root": {
-      const bars = rootBars(node.demanded, node.supplied);
-      return `<div class="node root"><div class="title"><b class="mono">${escape(id)}</b><span class="meta">Gen${node.generation}</span></div>
-        <div class="bars">
-          ${barRow("needs", blocks(bars.needs, scale.lane, () => "var(--accent)"), `${node.demanded} lanes`)}
-          ${barRow("gives", blocks(bars.gives, scale.lane, () => "var(--supply)"), `${node.supplied} lanes`)}
-        </div></div>`;
-    }
-    case "mux":
-      return `<div class="node mux"><div class="title"><b class="mono">${escape(id)}</b><span class="meta">mux</span></div>
-        <div class="meta">${node.mode === null ? "no mode holds" : `mode ${node.mode + 1}`}</div></div>`;
-    case "bridge":
-      return `<div class="node"><div class="title"><b class="mono">${escape(id)}</b><span class="meta">bridge</span></div>
-        <div class="meta">demands ${node.lanes} lanes</div></div>`;
-    case "controller":
-      return "";
-  }
-}
-
-function branchHtml(tree: TreeNode, report: Report | null): string {
-  const live = tree.node.kind === "socket" && tree.node.device !== null;
-  const kids = tree.children.length
-    ? `<div class="kids">${tree.children.map((child) => branchHtml(child, report)).join("")}</div>`
-    : "";
-  return `<div class="branch ${live ? "live" : ""}"><span class="wire"></span>${nodeHtml(tree, report)}${kids}</div>`;
-}
-
-/** Pixels per Gbps and per lane that draw the longest socket bar and the longest root bar `BAR_PX` wide. */
-function boardScale(nodes: LayoutNode[]): { gbps: number; lane: number } {
-  const links = nodes.flatMap((node) => (node.kind === "socket" ? [node.needs, node.offers] : []));
-  const roots = nodes.flatMap((node) => (node.kind === "root" ? [node.demanded, node.supplied] : []));
-  return {
-    gbps: scaleFor(links.flatMap((link) => (link === null ? [] : [linkGbps(link)])), BAR_PX),
-    lane: scaleFor(roots, BAR_PX),
-  };
-}
-
-function renderBracket(nodes: Record<string, LayoutNode> | null, report: Report | null): void {
-  if (nodes === null) {
-    $("bracket").innerHTML = `<p class="empty">Load a board to start.</p>`;
-    return;
-  }
-  const { roots, unknown } = bracket(nodes);
-  scale = boardScale(Object.values(nodes));
-  const groups = roots.map(
-    (root) => `<div class="group"><div class="tree">${nodeHtml(root, report)}${
-      root.children.length ? `<div class="kids">${root.children.map((c) => branchHtml(c, report)).join("")}</div>` : ""
-    }</div></div>`,
-  );
-  if (unknown.length) {
-    groups.push(
-      `<div class="group"><p class="group-title">Upstream not stated</p><div class="loose">${unknown
-        .map((tree) => nodeHtml(tree, report))
-        .join("")}</div></div>`,
-    );
-  }
-  $("bracket").innerHTML = groups.join("");
-}
-
 function renderReport(report: Report | null): void {
   const status = $("status");
   status.className = `status ${report?.status ?? ""}`;
   status.textContent = report?.status ?? "";
-  $("report").innerHTML =
-    report === null || report.diagnostics.length === 0
-      ? `<p class="empty">No diagnostics.</p>`
-      : report.diagnostics
-          .map((d) => `<div class="diag"><span class="sev ${d.severity}">${d.severity}</span><span>${escape(d.message)}<code>${d.code}</code></span></div>`)
-          .join("");
-  const rows = Object.entries(report?.links ?? {})
-    .map(([socket, link]) => `<tr><td class="mono">${escape(socket)}</td><td class="mono">${linkText(link!)} · ${link!.gbps.toFixed(2)} Gbps</td></tr>`)
-    .join("");
-  $("links").innerHTML = rows ? `<table>${rows}</table>` : `<span class="meta">No links.</span>`;
+  $("report").innerHTML = diagnosticsHtml(report);
+  $("links").innerHTML = linksHtml(report);
 }
 
 function render(): void {
@@ -230,6 +98,7 @@ function render(): void {
           <small>${escape(entry.vendor)}${path.startsWith("local/") ? " · loaded" : ""}</small><b>${escape(entry.model)}</b>
         </button>`,
         path,
+        editing,
       ),
     )
     .join("");
@@ -244,6 +113,7 @@ function render(): void {
           <span><b>${escape(device.name)}</b><small class="mono">${escape(interfaceText(device))}${path.startsWith("local/") ? " · loaded" : ""}</small></span>
         </button>`,
             path,
+            editing,
           ),
         )
         .join("")
@@ -258,6 +128,7 @@ function render(): void {
           <small>${escape(path.slice(path.lastIndexOf("/") + 1))}</small><b>${escape(entry.name)}</b>
         </button>`,
             path,
+            editing,
           ),
         )
         .join("")
@@ -274,9 +145,9 @@ function render(): void {
       notices = [...notices, (error as Error).message];
     }
   }
-  renderBracket(nodes, report);
+  $("bracket").innerHTML = bracketHtml(nodes, { entries, report, selected });
   renderReport(report);
-  $("notices").innerHTML = notices.map((n) => `<div class="notice">${escape(n)}</div>`).join("");
+  $("notices").innerHTML = noticesHtml(notices);
 }
 
 function install(socket: string, part: string): void {
