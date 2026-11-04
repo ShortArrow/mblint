@@ -6,6 +6,9 @@ try {
   root.dataset.labels = localStorage.getItem("mblint-labels") === "on" ? "on" : "off";
   root.dataset.left = localStorage.getItem("mblint-left") === "off" ? "off" : "on";
   root.dataset.report = localStorage.getItem("mblint-report") === "off" ? "off" : "on";
+  for (const list of ["boards", "parts", "rigs"]) {
+    root.dataset[list] = localStorage.getItem(`mblint-${list}`) === "off" ? "off" : "on";
+  }
   for (const side of ["left", "right"]) {
     const width = Number(localStorage.getItem(`mblint-${side}-width`));
     if (width >= 180 && width <= 480) root.style.setProperty(`--${side}-w`, `${width}px`);
