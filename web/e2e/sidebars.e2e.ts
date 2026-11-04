@@ -64,44 +64,93 @@ for (const side of [".picker", ".report-panel"] as const) {
   });
 }
 
+type Frame = { width: number; icons: number[]; lists: number[] };
+
+/** Records, every frame until `stopFrames` is called, the width of `side`, the left edges of its heading icons and the heights of its lists. */
+async function recordFrames(page: Page, side: string): Promise<void> {
+  await page.evaluate((side) => {
+    const sidebar = document.querySelector<HTMLElement>(side)!;
+    const state = window as unknown as { frames: Frame[]; sampling: number };
+    state.frames = [];
+    const sample = () => {
+      state.frames.push({
+        width: sidebar.getBoundingClientRect().width,
+        icons: [...sidebar.querySelectorAll(".heading-icon")].map((icon) => Math.round(icon.getBoundingClientRect().left)),
+        lists: [...sidebar.querySelectorAll(".full > :not(h2)")].map((list) => list.getBoundingClientRect().height),
+      });
+      state.sampling = requestAnimationFrame(sample);
+    };
+    sample();
+  }, side);
+}
+
+/** Stops `recordFrames` and returns the frames it recorded. */
+async function stopFrames(page: Page): Promise<Frame[]> {
+  return page.evaluate(() => {
+    const state = window as unknown as { frames: Frame[]; sampling: number };
+    cancelAnimationFrame(state.sampling);
+    return state.frames;
+  });
+}
+
+/** Rests the pointer on `side` until it has opened, then moves it off until `side` has collapsed. */
+async function peek(page: Page, side: string): Promise<void> {
+  const box = (await page.locator(side).boundingBox())!;
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  await page.waitForTimeout(600);
+  await page.mouse.move(720, 450);
+  await page.waitForTimeout(600);
+}
+
 for (const side of [".picker", ".report-panel"] as const) {
-  test(`a collapsed ${side} shows its icons until it has opened and its contents until it has collapsed`, async ({ page }) => {
+  test(`the heading icons of a collapsed ${side} stay where they are while it opens and collapses`, async ({ page }) => {
     await toggle(page, side);
-    await page.evaluate((side) => {
-      const sidebar = document.querySelector<HTMLElement>(side)!;
-      const shown = (part: string) => {
-        const style = getComputedStyle(sidebar.querySelector(part)!);
-        return style.display !== "none" && style.visibility === "visible";
-      };
-      const state = window as unknown as { phase: string; faults: string[]; sampling: number };
-      state.faults = [];
-      const sample = () => {
-        const width = sidebar.getBoundingClientRect().width;
-        if (width > 41 && width < 200) {
-          const expected = state.phase === "opening" ? ".rail" : ".full";
-          const other = expected === ".rail" ? ".full" : ".rail";
-          if (!shown(expected) || shown(other)) state.faults.push(`${state.phase} at width ${width}`);
-        }
-        state.sampling = requestAnimationFrame(sample);
-      };
-      sample();
-    }, side);
-    const setPhase = (phase: string) => page.evaluate((phase) => ((window as unknown as { phase: string }).phase = phase), phase);
-    const box = (await page.locator(side).boundingBox())!;
+    await recordFrames(page, side);
 
-    await setPhase("opening");
-    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
-    await page.waitForTimeout(500);
-    await setPhase("collapsing");
+    await peek(page, side);
+
+    const frames = await stopFrames(page);
+    expect(frames[0].icons.length).toBeGreaterThan(1);
+    expect(new Set(frames.map((frame) => frame.icons.join()))).toEqual(new Set([frames[0].icons.join()]));
+  });
+
+  test(`a collapsed ${side} opens its lists only once it has widened, and closes them before it narrows`, async ({ page }) => {
+    await toggle(page, side);
+    await recordFrames(page, side);
+
+    await peek(page, side);
+
+    const frames = await stopFrames(page);
+    const open = Math.max(...frames.map((frame) => frame.width));
+    expect(open).toBeGreaterThan(200);
+    expect(frames.some((frame) => frame.lists.some((height) => height > 20))).toBe(true);
+    const narrower = frames.filter((frame) => frame.width < open - 0.5);
+    expect(narrower.filter((frame) => frame.lists.some((height) => height > 0.5))).toEqual([]);
+  });
+
+  test(`a collapsed ${side} draws no line between its icons`, async ({ page }) => {
+    await toggle(page, side);
+
+    const lines = await page.locator(`${side} > .full > h2`).evaluateAll((headings) =>
+      headings.flatMap((heading) => {
+        const style = getComputedStyle(heading);
+        return [
+          [style.borderTopWidth, style.borderTopColor],
+          [style.borderBottomWidth, style.borderBottomColor],
+        ].filter(([width, color]) => width !== "0px" && !color.endsWith(", 0)") && color !== "transparent");
+      }),
+    );
+
+    expect(lines).toEqual([]);
+  });
+
+  test(`an icon of a collapsed ${side} opens it`, async ({ page }) => {
+    await toggle(page, side);
+
+    await page.locator(`${side} .heading-icon`).first().click();
     await page.mouse.move(720, 450);
-    await page.waitForTimeout(500);
 
-    const faults = await page.evaluate(() => {
-      const state = window as unknown as { faults: string[]; sampling: number };
-      cancelAnimationFrame(state.sampling);
-      return state.faults;
-    });
-    expect(faults).toEqual([]);
+    await expect.poll(async () => (await page.locator(side).boundingBox())!.width).toBeGreaterThan(200);
   });
 }
 

@@ -5,7 +5,7 @@ type Heading = keyof typeof LISTS;
 
 /** Clicks the heading named `name` in the left sidebar. */
 async function fold(page: Page, name: Heading): Promise<void> {
-  await page.locator(".picker h2", { hasText: name }).getByRole("button", { name }).click();
+  await page.locator(".picker h2", { hasText: name }).getByRole("button", { name, exact: true }).click();
 }
 
 /** The height of the left sidebar's contents that its headings and lists leave empty, in CSS pixels. */
