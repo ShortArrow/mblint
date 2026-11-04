@@ -172,6 +172,22 @@ for (const side of [".picker", ".report-panel"] as const) {
     expect(layout.footEnd).toBe(0);
   });
 
+  test(`the bracket shows through the gaps of a ${side} opened by the pointer`, async ({ page }) => {
+    await toggle(page, side);
+    const box = (await page.locator(side).boundingBox())!;
+    await page.mouse.move(box.x + box.width / 2, box.y + 20);
+    await page.waitForTimeout(600);
+
+    const drawn = await page.locator(side).evaluate((sidebar) => {
+      const style = getComputedStyle(sidebar);
+      return { width: sidebar.getBoundingClientRect().width, image: style.backgroundImage, shadow: style.boxShadow };
+    });
+
+    expect(drawn.width).toBeGreaterThan(200);
+    expect(drawn.image).toMatch(side === ".picker" ? /^linear-gradient\(to right, .+ 48px, rgba\(0, 0, 0, 0\)\)$/ : /^linear-gradient\(to left, .+ 48px, rgba\(0, 0, 0, 0\)\)$/);
+    expect(drawn.shadow).toBe("none");
+  });
+
   test(`an icon of a collapsed ${side} opens it`, async ({ page }) => {
     await toggle(page, side);
 
