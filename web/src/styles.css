@@ -200,7 +200,8 @@ main {
   position: sticky;
   top: var(--header-h);
   height: calc(100vh - var(--header-h) - 8px);
-  background: var(--bg);
+  background: none;
+  border: 0;
   box-shadow: none;
   display: flex;
   flex-direction: column;
@@ -252,32 +253,47 @@ body.resizing {
   display: none;
 }
 .sidebar > .full {
-  flex: 1 1 0;
+  flex: 1 1 auto;
   min-height: 0;
   display: flex;
   flex-direction: column;
   overflow-y: auto;
 }
-.sidebar > .full > h2 {
+.panel.sidebar > .full > h2 {
   display: flex;
   align-items: center;
   gap: 4px;
-  padding: 6px 14px 6px 4px;
+  padding: 3px 14px 3px 3px;
+  border: 1px solid var(--line);
+  border-radius: 8px 8px 0 0;
+  background: var(--bg);
   white-space: nowrap;
 }
-.report-panel > .full > h2 {
-  padding: 6px 4px 6px 14px;
+.panel.sidebar > .full > h2:not(:first-child) {
+  margin-top: 8px;
+}
+.sidebar > .full > :not(h2) {
+  border: 1px solid var(--line);
+  border-top: 0;
+  border-radius: 0 0 8px 8px;
+  background: var(--bg);
+}
+.panel.report-panel > .full > h2 {
+  padding: 3px 3px 3px 14px;
+  justify-content: flex-end;
 }
 .report-panel > .full > h2 > .name {
   flex: 1;
+  min-width: 0;
+  overflow: hidden;
 }
 .sidebar > .full > h2 {
   position: relative;
 }
 .splitter {
   position: absolute;
-  inset: -5px 0 auto;
-  height: 9px;
+  inset: -9px 0 auto;
+  height: 8px;
   cursor: row-resize;
   touch-action: none;
   z-index: 1;
@@ -285,7 +301,7 @@ body.resizing {
 .splitter::after {
   content: "";
   position: absolute;
-  inset: 4px 0 auto;
+  inset: 3px 0 auto;
   height: 2px;
 }
 .splitter:hover::after,
@@ -305,6 +321,8 @@ body.resizing:has(.splitter.active) {
 }
 .heading-icon {
   flex: none;
+  width: 32px;
+  padding: 0;
   color: var(--muted);
 }
 :root[data-left="on"] .picker .heading-icon,
@@ -314,15 +332,17 @@ body.resizing:has(.splitter.active) {
 :where(.sidebar > .full > :not(h2)) {
   max-height: 100%;
 }
-.heading-icon,
-.sidebar > .foot {
+.heading-icon {
   border-color: transparent;
   background: none;
 }
 .sidebar > .foot {
-  flex: none;
-  margin: 6px;
-  align-self: flex-end;
+  flex: 0 0 auto;
+  margin: 8px 0 0;
+  align-self: stretch;
+  border-color: var(--line);
+  border-radius: 8px;
+  background: var(--bg);
   color: var(--muted);
 }
 .heading-icon:hover,
@@ -334,21 +354,16 @@ body.resizing:has(.splitter.active) {
 :root[data-report="off"] .report-panel {
   overflow: hidden;
 }
-:root[data-left="off"] .picker > .full {
-  min-width: var(--left-w, 230px);
-  align-self: flex-start;
+:root[data-left="off"] .picker > .full,
+:root[data-report="off"] .report-panel > .full,
+:root[data-left="off"] .picker > .full > h2,
+:root[data-report="off"] .report-panel > .full > h2 {
   overflow: hidden;
 }
-:root[data-report="off"] .report-panel > .full {
-  min-width: var(--right-w, 280px);
-  align-self: flex-end;
+:root[data-left="off"] .picker .fold,
+:root[data-report="off"] .report-panel .fold {
+  min-width: 0;
   overflow: hidden;
-}
-:root[data-left="off"] .picker > .foot {
-  align-self: flex-start;
-}
-:root[data-report="off"] .report-panel > .foot {
-  align-self: flex-end;
 }
 @media not ((hover: hover) and (min-width: 1101px)) {
   :root[data-left="off"] .picker > .full > :not(h2),
@@ -357,7 +372,15 @@ body.resizing:has(.splitter.active) {
   }
   :root[data-left="off"] .picker > .full > h2,
   :root[data-report="off"] .report-panel > .full > h2 {
-    border-color: transparent;
+    border-radius: 8px;
+  }
+  :root[data-left="off"] .picker > .full,
+  :root[data-report="off"] .report-panel > .full {
+    flex-grow: 0;
+  }
+  :root[data-left="off"] .picker > .foot,
+  :root[data-report="off"] .report-panel > .foot {
+    flex-grow: 1;
   }
 }
 :root[data-left="off"] .picker .chevron,
@@ -422,8 +445,8 @@ body.resizing:has(.splitter.active) {
 .fold[aria-expanded="false"] .fold-mark {
   transform: rotate(-90deg);
 }
-.picker h2:has(.fold[aria-expanded="false"]) {
-  border-bottom: 0;
+.panel.picker > .full > h2:has(.fold[aria-expanded="false"]) {
+  border-radius: 8px;
 }
 .panel.stage {
   position: sticky;
@@ -549,27 +572,39 @@ body.resizing:has(.splitter.active) {
       max-height 120ms ease,
       padding-block 120ms ease,
       flex-grow 120ms ease,
+      border-bottom-width 0s 120ms,
       visibility 0s 120ms;
+  }
+  :root[data-left="off"] .picker > .full,
+  :root[data-report="off"] .report-panel > .full,
+  :root[data-left="off"] .picker > .foot,
+  :root[data-report="off"] .report-panel > .foot {
+    transition: flex-grow 120ms ease;
+  }
+  :root[data-left="off"] .picker > .full > h2,
+  :root[data-report="off"] .report-panel > .full > h2 {
+    transition: border-radius 0s 120ms;
   }
   :root[data-left="off"] .picker:is(.held, :not(:hover)) > .full > :not(h2),
   :root[data-report="off"] .report-panel:is(.held, :not(:hover)) > .full > :not(h2) {
     max-height: 0;
     padding-block: 0;
     flex-grow: 0;
+    border-bottom-width: 0;
     visibility: hidden;
     overflow: hidden;
   }
-  :root[data-left="off"] .picker > .full > h2,
-  :root[data-report="off"] .report-panel > .full > h2 {
-    transition: border-color 0s 120ms;
-  }
   :root[data-left="off"] .picker:is(.held, :not(:hover)) > .full > h2,
   :root[data-report="off"] .report-panel:is(.held, :not(:hover)) > .full > h2 {
-    border-color: transparent;
+    border-radius: 8px;
   }
-  :root[data-left="off"] .picker:not(.held):hover > .full > h2,
-  :root[data-report="off"] .report-panel:not(.held):hover > .full > h2 {
-    transition: border-color 0s 270ms;
+  :root[data-left="off"] .picker:is(.held, :not(:hover)) > .full,
+  :root[data-report="off"] .report-panel:is(.held, :not(:hover)) > .full {
+    flex-grow: 0;
+  }
+  :root[data-left="off"] .picker:is(.held, :not(:hover)) > .foot,
+  :root[data-report="off"] .report-panel:is(.held, :not(:hover)) > .foot {
+    flex-grow: 1;
   }
   :root[data-left="off"] .picker:not(.held):hover > .full > :not(h2),
   :root[data-report="off"] .report-panel:not(.held):hover > .full > :not(h2) {
@@ -577,7 +612,18 @@ body.resizing:has(.splitter.active) {
       max-height 120ms ease 270ms,
       padding-block 120ms ease 270ms,
       flex-grow 120ms ease 270ms,
+      border-bottom-width 0s 270ms,
       visibility 0s 270ms;
+  }
+  :root[data-left="off"] .picker:not(.held):hover > .full,
+  :root[data-report="off"] .report-panel:not(.held):hover > .full,
+  :root[data-left="off"] .picker:not(.held):hover > .foot,
+  :root[data-report="off"] .report-panel:not(.held):hover > .foot {
+    transition: flex-grow 120ms ease 270ms;
+  }
+  :root[data-left="off"] .picker:not(.held):hover > .full > h2,
+  :root[data-report="off"] .report-panel:not(.held):hover > .full > h2 {
+    transition: border-radius 0s 270ms;
   }
   :root[data-left="off"] .picker {
     justify-self: start;
@@ -638,15 +684,13 @@ body.resizing:has(.splitter.active) {
   }
   :root[data-left="off"] .picker > .full,
   :root[data-report="off"] .report-panel > .full {
-    flex: 1;
     flex-direction: row;
-    min-width: 0;
-    align-self: auto;
+    gap: 8px;
   }
   :root[data-left="off"] .picker > .full > h2,
   :root[data-report="off"] .report-panel > .full > h2 {
-    border: 0;
-    padding: 4px;
+    margin: 0;
+    padding: 3px;
   }
   :root[data-left="off"] .picker > .full > h2 > :not(.heading-icon),
   :root[data-report="off"] .report-panel > .full > h2 > :not(.heading-icon) {
@@ -654,7 +698,7 @@ body.resizing:has(.splitter.active) {
   }
   :root[data-left="off"] .picker > .foot,
   :root[data-report="off"] .report-panel > .foot {
-    align-self: center;
+    margin: 0 0 0 8px;
   }
   .picker .chevron,
   :root[data-report="off"] .report-panel .chevron {
@@ -1182,20 +1226,6 @@ dialog .address .button {
 dialog .address .button:disabled {
   cursor: progress;
   opacity: 0.6;
-}
-
-.sidebar.picker {
-  border-right: 1px solid var(--line);
-}
-.sidebar.report-panel {
-  border-left: 1px solid var(--line);
-}
-@media (max-width: 1100px) {
-  .sidebar.picker,
-  .sidebar.report-panel {
-    border-left: none;
-    border-right: none;
-  }
 }
 
 @media (max-width: 640px) {
