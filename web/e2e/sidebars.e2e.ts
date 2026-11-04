@@ -65,6 +65,47 @@ for (const side of [".picker", ".report-panel"] as const) {
 }
 
 for (const side of [".picker", ".report-panel"] as const) {
+  test(`a collapsed ${side} shows its icons until it has opened and its contents until it has collapsed`, async ({ page }) => {
+    await toggle(page, side);
+    await page.evaluate((side) => {
+      const sidebar = document.querySelector<HTMLElement>(side)!;
+      const shown = (part: string) => {
+        const style = getComputedStyle(sidebar.querySelector(part)!);
+        return style.display !== "none" && style.visibility === "visible";
+      };
+      const state = window as unknown as { phase: string; faults: string[]; sampling: number };
+      state.faults = [];
+      const sample = () => {
+        const width = sidebar.getBoundingClientRect().width;
+        if (width > 41 && width < 200) {
+          const expected = state.phase === "opening" ? ".rail" : ".full";
+          const other = expected === ".rail" ? ".full" : ".rail";
+          if (!shown(expected) || shown(other)) state.faults.push(`${state.phase} at width ${width}`);
+        }
+        state.sampling = requestAnimationFrame(sample);
+      };
+      sample();
+    }, side);
+    const setPhase = (phase: string) => page.evaluate((phase) => ((window as unknown as { phase: string }).phase = phase), phase);
+    const box = (await page.locator(side).boundingBox())!;
+
+    await setPhase("opening");
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    await page.waitForTimeout(500);
+    await setPhase("collapsing");
+    await page.mouse.move(720, 450);
+    await page.waitForTimeout(500);
+
+    const faults = await page.evaluate(() => {
+      const state = window as unknown as { faults: string[]; sampling: number };
+      cancelAnimationFrame(state.sampling);
+      return state.faults;
+    });
+    expect(faults).toEqual([]);
+  });
+}
+
+for (const side of [".picker", ".report-panel"] as const) {
   test(`a ${side} collapsed by its control stays collapsed under the pointer until the pointer leaves it`, async ({ page }) => {
     const width = async () => (await page.locator(side).boundingBox())!.width;
 
