@@ -323,6 +323,10 @@ body.resizing {
   :root[data-report="off"] .report-panel > .full > :not(h2) {
     display: none;
   }
+  :root[data-left="off"] .picker > .full > h2,
+  :root[data-report="off"] .report-panel > .full > h2 {
+    border-color: transparent;
+  }
 }
 :root[data-left="off"] .picker .chevron,
 :root[data-report="off"] .report-panel .chevron {
@@ -514,6 +518,18 @@ body.resizing {
     flex-grow: 0;
     visibility: hidden;
     overflow: hidden;
+  }
+  :root[data-left="off"] .picker > .full > h2,
+  :root[data-report="off"] .report-panel > .full > h2 {
+    transition: border-color 0s 120ms;
+  }
+  :root[data-left="off"] .picker:is(.held, :not(:hover)) > .full > h2,
+  :root[data-report="off"] .report-panel:is(.held, :not(:hover)) > .full > h2 {
+    border-color: transparent;
+  }
+  :root[data-left="off"] .picker:not(.held):hover > .full > h2,
+  :root[data-report="off"] .report-panel:not(.held):hover > .full > h2 {
+    transition: border-color 0s 270ms;
   }
   :root[data-left="off"] .picker:not(.held):hover > .full > :not(h2),
   :root[data-report="off"] .report-panel:not(.held):hover > .full > :not(h2) {

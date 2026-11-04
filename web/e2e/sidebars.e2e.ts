@@ -128,6 +128,22 @@ for (const side of [".picker", ".report-panel"] as const) {
     expect(narrower.filter((frame) => frame.lists.some((height) => height > 0.5))).toEqual([]);
   });
 
+  test(`a collapsed ${side} draws no line between its icons`, async ({ page }) => {
+    await toggle(page, side);
+
+    const lines = await page.locator(`${side} > .full > h2`).evaluateAll((headings) =>
+      headings.flatMap((heading) => {
+        const style = getComputedStyle(heading);
+        return [
+          [style.borderTopWidth, style.borderTopColor],
+          [style.borderBottomWidth, style.borderBottomColor],
+        ].filter(([width, color]) => width !== "0px" && !color.endsWith(", 0)") && color !== "transparent");
+      }),
+    );
+
+    expect(lines).toEqual([]);
+  });
+
   test(`an icon of a collapsed ${side} opens it`, async ({ page }) => {
     await toggle(page, side);
 
