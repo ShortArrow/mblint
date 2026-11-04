@@ -17,7 +17,7 @@ import { rigToml, takes } from "./rig";
 import { newFile, newRig, type Template } from "./templates";
 import { fetchRoot, parseAddress, rootOf, withRepository } from "./github";
 import { flag, flagValue, readPref, removePref, writePref } from "./prefs";
-import { dragWidth, type Side, storedWidth } from "./resize";
+import { dragWidth, moveBorder, PANE_MIN, type Side, storedHeights, storedWidth } from "./resize";
 import {
   applyTheme,
   coverRadius,
@@ -536,6 +536,82 @@ function resizable(handle: HTMLElement): void {
   });
 }
 
+const heightsKey = (side: Side) => `mblint-${side}-heights`;
+
+/** The lists of `sidebar`, in order. */
+function listsOf(sidebar: HTMLElement): HTMLElement[] {
+  return [...sidebar.querySelectorAll<HTMLElement>(":scope > .full > :not(h2)")];
+}
+
+/** The height of `element` inside its padding, in pixels. */
+function heightInside(element: HTMLElement): number {
+  const style = getComputedStyle(element);
+  return element.getBoundingClientRect().height - parseFloat(style.paddingTop) - parseFloat(style.paddingBottom);
+}
+
+/** Draws the lists of `sidebar` in proportion to `heights`, or as they start when `heights` is null, and stores them when `store` is set. */
+function setHeights(sidebar: HTMLElement, heights: number[] | null, store: boolean): void {
+  const key = heightsKey(sidebar.dataset.side as Side);
+  sidebar.classList.toggle("sized", heights !== null);
+  listsOf(sidebar).forEach((list, index) =>
+    heights === null ? list.style.removeProperty("--grow") : list.style.setProperty("--grow", String(heights[index])),
+  );
+  if (store) heights === null ? removePref(key) : writePref(key, JSON.stringify(heights));
+}
+
+/**
+ * The heights inside the padding of the lists of `sidebar` as drawn, the last open list taking any height they leave
+ * empty, keeping the stored height of a collapsed list; and which lists are open.
+ */
+function measureLists(sidebar: HTMLElement): { heights: number[]; open: boolean[] } {
+  const lists = listsOf(sidebar);
+  const full = sidebar.querySelector<HTMLElement>(":scope > .full")!;
+  const stored = storedHeights(readPref(heightsKey(sidebar.dataset.side as Side)), lists.length);
+  const open = lists.map((list) => getComputedStyle(list).display !== "none");
+  const heights = lists.map((list, index) => (open[index] ? heightInside(list) : (stored?.[index] ?? 2 * PANE_MIN)));
+  const drawn = [...full.children].reduce((sum, child) => sum + child.getBoundingClientRect().height, 0);
+  const last = open.lastIndexOf(true);
+  if (last >= 0) heights[last] += Math.max(0, full.clientHeight - drawn);
+  return { heights, open };
+}
+
+/** Lets the border `handle` move height between the lists around it by dragging, by the arrow keys, and back to the start by a double click. */
+function splittable(handle: HTMLElement): void {
+  const sidebar = handle.closest<HTMLElement>(".sidebar")!;
+  const border = [...sidebar.querySelectorAll(":scope > .full > h2")].indexOf(handle.parentElement!);
+  handle.addEventListener("pointerdown", (down) => {
+    down.preventDefault();
+    const start = measureLists(sidebar);
+    let heights: number[] | null = null;
+    const move = (event: PointerEvent) => {
+      heights = moveBorder(start.heights, start.open, border, event.clientY - down.clientY);
+      setHeights(sidebar, heights, false);
+    };
+    handle.setPointerCapture(down.pointerId);
+    handle.classList.add("active");
+    document.body.classList.add("resizing");
+    handle.addEventListener("pointermove", move);
+    handle.addEventListener(
+      "lostpointercapture",
+      () => {
+        handle.removeEventListener("pointermove", move);
+        handle.classList.remove("active");
+        document.body.classList.remove("resizing");
+        if (heights !== null) setHeights(sidebar, heights, true);
+      },
+      { once: true },
+    );
+  });
+  handle.addEventListener("keydown", (event) => {
+    const step = event.key === "ArrowUp" ? -16 : event.key === "ArrowDown" ? 16 : 0;
+    if (step === 0) return;
+    event.preventDefault();
+    const { heights, open } = measureLists(sidebar);
+    setHeights(sidebar, moveBorder(heights, open, border, step), true);
+  });
+  handle.addEventListener("dblclick", () => setHeights(sidebar, null, true));
+}
+
 /** Applies `choice`, revealing the new theme in a circle growing from `origin` when it changes. */
 function switchTheme(choice: ThemeChoice, origin: HTMLElement): void {
   const apply = () => applyTheme(choice);
@@ -568,6 +644,11 @@ for (const side of ["left", "right"] as const) {
   if (stored !== null) setWidth(side, storedWidth(stored, DEFAULT_WIDTH[side]), false);
 }
 document.querySelectorAll<HTMLElement>("[data-resize]").forEach(resizable);
+document.querySelectorAll<HTMLElement>(".sidebar[data-side]").forEach((sidebar) => {
+  const stored = storedHeights(readPref(heightsKey(sidebar.dataset.side as Side)), listsOf(sidebar).length);
+  if (stored !== null) setHeights(sidebar, stored, false);
+});
+document.querySelectorAll<HTMLElement>(".splitter").forEach(splittable);
 matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {
   if (themeChoice(storedTheme()) === "system") applyTheme("system");
 });
