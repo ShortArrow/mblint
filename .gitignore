@@ -4,6 +4,7 @@
 /web/dist/
 /web/src/wasm/
 /web/.wrangler/
+/web/.storybook/.wrangler/
 /web/test-results/
 /web/playwright-report/
 /web/storybook-static/
