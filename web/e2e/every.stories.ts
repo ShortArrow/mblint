@@ -1,14 +1,19 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { expect, test } from "@playwright/test";
 
-const index = JSON.parse(readFileSync(join(import.meta.dirname, "../storybook-static/index.json"), "utf8")) as {
+const built = join(import.meta.dirname, "../storybook-static");
+const index = JSON.parse(readFileSync(join(built, "index.json"), "utf8")) as {
   entries: Record<string, { id: string; type: string }>;
 };
 const stories = Object.values(index.entries).filter((entry) => entry.type === "story");
 
 test("the built Storybook holds stories", () => {
   expect(stories.length).toBeGreaterThan(0);
+});
+
+test("the built Storybook carries none of the page's response headers", () => {
+  expect(existsSync(join(built, "_headers"))).toBe(false);
 });
 
 for (const { id } of stories) {
