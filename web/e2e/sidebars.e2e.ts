@@ -64,9 +64,12 @@ for (const side of [".picker", ".report-panel"] as const) {
   });
 }
 
-type Frame = { width: number; icons: number[]; lists: number[] };
+type Frame = { width: number; icons: number[]; lists: number[]; footGap: number };
 
-/** Records, every frame until `stopFrames` is called, the width of `side`, the left edges of its heading icons and the heights of its lists. */
+/**
+ * Records, every frame until `stopFrames` is called, the width of `side`, the left edges of its heading icons, the heights
+ * of its lists and the gap between its last drawn inset and the control below.
+ */
 async function recordFrames(page: Page, side: string): Promise<void> {
   await page.evaluate((side) => {
     const sidebar = document.querySelector<HTMLElement>(side)!;
@@ -77,6 +80,14 @@ async function recordFrames(page: Page, side: string): Promise<void> {
         width: sidebar.getBoundingClientRect().width,
         icons: [...sidebar.querySelectorAll(".heading-icon")].map((icon) => Math.round(icon.getBoundingClientRect().left)),
         lists: [...sidebar.querySelectorAll(".full > :not(h2)")].map((list) => list.getBoundingClientRect().height),
+        footGap:
+          sidebar.querySelector(":scope > .foot")!.getBoundingClientRect().top -
+          Math.max(
+            ...[...sidebar.querySelectorAll(":scope > .full > *")]
+              .map((inset) => inset.getBoundingClientRect())
+              .filter((box) => box.height > 0)
+              .map((box) => box.bottom),
+          ),
       });
       state.sampling = requestAnimationFrame(sample);
     };
@@ -126,6 +137,32 @@ for (const side of [".picker", ".report-panel"] as const) {
     expect(frames.some((frame) => frame.lists.some((height) => height > 20))).toBe(true);
     const narrower = frames.filter((frame) => frame.width < open - 0.5);
     expect(narrower.filter((frame) => frame.lists.some((height) => height > 0.5))).toEqual([]);
+  });
+
+  test(`a collapsed ${side} keeps its control 8 pixels below its insets while it opens and collapses`, async ({ page }) => {
+    await toggle(page, side);
+    await recordFrames(page, side);
+
+    await peek(page, side);
+
+    const gaps = (await stopFrames(page)).map((frame) => Math.round(frame.footGap));
+    expect(gaps.filter((gap) => gap !== 8)).toEqual([]);
+  });
+
+  test(`a collapsed ${side} whose lists were resized keeps its control 8 pixels below its insets while it opens and collapses`, async ({ page }) => {
+    const box = (await page.locator(`${side} .splitter`).first().boundingBox())!;
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2 + 40);
+    await page.mouse.up();
+    await expect(page.locator(side)).toHaveClass(/sized/);
+    await toggle(page, side);
+    await recordFrames(page, side);
+
+    await peek(page, side);
+
+    const gaps = (await stopFrames(page)).map((frame) => Math.round(frame.footGap));
+    expect(gaps.filter((gap) => gap !== 8)).toEqual([]);
   });
 
   test(`each list of an open ${side} lies in its own rounded inset, 8 pixels from the next and from the wide control below`, async ({ page }) => {
