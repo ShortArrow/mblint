@@ -554,7 +554,19 @@ body.resizing:has(.splitter.active) {
   border-color: var(--line);
 }
 @media (hover: hover) and (min-width: 1101px) {
+  .picker .list {
+    max-height: 45cqh;
+  }
+  .picker .list.rigs {
+    max-height: 30cqh;
+  }
+  :where(.sidebar > .full > :not(h2)),
+  .sidebar.sized > .full > :not(h2),
+  :root[data-parts="off"] .picker:not(.sized) .list {
+    max-height: 100cqh;
+  }
   .panel.sidebar {
+    container-type: size;
     transition:
       width 120ms ease 120ms,
       z-index 0s 240ms;
@@ -569,7 +581,6 @@ body.resizing:has(.splitter.active) {
     transition:
       max-height 120ms ease,
       padding-block 120ms ease,
-      flex-grow 120ms ease,
       border-bottom-width 0s 120ms,
       visibility 0s 120ms;
   }
@@ -587,7 +598,6 @@ body.resizing:has(.splitter.active) {
   :root[data-report="off"] .report-panel:is(.held, :not(:hover)) > .full > :not(h2) {
     max-height: 0;
     padding-block: 0;
-    flex-grow: 0;
     border-bottom-width: 0;
     visibility: hidden;
     overflow: hidden;
@@ -609,7 +619,6 @@ body.resizing:has(.splitter.active) {
     transition:
       max-height 120ms ease 270ms,
       padding-block 120ms ease 270ms,
-      flex-grow 120ms ease 270ms,
       border-bottom-width 0s 270ms,
       visibility 0s 270ms;
   }
