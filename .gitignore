@@ -6,3 +6,4 @@
 /web/.wrangler/
 /web/test-results/
 /web/playwright-report/
+/web/storybook-static/

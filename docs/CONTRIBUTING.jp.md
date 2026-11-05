@@ -74,10 +74,12 @@ cargo clippy --all-targets -- -D warnings
 cargo test
 cargo test -p mblint-core --features ts export_bindings && test -z "$(git status --porcelain web/src/report)"
 for board in data/boards/*/*.toml; do cargo run -q -p mblint -- lint --data-root data "${board#data/}"; done
-(cd web && npm ci && npm run build:wasm && npm test && npm run test:e2e && npm run build)
+(cd web && npm ci && npm run build:wasm && npm test && npm run test:e2e && npm run build-storybook && npm run test:stories && npm run build)
 ```
 
-最後の行には、`wasm32-unknown-unknown` ターゲット（`rustup target add wasm32-unknown-unknown`）、`Cargo.lock` にある版の `wasm-bindgen` コマンドライン（`cargo install wasm-bindgen-cli --version <版>`）、Node.js 26 が必要です。`npm run test:e2e` は、ブラウザのレイアウトが要るテストを Chromium で実行します。Chromium は `npx playwright install chromium` で一度だけダウンロードします。
+最後の行には、`wasm32-unknown-unknown` ターゲット（`rustup target add wasm32-unknown-unknown`）、`Cargo.lock` にある版の `wasm-bindgen` コマンドライン（`cargo install wasm-bindgen-cli --version <版>`）、Node.js 26 が必要です。`npm run test:e2e` は、ブラウザのレイアウトが要るテストを Chromium で実行します。Chromium は `npx playwright install chromium` で一度だけダウンロードします。`npm run test:stories` は、`npm run build-storybook` でビルドした Storybook の story をすべて開き、何も描かない story や例外を投げる story があれば失敗します。
+
+`npm run storybook` は、Storybook を <http://localhost:6006> で開きます。トーナメント表のカードと枝とそのバー、レポート、インジケーターとトースト、エディタの色分けと補完と印、ヘッダーとサイドバーを、ページが描くのと同じコードで一つずつ描きます。トーナメント表とレポートの story は `web/src/view.ts` を通してデータから描き、ヘッダーとサイドバーの story は `web/index.html` のマークアップを使います。
 
 ## リポジトリ構成
 
