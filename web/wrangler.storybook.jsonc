@@ -3,5 +3,6 @@
   "name": "mblint-storybook",
   "compatibility_date": "2026-10-01",
   "assets": { "directory": "./storybook-static" },
+  "preview_urls": true,
   "routes": [{ "pattern": "storybook.mblint.shortarrow.jp", "zone_name": "shortarrow.jp", "custom_domain": true }],
 }
