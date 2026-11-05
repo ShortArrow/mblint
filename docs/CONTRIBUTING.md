@@ -79,7 +79,7 @@ for board in data/boards/*/*.toml; do cargo run -q -p mblint -- lint --data-root
 
 The last line needs the `wasm32-unknown-unknown` target (`rustup target add wasm32-unknown-unknown`), the `wasm-bindgen` command line of the version in `Cargo.lock` (`cargo install wasm-bindgen-cli --version <version>`), and Node.js 26. `npm run test:e2e` runs the tests that need a browser's layout in Chromium, which `npx playwright install chromium` downloads once. `npm run test:stories` opens every story of the Storybook that `npm run build-storybook` builds and fails on one that draws nothing or throws.
 
-`npm run storybook` serves the Storybook at <http://localhost:6006>: the cards and branches of the bracket with their bars, the report, the indicators and toasts, the editor's colours, completion and marks, and the header and the sidebars, each drawn by the code the page draws them with. A story of the bracket or the report draws from data through `web/src/view.ts`; one of the header or a sidebar takes its markup from `web/index.html`.
+`npm run storybook` serves the Storybook at <http://localhost:6006>: the cards and branches of the bracket with their bars, the report, the indicators and toasts, the editor's colours, completion and marks, and the header and the sidebars, each drawn by the code the page draws them with. A story of the bracket or the report draws from data through `web/src/view.ts`; one of the header or a sidebar takes its markup from `web/index.html`. Each story is drawn in the system's light or dark theme until the theme is picked in the toolbar.
 
 ## Repository layout
 
