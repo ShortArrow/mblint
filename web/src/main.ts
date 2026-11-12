@@ -240,7 +240,10 @@ function addRepository(root: string, loaded: Files, skipped: { path: string; rea
 /** Chooses the board of the rig in the file at `path` and installs its bindings, noting the paths no file supplies. */
 function applyRig(path: string, entry: RigEntry): void {
   const name = path.slice(path.lastIndexOf("/") + 1);
-  if (link !== null && path.startsWith(repositoryRoot(link.address))) showLink(path.slice(repositoryRoot(link.address).length));
+  if (link !== null) {
+    const root = repositoryRoot(link.address);
+    showLink(path.startsWith(root) ? path.slice(root.length) : null);
+  }
   const resolved = resolveRig(entry.board, entry.bindings, files, rootOf(path));
   board = resolved.board;
   bindings = resolved.bindings;

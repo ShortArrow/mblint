@@ -72,3 +72,15 @@ test("applying a rig of the folder adds it to the address, and choosing another 
 
   await expect.poll(() => query(page)).toEqual({ github: "acme/rigs" });
 });
+
+test("applying a rig from elsewhere removes the folder's rig from the address", async ({ page }) => {
+  await page.goto("/?github=acme/rigs");
+  await page.locator('[data-rig="github/acme/rigs/rigs/a.toml"]').click();
+  await expect.poll(() => query(page)).toEqual({ github: "acme/rigs", rig: "rigs/a.toml" });
+
+  await page.locator('[data-new="rig"]').click();
+  await page.locator("#editor-close").click();
+  await page.locator('[data-rig="local/new-rig.toml"]').click();
+
+  await expect.poll(() => query(page)).toEqual({ github: "acme/rigs" });
+});
