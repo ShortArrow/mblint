@@ -13,7 +13,7 @@ import type { Report } from "./report/Report";
 import type { SocketCategory } from "./report/SocketCategory";
 import { rigToml, takes } from "./rig";
 import { newFile, newRig, type Template } from "./templates";
-import { fetchRoot, parseAddress, rootOf, withRepository } from "./github";
+import { type Address, fetchRoot, parseAddress, readLink, rootOf, withRepository, writeLink } from "./github";
 import { flag, flagValue, readPref, removePref, writePref } from "./prefs";
 import { dragWidth, moveBorder, PANE_MIN, type Side, storedHeights, storedWidth } from "./resize";
 import {
@@ -52,6 +52,7 @@ let pendingEdit: ReturnType<typeof setTimeout> | undefined;
 let code: CodeEditor | null = null;
 let loadingCode: Promise<CodeEditor> | null = null;
 let openings = 0;
+let link: { address: Address; rig: string | null } | null = null;
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 
@@ -239,6 +240,10 @@ function addRepository(root: string, loaded: Files, skipped: { path: string; rea
 /** Chooses the board of the rig in the file at `path` and installs its bindings, noting the paths no file supplies. */
 function applyRig(path: string, entry: RigEntry): void {
   const name = path.slice(path.lastIndexOf("/") + 1);
+  if (link !== null) {
+    const root = repositoryRoot(link.address);
+    showLink(path.startsWith(root) ? path.slice(root.length) : null);
+  }
   const resolved = resolveRig(entry.board, entry.bindings, files, rootOf(path));
   board = resolved.board;
   bindings = resolved.bindings;
@@ -249,6 +254,7 @@ function applyRig(path: string, entry: RigEntry): void {
 function chooseBoard(path: string): void {
   if (path === board) return;
   settleEdit();
+  showLink(null);
   board = path;
   bindings = {};
   notices = [];
@@ -651,6 +657,7 @@ $("editor-download").addEventListener("click", () => {
 
 $("clear").addEventListener("click", () => {
   settleEdit();
+  showLink(null);
   bindings = {};
   notices = [];
   writeRig(false);
@@ -683,20 +690,57 @@ $<HTMLFormElement>("github-form").addEventListener("submit", async (event) => {
   const button = $<HTMLButtonElement>("github-load");
   button.disabled = true;
   error.hidden = true;
-  try {
-    const root = await fetchRoot(address, (url) => fetch(url));
-    if ("refused" in root) {
-      showError(root.refused);
-      return;
-    }
-    github.close();
-    addRepository(`github/${address.owner}/${address.repo}/`, root.files, root.skipped);
-  } catch {
-    showError("GitHub could not be reached.");
-  } finally {
-    button.disabled = false;
-  }
+  const refused = await loadFolder(address);
+  button.disabled = false;
+  if (refused === null) github.close();
+  else showError(refused);
 });
+
+/** The prefix under which the files of the repository holding the folder `at` are kept. */
+function repositoryRoot(at: Address): string {
+  return `github/${at.owner}/${at.repo}/`;
+}
+
+/** Names the loaded folder in the page's address, with the rig at `rig` from it unless null, adding no history entry. */
+function showLink(rig: string | null): void {
+  if (link === null) return;
+  link = { ...link, rig };
+  history.replaceState(history.state, "", writeLink(link.address, rig));
+}
+
+/** Loads the folder `at` from GitHub and names it in the page's address; why it was not loaded, or null. */
+async function loadFolder(at: Address): Promise<string | null> {
+  try {
+    const root = await fetchRoot(at, (url) => fetch(url));
+    if ("refused" in root) return root.refused;
+    link = { address: at, rig: null };
+    showLink(null);
+    addRepository(repositoryRoot(at), root.files, root.skipped);
+    return null;
+  } catch {
+    return "GitHub could not be reached.";
+  }
+}
+
+/** Loads the folder the page's address names and applies the rig it names from it, reporting what fails. */
+async function openLink(): Promise<void> {
+  const named = readLink(location.search);
+  if (named === null) return;
+  if (named.address === null) {
+    notices = [...notices, "The page's address names no folder of a repository on github.com."];
+    render();
+    return;
+  }
+  const refused = await loadFolder(named.address);
+  if (refused !== null) notices = [...notices, refused];
+  else if (named.rig !== null) {
+    const path = repositoryRoot(named.address) + named.rig;
+    const entry = entries[path];
+    if (entry?.kind === "rig") applyRig(path, entry);
+    else notices = [...notices, `${named.rig}: the folder holds no rig at this path`];
+  }
+  render();
+}
 
 const settings = $<HTMLDialogElement>("settings");
 $("settings-open").addEventListener("click", () => {
@@ -716,3 +760,4 @@ settings.addEventListener("change", (event) => {
 
 await init();
 render();
+await openLink();

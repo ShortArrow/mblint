@@ -26,6 +26,25 @@ export function parseAddress(text: string): Address | null {
   return { owner: owner!, repo: repo!.replace(/\.git$/, ""), ref: ref ?? null, path: (path ?? "").replace(/^\//, "") };
 }
 
+/**
+ * The folder and the rig the page's query `search` names with `github` and `rig`; `address` is null
+ * when `github` names no folder, and the whole is null when there is no `github`.
+ */
+export function readLink(search: string): { address: Address | null; rig: string | null } | null {
+  const query = new URLSearchParams(search);
+  const folder = query.get("github");
+  if (folder === null) return null;
+  return { address: parseAddress(`https://github.com/${folder}`), rig: query.get("rig") };
+}
+
+/** The page's query that names the folder `at` and, unless null, the rig at `rig` from it. */
+export function writeLink(at: Address, rig: string | null): string {
+  const keepSlashes = (text: string) => encodeURIComponent(text).replace(/%2F/g, "/");
+  const tree = at.ref === null ? "" : `/tree/${at.ref}${at.path === "" ? "" : `/${at.path}`}`;
+  const folder = `?github=${keepSlashes(`${at.owner}/${at.repo}${tree}`)}`;
+  return rig === null ? folder : `${folder}&rig=${keepSlashes(rig)}`;
+}
+
 /** The prefix `github/<owner>/<repo>/` of a path loaded from a repository, or `""` for any other path. */
 export function rootOf(path: string): string {
   return /^github\/[^/]+\/[^/]+\//.exec(path)?.[0] ?? "";

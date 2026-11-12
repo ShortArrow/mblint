@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { fetchRoot, MAX_ROOT_FILES, parseAddress, rootOf, withRepository } from "./github";
+import { fetchRoot, MAX_ROOT_FILES, parseAddress, readLink, rootOf, withRepository, writeLink } from "./github";
 
 describe("parseAddress", () => {
   it("reads a repository's default branch", () => {
@@ -144,5 +144,44 @@ describe("fetchRoot", () => {
     expect(await fetchRoot({ owner: "acme", repo: "rigs", ref: null, path: "" }, fetch)).toEqual({
       refused: expect.stringMatching(/too often/),
     });
+  });
+});
+
+describe("readLink", () => {
+  it("reads the folder and the rig a page's query names", () => {
+    expect(readLink("?github=acme/rigs/tree/v1/data&rig=rigs/b.toml")).toEqual({
+      address: { owner: "acme", repo: "rigs", ref: "v1", path: "data" },
+      rig: "rigs/b.toml",
+    });
+  });
+
+  it("reads a folder without a rig, the root of the default branch", () => {
+    expect(readLink("?github=acme/rigs")).toEqual({ address: { owner: "acme", repo: "rigs", ref: null, path: "" }, rig: null });
+  });
+
+  it("reads nothing from a query without github", () => {
+    expect(readLink("")).toBeNull();
+    expect(readLink("?rig=rigs/b.toml")).toBeNull();
+  });
+
+  it("reads the address github names as unreadable when it names no folder", () => {
+    expect(readLink("?github=acme")).toEqual({ address: null, rig: null });
+  });
+});
+
+describe("writeLink", () => {
+  it("names the folder and the rig, keeping their slashes", () => {
+    expect(writeLink({ owner: "acme", repo: "rigs", ref: "v1", path: "data" }, "rigs/b c.toml")).toBe(
+      "?github=acme/rigs/tree/v1/data&rig=rigs/b%20c.toml",
+    );
+  });
+
+  it("names the root of the default branch by the repository alone, and leaves out a rig that is not", () => {
+    expect(writeLink({ owner: "acme", repo: "rigs", ref: null, path: "" }, null)).toBe("?github=acme/rigs");
+  });
+
+  it("is read back as what it names", () => {
+    const address = { owner: "acme", repo: "rigs", ref: "main", path: "a/b" };
+    expect(readLink(writeLink(address, "rigs/x&y.toml"))).toEqual({ address, rig: "rigs/x&y.toml" });
   });
 });
