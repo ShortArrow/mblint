@@ -1,0 +1,19 @@
+{
+  "name": "mblint-marketplace",
+  "private": true,
+  "type": "module",
+  "license": "MIT OR Apache-2.0",
+  "scripts": {
+    "dev": "wrangler dev",
+    "test": "tsc --noEmit && vitest run"
+  },
+  "devDependencies": {
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.5",
+    "wrangler": "^4.156.0"
+  },
+  "allowScripts": {
+    "esbuild": false,
+    "workerd": false
+  }
+}

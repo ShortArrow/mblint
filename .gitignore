@@ -8,3 +8,5 @@
 /web/test-results/
 /web/playwright-report/
 /web/storybook-static/
+/marketplace/node_modules/
+/marketplace/.wrangler/
