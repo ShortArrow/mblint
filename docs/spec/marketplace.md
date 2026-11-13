@@ -16,4 +16,4 @@ What the marketplace shows is at most an hour behind GitHub. The marketplace doe
 
 ## Build
 
-The marketplace is a Cloudflare Worker. It asks GitHub's search API for the repositories with the topic, signed in with a token that only reads public data, and keeps the answer for an hour, so a visitor's browser never asks GitHub. When GitHub cannot be reached, it serves the last answer it kept, and says how old that is.
+The marketplace is a Cloudflare Worker. It asks GitHub's search API for the repositories with the topic, signed in with a token that only reads public data, and keeps the answer for an hour, so a visitor's browser never asks GitHub. When GitHub cannot be reached, it serves the last answer it kept, and says how old that is. When it cannot read the answer it keeps, it says that it is busy and to try again later, and does not ask GitHub.
