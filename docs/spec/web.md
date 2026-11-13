@@ -166,7 +166,7 @@ On a narrow screen the three are stacked in that order and the page scrolls thro
 
 The icon in the browser's tab is a green chip with pins on its four sides and a white dot at one corner.
 
-The controls in the header are icons, each named in its tooltip: loading files, loading files from GitHub, clearing the rig, exporting the rig, switching between the light and the dark theme, and a cog that opens the settings.
+The controls in the header are icons, each named in its tooltip: loading files, loading files from GitHub, clearing the rig, exporting the rig, a link to the marketplace at marketplace.mblint.shortarrow.jp, which lists rigs published on GitHub, switching between the light and the dark theme, and a cog that opens the settings.
 
 The settings choose the theme, which is the system's light or dark theme, light, or dark, and whether the header shows the names of its controls beside their icons. The browser remembers both. Switching or choosing a theme reveals it in a circle growing from the control, or at once when the system asks for reduced motion. The page is drawn in its theme from the first paint, and the sidebars and the bracket hold their places while the module loads, so that loading the page neither flashes another theme nor rearranges it. The page does not scroll sideways; a part of it that must scroll has a thin scrollbar in the theme's colours, shown while the pointer is over that part.
 
