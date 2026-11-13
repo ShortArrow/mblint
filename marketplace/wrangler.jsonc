@@ -1,0 +1,10 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "mblint-marketplace",
+  "main": "src/worker.ts",
+  "compatibility_date": "2026-10-01",
+  "preview_urls": true,
+  "previews": {},
+  "kv_namespaces": [{ "binding": "LISTING" }],
+  "routes": [{ "pattern": "marketplace.mblint.shortarrow.jp", "zone_name": "shortarrow.jp", "custom_domain": true }],
+}
