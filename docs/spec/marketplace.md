@@ -25,7 +25,7 @@ The page has a section, "Publish your rig", listing the steps:
 
 ## Look
 
-The page has a header like the simulator's, naming the marketplace, and shows each repository as a card. It uses the simulator's colours, and its typefaces, Inter and JetBrains Mono, from Google Fonts as the simulator does. It follows the system's light or dark theme; having no script, it offers no switch between them. It loads nothing from the simulator's site, and does not scroll sideways, however long a repository's name or description.
+The page has a header like the simulator's, naming the marketplace and linking back to the simulator at mblint.shortarrow.jp, and shows each repository as a card. It uses the simulator's colours, and its typefaces, Inter and JetBrains Mono, from Google Fonts as the simulator does. It follows the system's light or dark theme; having no script, it offers no switch between them. It loads nothing from the simulator's site, and does not scroll sideways, however long a repository's name or description.
 
 ## Build
 
