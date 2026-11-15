@@ -199,11 +199,15 @@ async function load(fileList: FileList | File[]): Promise<void> {
   );
   if (chosen.length === 0) return;
   notices = refused.map((file) => `${file.name}: not loaded, as its name is not a plain file name`);
-  add(loaded);
+  add(loaded, true);
 }
 
-/** Adds `loaded` under `local/`, each file taking the effect of its kind, and shows the change. */
-function add(loaded: Loaded[]): void {
+/**
+ * Adds `loaded` under `local/`, each file taking the effect of its kind, and shows the change,
+ * offering the steps for publishing a rig when `offer` is set and a rig was applied.
+ */
+function add(loaded: Loaded[], offer = false): void {
+  let applied = false;
   files = addLoaded(files, loaded);
   entries = catalog(files);
   for (const { name } of loaded) {
@@ -215,9 +219,10 @@ function add(loaded: Loaded[]): void {
       bindings = {};
     } else if (entry.kind === "rig") {
       applyRig(`local/${name}`, entry);
-      notices.push(PUBLISH_OFFER);
+      applied = true;
     }
   }
+  if (offer && applied) notices.push(PUBLISH_OFFER);
   if (loaded.some(({ name }) => `local/${name}` === editing)) void openEditor(editing);
   else render();
 }

@@ -42,3 +42,32 @@ test("the offer goes when the other notices go", async ({ page }) => {
   await page.locator('[data-board]:not(.selected)').first().click();
   await expect(page.locator("#notices [data-publish]")).toHaveCount(0);
 });
+
+test("loading two rigs at once offers the steps once", async ({ page }) => {
+  await page.locator("#file").setInputFiles([
+    { name: "desk.toml", mimeType: "application/toml", buffer: Buffer.from(RIG) },
+    { name: "tower.toml", mimeType: "application/toml", buffer: Buffer.from(RIG.replace("Desk", "Tower")) },
+  ]);
+  await expect(page.locator("#notices [data-publish]")).toHaveCount(1);
+});
+
+test("creating a new rig offers no steps", async ({ page }) => {
+  await page.locator('[data-new="rig"]').click();
+  await expect(page.locator("#editor-path")).toHaveText("local/new-rig.toml");
+  await expect(page.locator("#notices [data-publish]")).toHaveCount(0);
+});
+
+test("the offer is drawn as a notice in the accent colour, and the dialog's steps as a numbered list", async ({ page }) => {
+  await load(page, "desk.toml", RIG);
+  const accent = await page.evaluate(() => {
+    const probe = document.body.appendChild(document.createElement("div"));
+    probe.style.color = "var(--accent)";
+    const colour = getComputedStyle(probe).color;
+    probe.remove();
+    return colour;
+  });
+  await expect(page.locator("#notices .notice.offer")).toHaveCSS("border-top-color", accent);
+  await page.locator("#notices [data-publish]").click();
+  await expect(page.locator("dialog#publish .steps")).toHaveCSS("padding-left", "16px");
+  await expect(page.locator("dialog#publish ol > li").first()).toHaveCSS("list-style-type", "decimal");
+});
