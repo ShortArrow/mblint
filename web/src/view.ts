@@ -158,7 +158,7 @@ export function linksHtml(report: Report | null): string {
   return rows ? `<table>${rows}</table>` : `<span class="meta">No links.</span>`;
 }
 
-/** The notice offering the steps for publishing the rig just loaded. */
+/** The notice offering the steps for publishing the rig just loaded or exported. */
 export const PUBLISH_OFFER = { publish: true } as const;
 
 /** A notice: a message, or the offer to show the steps for publishing a rig. */
@@ -170,7 +170,7 @@ export function noticesHtml(notices: Notice[]): string {
     .map((n) =>
       typeof n === "string"
         ? `<div class="notice">${escape(n)}</div>`
-        : `<div class="notice offer">The rig is loaded. <button type="button" class="button" data-publish>How to publish it</button></div>`,
+        : `<div class="notice offer">Others can open this rig once it is on GitHub. <button type="button" class="button" data-publish>How to publish it</button></div>`,
     )
     .join("");
 }

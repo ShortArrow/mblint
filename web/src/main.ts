@@ -652,6 +652,8 @@ $("export").addEventListener("click", () => {
   const marked = rigs().find(([path, entry]) => isApplied(path, entry));
   const name = (marked?.[1].name ?? "rig").replace(/[^\w.-]/g, "_");
   save(new Blob([zip(rigBundle(files, board, bindings, name))], { type: "application/zip" }), `${name}.zip`);
+  notices = [...notices.filter((notice) => notice !== PUBLISH_OFFER), PUBLISH_OFFER];
+  $("notices").innerHTML = noticesHtml(notices);
 });
 
 $("editor-close").addEventListener("click", () => void openEditor(null));

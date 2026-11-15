@@ -71,3 +71,23 @@ test("the offer is drawn as a notice in the accent colour, and the dialog's step
   await expect(page.locator("dialog#publish .steps")).toHaveCSS("padding-left", "16px");
   await expect(page.locator("dialog#publish ol > li").first()).toHaveCSS("list-style-type", "decimal");
 });
+
+/** Exports the rig being built, waiting for the archive's download. */
+async function exportRig(page: Page): Promise<void> {
+  const download = page.waitForEvent("download");
+  await page.locator("#export").click();
+  await download;
+}
+
+test("exporting the rig offers the steps for publishing it", async ({ page }) => {
+  await exportRig(page);
+  await page.locator("#notices [data-publish]").click();
+  await expect(page.locator("dialog#publish")).toBeVisible();
+});
+
+test("exporting again, or after loading a rig, still offers the steps once", async ({ page }) => {
+  await load(page, "desk.toml", RIG);
+  await exportRig(page);
+  await exportRig(page);
+  await expect(page.locator("#notices [data-publish]")).toHaveCount(1);
+});
