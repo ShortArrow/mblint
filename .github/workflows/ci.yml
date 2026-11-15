@@ -75,6 +75,8 @@ jobs:
           node-version: 26
       - run: npm ci
       - run: npm test
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:look
       - run: npx wrangler deploy --dry-run
 
   secrets:
