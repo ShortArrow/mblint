@@ -158,7 +158,19 @@ export function linksHtml(report: Report | null): string {
   return rows ? `<table>${rows}</table>` : `<span class="meta">No links.</span>`;
 }
 
+/** The notice offering the steps for publishing the rig just loaded. */
+export const PUBLISH_OFFER = { publish: true } as const;
+
+/** A notice: a message, or the offer to show the steps for publishing a rig. */
+export type Notice = string | typeof PUBLISH_OFFER;
+
 /** Each of `notices` as a toast. */
-export function noticesHtml(notices: string[]): string {
-  return notices.map((n) => `<div class="notice">${escape(n)}</div>`).join("");
+export function noticesHtml(notices: Notice[]): string {
+  return notices
+    .map((n) =>
+      typeof n === "string"
+        ? `<div class="notice">${escape(n)}</div>`
+        : `<div class="notice offer">The rig is loaded. <button type="button" class="button" data-publish>How to publish it</button></div>`,
+    )
+    .join("");
 }

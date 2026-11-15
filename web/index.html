@@ -163,6 +163,25 @@
         </div>
       </form>
     </dialog>
+    <dialog id="publish" aria-labelledby="publish-title">
+      <form method="dialog">
+        <div class="dialog-head">
+          <h2 id="publish-title">Publish your rig</h2>
+          <button class="tool" value="close" title="Close">
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" /></svg>
+          </button>
+        </div>
+        <div class="steps">
+          <ol>
+            <li>Make a public repository on GitHub.</li>
+            <li>Put the files of a rig exported from the simulator at the root of its default branch.</li>
+            <li>Add the topic <code>mblint-rig</code> to the repository.</li>
+            <li>Wait up to an hour for the marketplace to list it.</li>
+          </ol>
+          <a href="https://marketplace.mblint.shortarrow.jp/">Browse the marketplace</a>
+        </div>
+      </form>
+    </dialog>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

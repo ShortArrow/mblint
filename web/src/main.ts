@@ -27,7 +27,7 @@ import {
   themeChoice,
   toggleTheme,
 } from "./theme";
-import { bracketHtml, colour, diagnosticsHtml, editable, interfaceText, linksHtml, noticesHtml } from "./view";
+import { bracketHtml, colour, diagnosticsHtml, editable, interfaceText, linksHtml, type Notice, noticesHtml, PUBLISH_OFFER } from "./view";
 
 const RIG_PATH = "local/rig.toml";
 const LABELS_KEY = "mblint-labels";
@@ -46,7 +46,7 @@ let entries: Record<string, CatalogEntry> = {};
 let board: string | null = null;
 let bindings: Record<string, string> = {};
 let selected: string | null = null;
-let notices: string[] = [];
+let notices: Notice[] = [];
 let editing: string | null = null;
 let pendingEdit: ReturnType<typeof setTimeout> | undefined;
 let code: CodeEditor | null = null;
@@ -215,6 +215,7 @@ function add(loaded: Loaded[]): void {
       bindings = {};
     } else if (entry.kind === "rig") {
       applyRig(`local/${name}`, entry);
+      notices.push(PUBLISH_OFFER);
     }
   }
   if (loaded.some(({ name }) => `local/${name}` === editing)) void openEditor(editing);
@@ -743,6 +744,14 @@ async function openLink(): Promise<void> {
 }
 
 const settings = $<HTMLDialogElement>("settings");
+const publish = $("publish") as HTMLDialogElement;
+$("notices").addEventListener("click", (event) => {
+  if ((event.target as Element).closest("[data-publish]")) publish.showModal();
+});
+publish.addEventListener("click", (event) => {
+  if (event.target === publish) publish.close();
+});
+
 $("settings-open").addEventListener("click", () => {
   const choice = themeChoice(storedTheme());
   settings.querySelectorAll<HTMLInputElement>("input[name=theme]").forEach((input) => (input.checked = input.value === choice));
