@@ -14,6 +14,10 @@ The repositories are ordered by their number of stars, most first. A field narro
 
 What the marketplace shows is at most an hour behind GitHub. The marketplace does not read the repositories' files, so a listed repository may hold no rig the simulator can load; the simulator says so when it is opened.
 
+## Look
+
+The page has a header like the simulator's, naming the marketplace, and shows each repository as a card. It uses the simulator's colours, and its typefaces, Inter and JetBrains Mono, from Google Fonts as the simulator does. It follows the system's light or dark theme; having no script, it offers no switch between them. It loads nothing from the simulator's site, and does not scroll sideways, however long a repository's name or description.
+
 ## Build
 
 The marketplace is a Cloudflare Worker. It asks GitHub's search API for the repositories with the topic, signed in with a token that only reads public data, and keeps the answer for an hour, so a visitor's browser never asks GitHub. When GitHub cannot be reached, it serves the last answer it kept, and says how old that is. When it cannot read the answer it keeps, it says that it is busy and to try again later, and does not ask GitHub. When it has kept no answer and GitHub cannot be reached, it says that GitHub cannot be reached and to try again later.
