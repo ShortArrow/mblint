@@ -17,7 +17,8 @@ export type Listing = {
   open: string;
 };
 
-const SIMULATOR = "https://mblint.shortarrow.jp/";
+/** The simulator's address. */
+export const SIMULATOR = "https://mblint.shortarrow.jp/";
 
 /**
  * The repositories in `found` that `excluded` does not name, compared ignoring case, as the
