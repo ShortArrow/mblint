@@ -32,13 +32,13 @@ form { display: flex; gap: 8px; margin: 0 0 20px; max-width: 480px; }
 input, button, .button { font: inherit; color: inherit; background: var(--panel-2); border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px; }
 input { flex: 1; min-width: 0; }
 button, .button { cursor: pointer; text-decoration: none; }
-ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 16px; }
-li { display: flex; flex-direction: column; gap: 8px; min-width: 0; padding: 16px; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; box-shadow: var(--shadow); overflow-wrap: anywhere; }
-li > a:first-child { font-weight: 600; font-size: 15px; color: var(--ink); text-decoration: none; }
-li > a:first-child:hover { color: var(--accent); }
-li > span { color: var(--muted); font-size: 12px; }
-li > p { margin: 0; flex: 1; }
-li > .button { align-self: flex-start; }
+.repositories { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 16px; }
+.repositories > li { display: flex; flex-direction: column; gap: 8px; min-width: 0; padding: 16px; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; box-shadow: var(--shadow); overflow-wrap: anywhere; }
+.repositories > li > a:first-child { font-weight: 600; font-size: 15px; color: var(--ink); text-decoration: none; }
+.repositories > li > a:first-child:hover { color: var(--accent); }
+.repositories > li > span { color: var(--muted); font-size: 12px; }
+.repositories > li > p { margin: 0; flex: 1; }
+.repositories > li > .button { align-self: flex-start; }
 @media (max-width: 640px) { header { padding: 0 16px; } main { padding: 16px; } }`;
 
 /** The page around `body`, with the narrowing field holding `text`. */
@@ -89,5 +89,5 @@ export function renderPage(answer: Answer, excluded: string[], text: string, now
   if (answer.kind === "busy") return frame("<p>The marketplace is busy; try again later.</p>", text);
   if (answer.kind === "unreachable") return frame("<p>GitHub cannot be reached; try again later.</p>", text);
   const listed = narrow(listRepositories(answer.found, excluded), text);
-  return frame(`${age(answer.at, now)}<ul>\n${listed.map(item).join("\n")}\n</ul>`, text);
+  return frame(`${age(answer.at, now)}<ul class="repositories">\n${listed.map(item).join("\n")}\n</ul>`, text);
 }
