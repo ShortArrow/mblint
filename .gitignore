@@ -10,3 +10,4 @@
 /web/storybook-static/
 /marketplace/node_modules/
 /marketplace/.wrangler/
+/marketplace/test-results/
