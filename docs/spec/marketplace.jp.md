@@ -18,10 +18,12 @@ GitHub の公開リポジトリは、トピック `mblint-rig` を付けると�
 
 ページには「Publish your rig」の節があり、次の手順を並べる。
 
-1. GitHub に公開リポジトリを作る。
+1. GitHub に公開リポジトリを作る。たとえば、ひな形の ShortArrow/mblint-rigs から作る。
 2. シミュレーターから書き出した rig のファイルを、デフォルトブランチのルートに置く。
 3. リポジトリにトピック `mblint-rig` を付ける。
 4. マーケットプレイスに載るまで、最大 1 時間待つ。
+
+ひな形の名前は、GitHub にあるひな形のリポジトリ https://github.com/ShortArrow/mblint-rigs へのリンクにする。
 
 ## 見た目
 
