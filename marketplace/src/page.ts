@@ -1,5 +1,5 @@
 import { type Answer, HOUR } from "./answer";
-import { type Listing, listRepositories, narrow } from "./listing";
+import { type Listing, SIMULATOR, listRepositories, narrow } from "./listing";
 
 /** `text` with the characters HTML gives meaning to replaced by their references. */
 function escape(text: string): string {
@@ -26,20 +26,35 @@ a { color: var(--accent); }
 header { display: flex; align-items: center; height: 56px; padding: 0 24px; background: var(--panel); border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 5; }
 header h1 { font-size: 17px; margin: 0; letter-spacing: -0.01em; }
 header h1 span { color: var(--muted); font-weight: 500; }
+header .button { margin-left: auto; }
+#publish { margin-top: 32px; max-width: 640px; }
+#publish h2 { font-size: 15px; margin: 0 0 8px; }
+#publish ol { margin: 0; padding-left: 20px; display: grid; gap: 4px; }
 main { padding: 24px; background: var(--bg); min-height: calc(100vh - 56px); }
 main > p { color: var(--muted); margin: 0 0 16px; }
 form { display: flex; gap: 8px; margin: 0 0 20px; max-width: 480px; }
 input, button, .button { font: inherit; color: inherit; background: var(--panel-2); border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px; }
 input { flex: 1; min-width: 0; }
 button, .button { cursor: pointer; text-decoration: none; }
-ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 16px; }
-li { display: flex; flex-direction: column; gap: 8px; min-width: 0; padding: 16px; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; box-shadow: var(--shadow); overflow-wrap: anywhere; }
-li > a:first-child { font-weight: 600; font-size: 15px; color: var(--ink); text-decoration: none; }
-li > a:first-child:hover { color: var(--accent); }
-li > span { color: var(--muted); font-size: 12px; }
-li > p { margin: 0; flex: 1; }
-li > .button { align-self: flex-start; }
+.repositories { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 16px; }
+.repositories > li { display: flex; flex-direction: column; gap: 8px; min-width: 0; padding: 16px; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; box-shadow: var(--shadow); overflow-wrap: anywhere; }
+.repositories > li > a:first-child { font-weight: 600; font-size: 15px; color: var(--ink); text-decoration: none; }
+.repositories > li > a:first-child:hover { color: var(--accent); }
+.repositories > li > span { color: var(--muted); font-size: 12px; }
+.repositories > li > p { margin: 0; flex: 1; }
+.repositories > li > .button { align-self: flex-start; }
 @media (max-width: 640px) { header { padding: 0 16px; } main { padding: 16px; } }`;
+
+/** The steps for publishing a rig, as the marketplace lists them. */
+const PUBLISH = `<section id="publish">
+<h2>Publish your rig</h2>
+<ol>
+<li>Make a public repository on GitHub.</li>
+<li>Put the files of a rig exported from the simulator at the root of its default branch.</li>
+<li>Add the topic <code>mblint-rig</code> to the repository.</li>
+<li>Wait up to an hour for the marketplace to list it.</li>
+</ol>
+</section>`;
 
 /** The page around `body`, with the narrowing field holding `text`. */
 function frame(body: string, text: string): string {
@@ -57,11 +72,12 @@ ${STYLE}
 </style>
 </head>
 <body>
-<header><h1>mblint <span>marketplace</span></h1></header>
+<header><h1>mblint <span>marketplace</span></h1><a class="button" href="${SIMULATOR}">Simulator</a></header>
 <main>
 <p>Rigs published on GitHub with the topic <code>mblint-rig</code>.</p>
 <form method="get"><input name="q" type="search" value="${escape(text)}" aria-label="Narrow"><button>Narrow</button></form>
 ${body}
+${PUBLISH}
 </main>
 </body>
 </html>
@@ -89,5 +105,5 @@ export function renderPage(answer: Answer, excluded: string[], text: string, now
   if (answer.kind === "busy") return frame("<p>The marketplace is busy; try again later.</p>", text);
   if (answer.kind === "unreachable") return frame("<p>GitHub cannot be reached; try again later.</p>", text);
   const listed = narrow(listRepositories(answer.found, excluded), text);
-  return frame(`${age(answer.at, now)}<ul>\n${listed.map(item).join("\n")}\n</ul>`, text);
+  return frame(`${age(answer.at, now)}<ul class="repositories">\n${listed.map(item).join("\n")}\n</ul>`, text);
 }

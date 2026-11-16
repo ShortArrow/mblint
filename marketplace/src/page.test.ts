@@ -54,6 +54,24 @@ describe("renderPage", () => {
     expect(page.querySelector("script")).toBeNull();
   });
 
+  it("links back to the simulator from its header", () => {
+    expect(pageOf([]).querySelector('header a[href="https://mblint.shortarrow.jp/"]')).not.toBeNull();
+  });
+
+  it("lists the steps for publishing a rig, whether or not the list of repositories could be shown", () => {
+    const steps = [
+      "Make a public repository on GitHub.",
+      "Put the files of a rig exported from the simulator at the root of its default branch.",
+      "Add the topic mblint-rig to the repository.",
+      "Wait up to an hour for the marketplace to list it.",
+    ];
+    for (const html of [renderPage({ kind: "answer", at: NOW, found: [] }, [], "", NOW), renderPage({ kind: "busy" }, [], "", NOW)]) {
+      const section = new DOMParser().parseFromString(html, "text/html").querySelector("section#publish")!;
+      expect(section.querySelector("h2")!.textContent).toBe("Publish your rig");
+      expect([...section.querySelectorAll("ol > li")].map((step) => step.textContent)).toEqual(steps);
+    }
+  });
+
   it("says the marketplace is busy and to try again later", () => {
     expect(renderPage({ kind: "busy" }, [], "", NOW)).toContain("busy");
   });

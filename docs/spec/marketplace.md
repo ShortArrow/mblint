@@ -14,9 +14,18 @@ The repositories are ordered by their number of stars, most first. A field narro
 
 What the marketplace shows is at most an hour behind GitHub. The marketplace does not read the repositories' files, so a listed repository may hold no rig the simulator can load; the simulator says so when it is opened.
 
+## Publishing
+
+The page has a section, "Publish your rig", listing the steps:
+
+1. Make a public repository on GitHub.
+2. Put the files of a rig exported from the simulator at the root of its default branch.
+3. Add the topic `mblint-rig` to the repository.
+4. Wait up to an hour for the marketplace to list it.
+
 ## Look
 
-The page has a header like the simulator's, naming the marketplace, and shows each repository as a card. It uses the simulator's colours, and its typefaces, Inter and JetBrains Mono, from Google Fonts as the simulator does. It follows the system's light or dark theme; having no script, it offers no switch between them. It loads nothing from the simulator's site, and does not scroll sideways, however long a repository's name or description.
+The page has a header like the simulator's, naming the marketplace and linking back to the simulator at mblint.shortarrow.jp, and shows each repository as a card. It uses the simulator's colours, and its typefaces, Inter and JetBrains Mono, from Google Fonts as the simulator does. It follows the system's light or dark theme; having no script, it offers no switch between them. It loads nothing from the simulator's site, and does not scroll sideways, however long a repository's name or description.
 
 ## Build
 

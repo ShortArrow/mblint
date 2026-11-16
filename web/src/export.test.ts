@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { crc32, rigBundle, zip } from "./export";
+import { withRepository } from "./github";
+import { resolveRig } from "./load";
 
 describe("rigBundle", () => {
   const files = {
@@ -24,6 +26,20 @@ describe("rigBundle", () => {
     const bundle = rigBundle(files, "boards/asus/b.toml", { S1: "devices/cards/c.toml", S2: "devices/cards/c.toml" }, "rig");
 
     expect(Object.keys(bundle).sort()).toEqual(["boards/asus/b.toml", "devices/cards/c.toml", "rigs/rig.toml"]);
+  });
+
+  it("opens from a repository holding it at its root, on a page that never loaded its files", () => {
+    const bundle = rigBundle(files, "local/my_board.toml", { S1: "devices/cards/c.toml", S2: "local/my_card.toml" }, "desk");
+    const root = "github/o/r/";
+    const repository = Object.fromEntries(Object.entries(bundle).map(([path, text]) => [`${root}${path}`, text]));
+    const elsewhere = withRepository({ "boards/asus/b.toml": "board" }, root, repository);
+
+    const resolved = resolveRig("boards/my_board.toml", { S1: "devices/cards/c.toml", S2: "devices/my_card.toml" }, elsewhere, root);
+    expect(resolved).toEqual({
+      board: `${root}boards/my_board.toml`,
+      bindings: { S1: `${root}devices/cards/c.toml`, S2: `${root}devices/my_card.toml` },
+      missing: [],
+    });
   });
 });
 

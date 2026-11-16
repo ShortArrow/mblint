@@ -70,3 +70,18 @@ test("loads nothing but Google Fonts", async ({ page }) => {
   expect(hosts.filter((host) => host !== "fonts.googleapis.com" && host !== "fonts.gstatic.com")).toEqual([]);
   expect(hosts).toContain("fonts.googleapis.com");
 });
+
+test("lists the steps for publishing a rig as a plain numbered list, not as cards", async ({ page }) => {
+  await open(page);
+  const step = page.locator("#publish li").first();
+  await expect(step).toHaveCSS("border-top-width", "0px");
+  await expect(step).toHaveCSS("list-style-type", "decimal");
+});
+
+test("puts the link back to the simulator at the right of the header", async ({ page }) => {
+  await open(page);
+  const title = await page.locator("header h1").boundingBox();
+  const link = await page.locator('header a[href="https://mblint.shortarrow.jp/"]').boundingBox();
+  expect(link!.x).toBeGreaterThan(1440 / 2);
+  expect(link!.x).toBeGreaterThan(title!.x + title!.width);
+});

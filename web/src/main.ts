@@ -27,7 +27,7 @@ import {
   themeChoice,
   toggleTheme,
 } from "./theme";
-import { bracketHtml, colour, diagnosticsHtml, editable, interfaceText, linksHtml, noticesHtml } from "./view";
+import { bracketHtml, colour, diagnosticsHtml, editable, interfaceText, linksHtml, type Notice, noticesHtml, PUBLISH_OFFER } from "./view";
 
 const RIG_PATH = "local/rig.toml";
 const LABELS_KEY = "mblint-labels";
@@ -46,7 +46,7 @@ let entries: Record<string, CatalogEntry> = {};
 let board: string | null = null;
 let bindings: Record<string, string> = {};
 let selected: string | null = null;
-let notices: string[] = [];
+let notices: Notice[] = [];
 let editing: string | null = null;
 let pendingEdit: ReturnType<typeof setTimeout> | undefined;
 let code: CodeEditor | null = null;
@@ -199,11 +199,15 @@ async function load(fileList: FileList | File[]): Promise<void> {
   );
   if (chosen.length === 0) return;
   notices = refused.map((file) => `${file.name}: not loaded, as its name is not a plain file name`);
-  add(loaded);
+  add(loaded, true);
 }
 
-/** Adds `loaded` under `local/`, each file taking the effect of its kind, and shows the change. */
-function add(loaded: Loaded[]): void {
+/**
+ * Adds `loaded` under `local/`, each file taking the effect of its kind, and shows the change,
+ * offering the steps for publishing a rig when `offer` is set and a rig was applied.
+ */
+function add(loaded: Loaded[], offer = false): void {
+  let applied = false;
   files = addLoaded(files, loaded);
   entries = catalog(files);
   for (const { name } of loaded) {
@@ -215,8 +219,10 @@ function add(loaded: Loaded[]): void {
       bindings = {};
     } else if (entry.kind === "rig") {
       applyRig(`local/${name}`, entry);
+      applied = true;
     }
   }
+  if (offer && applied) notices.push(PUBLISH_OFFER);
   if (loaded.some(({ name }) => `local/${name}` === editing)) void openEditor(editing);
   else render();
 }
@@ -646,6 +652,8 @@ $("export").addEventListener("click", () => {
   const marked = rigs().find(([path, entry]) => isApplied(path, entry));
   const name = (marked?.[1].name ?? "rig").replace(/[^\w.-]/g, "_");
   save(new Blob([zip(rigBundle(files, board, bindings, name))], { type: "application/zip" }), `${name}.zip`);
+  notices = [...notices.filter((notice) => notice !== PUBLISH_OFFER), PUBLISH_OFFER];
+  $("notices").innerHTML = noticesHtml(notices);
 });
 
 $("editor-close").addEventListener("click", () => void openEditor(null));
@@ -743,6 +751,14 @@ async function openLink(): Promise<void> {
 }
 
 const settings = $<HTMLDialogElement>("settings");
+const publish = $("publish") as HTMLDialogElement;
+$("notices").addEventListener("click", (event) => {
+  if ((event.target as Element).closest("[data-publish]")) publish.showModal();
+});
+publish.addEventListener("click", (event) => {
+  if (event.target === publish) publish.close();
+});
+
 $("settings-open").addEventListener("click", () => {
   const choice = themeChoice(storedTheme());
   settings.querySelectorAll<HTMLInputElement>("input[name=theme]").forEach((input) => (input.checked = input.value === choice));
