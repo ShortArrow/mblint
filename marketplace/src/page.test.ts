@@ -20,7 +20,7 @@ function pageOf(names: string[], text = "", age = 0): Document {
 
 describe("renderPage", () => {
   it("shows each repository with a link to it on GitHub and a link opening it in the simulator", () => {
-    const entry = pageOf(["acme/rigs"]).querySelector("li")!;
+    const entry = pageOf(["acme/rigs"]).querySelector(".repositories > li")!;
     expect(entry.querySelector('a[href="https://github.com/acme/rigs"]')!.textContent).toBe("acme/rigs");
     expect(entry.querySelector('a[href="https://mblint.shortarrow.jp/?github=acme/rigs"]')).not.toBeNull();
     expect(entry.textContent).toContain("About acme/rigs");
@@ -29,7 +29,7 @@ describe("renderPage", () => {
 
   it("shows only the repositories the text narrows to, and keeps the text in the field", () => {
     const page = pageOf(["acme/rigs", "zeta/boards"], "zeta");
-    expect([...page.querySelectorAll("li a:first-child")].map((link) => link.textContent)).toEqual(["zeta/boards"]);
+    expect([...page.querySelectorAll(".repositories > li a:first-child")].map((link) => link.textContent)).toEqual(["zeta/boards"]);
     expect(page.querySelector<HTMLInputElement>('input[name="q"]')!.value).toBe("zeta");
   });
 
