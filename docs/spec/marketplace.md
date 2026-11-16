@@ -18,10 +18,12 @@ What the marketplace shows is at most an hour behind GitHub. The marketplace doe
 
 The page has a section, "Publish your rig", listing the steps:
 
-1. Make a public repository on GitHub.
+1. Make a public repository on GitHub, for example from the template ShortArrow/mblint-rigs.
 2. Put the files of a rig exported from the simulator at the root of its default branch.
 3. Add the topic `mblint-rig` to the repository.
 4. Wait up to an hour for the marketplace to list it.
+
+The name of the template links to the template's repository on GitHub, https://github.com/ShortArrow/mblint-rigs.
 
 ## Look
 
