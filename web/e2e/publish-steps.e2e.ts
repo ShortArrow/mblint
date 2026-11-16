@@ -22,12 +22,13 @@ test("loading a rig offers the steps for publishing it, which a dialog lists wit
   await expect(dialog).toBeVisible();
   await expect(dialog.locator("h2")).toHaveText("Publish your rig");
   await expect(dialog.locator("ol > li")).toHaveText([
-    "Make a public repository on GitHub.",
+    "Make a public repository on GitHub, for example from the template ShortArrow/mblint-rigs.",
     "Put the files of a rig exported from the simulator at the root of its default branch.",
     "Add the topic mblint-rig to the repository.",
     "Wait up to an hour for the marketplace to list it.",
   ]);
   await expect(dialog.locator('a[href="https://marketplace.mblint.shortarrow.jp/"]')).toBeVisible();
+  await expect(dialog.locator('ol > li:first-child a[href="https://github.com/ShortArrow/mblint-rigs"]')).toHaveText("ShortArrow/mblint-rigs");
 });
 
 test("loading a file that is not a rig offers no steps", async ({ page }) => {

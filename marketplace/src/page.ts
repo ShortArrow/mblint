@@ -49,7 +49,7 @@ button, .button { cursor: pointer; text-decoration: none; }
 const PUBLISH = `<section id="publish">
 <h2>Publish your rig</h2>
 <ol>
-<li>Make a public repository on GitHub.</li>
+<li>Make a public repository on GitHub, for example from the template <a href="https://github.com/ShortArrow/mblint-rigs">ShortArrow/mblint-rigs</a>.</li>
 <li>Put the files of a rig exported from the simulator at the root of its default branch.</li>
 <li>Add the topic <code>mblint-rig</code> to the repository.</li>
 <li>Wait up to an hour for the marketplace to list it.</li>
