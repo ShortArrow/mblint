@@ -62,7 +62,7 @@ describe("renderPage", () => {
     const steps = [
       "Make a public repository on GitHub, for example from the template ShortArrow/mblint-rigs.",
       "Put the files of a rig exported from the simulator at the root of its default branch.",
-      "Add the topic mblint-rig to the repository.",
+      "Add the topic mblint-rig to the repository: on its GitHub page, choose the gear beside About, enter it under Topics and choose Save changes, or run gh repo edit <owner>/<repo> --add-topic mblint-rig.",
       "Wait up to an hour for the marketplace to list it.",
     ];
     for (const html of [renderPage({ kind: "answer", at: NOW, found: [] }, [], "", NOW), renderPage({ kind: "busy" }, [], "", NOW)]) {
