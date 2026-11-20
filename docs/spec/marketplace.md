@@ -20,7 +20,7 @@ The page has a section, "Publish your rig", listing the steps:
 
 1. Make a public repository on GitHub, for example from the template ShortArrow/mblint-rigs.
 2. Put the files of a rig exported from the simulator at the root of its default branch.
-3. Add the topic `mblint-rig` to the repository.
+3. Add the topic `mblint-rig` to the repository: on its GitHub page, choose the gear beside About, enter it under Topics and choose Save changes, or run `gh repo edit <owner>/<repo> --add-topic mblint-rig`.
 4. Wait up to an hour for the marketplace to list it.
 
 The name of the template links to the template's repository on GitHub, https://github.com/ShortArrow/mblint-rigs.
