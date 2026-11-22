@@ -57,14 +57,14 @@ const PUBLISH = `<section id="publish">
 </ol>
 </section>`;
 
-/** The page around `body`, with the narrowing field holding `text`. */
-function frame(body: string, text: string): string {
+/** A page of the marketplace titled `title`, with its header, holding `content` as its main part. */
+function shell(title: string, content: string): string {
   return `<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>mblint marketplace</title>
+<title>${title}</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=optional">
@@ -75,15 +75,23 @@ ${STYLE}
 <body>
 <header><h1>mblint <span>marketplace</span></h1><a class="button" href="${SIMULATOR}">Simulator</a></header>
 <main>
-<p>Rigs published on GitHub with the topic <code>mblint-rig</code>.</p>
-<form method="get"><input name="q" type="search" value="${escape(text)}" aria-label="Narrow"><button>Narrow</button></form>
-${body}
-${PUBLISH}
-<footer><a href="${SIMULATOR}privacy">Privacy</a></footer>
+${content}
 </main>
 </body>
 </html>
 `;
+}
+
+/** The page around `body`, with the narrowing field holding `text`. */
+function frame(body: string, text: string): string {
+  return shell(
+    "mblint marketplace",
+    `<p>Rigs published on GitHub with the topic <code>mblint-rig</code>.</p>
+<form method="get"><input name="q" type="search" value="${escape(text)}" aria-label="Narrow"><button>Narrow</button></form>
+${body}
+${PUBLISH}
+<footer><a href="${SIMULATOR}privacy">Privacy</a></footer>`,
+  );
 }
 
 /** One repository as a list item. */
