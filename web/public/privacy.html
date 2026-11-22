@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>mblint privacy</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <style>
+      :root {
+        color-scheme: light dark;
+        --bg: light-dark(#f4f5f7, #0d1014);
+        --panel: light-dark(#ffffff, #151a21);
+        --line: light-dark(#d9dde3, #2a323d);
+        --ink: light-dark(#14171c, #e8ecf1);
+        --muted: light-dark(#667085, #8b95a3);
+        --accent: light-dark(#2f6bff, #6e9bff);
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font: 15px/24px Inter, system-ui, sans-serif;
+      }
+      header {
+        display: flex;
+        align-items: center;
+        height: 56px;
+        padding: 0 16px;
+        background: var(--panel);
+        border-bottom: 1px solid var(--line);
+      }
+      header a {
+        color: var(--ink);
+        font-weight: 600;
+        text-decoration: none;
+      }
+      main {
+        max-width: 680px;
+        margin: 0 auto;
+        padding: 24px 16px 48px;
+        overflow-wrap: anywhere;
+      }
+      h1 {
+        font-size: 24px;
+        margin: 8px 0 16px;
+      }
+      h2 {
+        font-size: 17px;
+        margin: 32px 0 8px;
+      }
+      a {
+        color: var(--accent);
+      }
+      code {
+        font-family: "JetBrains Mono", ui-monospace, monospace;
+        font-size: 0.9em;
+      }
+      ul {
+        padding-left: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <header><a href="/">mblint</a></header>
+    <main>
+      <h1>Privacy</h1>
+      <p>
+        This page covers mblint's simulator at mblint.shortarrow.jp, its marketplace at marketplace.mblint.shortarrow.jp and its
+        Storybook at storybook.mblint.shortarrow.jp. None of them asks you to sign in or sets a cookie of its own.
+      </p>
+
+      <h2>Cloudflare Web Analytics</h2>
+      <p>
+        The sites are served by Cloudflare, which adds the script of Cloudflare Web Analytics to their pages. For each visit, the
+        script reports the page's address, the site that linked to it, your country, browser, operating system and type of device,
+        and how long the page took to load. The
+        <a href="https://developers.cloudflare.com/web-analytics/data-metrics/dimensions/">list of what it records</a> is
+        Cloudflare's.
+      </p>
+      <p>
+        Cloudflare states that Web Analytics uses no state kept in your browser, such as a cookie or local storage, to collect
+        these figures, and does not fingerprint visitors by their IP address, their browser's User-Agent or any other data. See
+        <a href="https://www.cloudflare.com/web-analytics/">Cloudflare Web Analytics</a>.
+      </p>
+
+      <h2>What the simulator keeps in your browser</h2>
+      <p>
+        The simulator keeps how it is displayed in your browser's local storage: the theme, whether the names of the controls are
+        shown, which sidebars and lists are open, and how wide and tall they are. It sends none of this anywhere.
+      </p>
+      <p>
+        Files you load or edit stay in the browser tab and are gone when it closes, and a rig you export is saved only to your
+        own computer. The simulator sends none of them anywhere.
+      </p>
+
+      <h2>Other sites your browser asks</h2>
+      <ul>
+        <li>
+          The simulator and the marketplace load their typefaces from Google Fonts, so your browser asks
+          <code>fonts.googleapis.com</code> and <code>fonts.gstatic.com</code> for them.
+        </li>
+        <li>
+          When you load a repository into the simulator, or open a link that names one, your browser asks
+          <code>api.github.com</code> and <code>raw.githubusercontent.com</code> for its files, without signing in.
+        </li>
+      </ul>
+      <p>Each of these sites receives your IP address and your browser's request, and handles them under its own policy.</p>
+
+      <h2>Questions</h2>
+      <p>Ask them in an issue at <a href="https://github.com/ShortArrow/mblint/issues">github.com/ShortArrow/mblint</a>.</p>
+    </main>
+  </body>
+</html>

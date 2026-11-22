@@ -32,6 +32,7 @@ header .button { margin-left: auto; }
 #publish ol { margin: 0; padding-left: 20px; display: grid; gap: 4px; }
 main { padding: 24px; background: var(--bg); min-height: calc(100vh - 56px); }
 main > p { color: var(--muted); margin: 0 0 16px; }
+main > footer { margin-top: 32px; }
 form { display: flex; gap: 8px; margin: 0 0 20px; max-width: 480px; }
 input, button, .button { font: inherit; color: inherit; background: var(--panel-2); border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px; }
 input { flex: 1; min-width: 0; }
@@ -78,6 +79,7 @@ ${STYLE}
 <form method="get"><input name="q" type="search" value="${escape(text)}" aria-label="Narrow"><button>Narrow</button></form>
 ${body}
 ${PUBLISH}
+<footer><a href="${SIMULATOR}privacy.html">Privacy</a></footer>
 </main>
 </body>
 </html>
