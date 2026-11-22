@@ -19,8 +19,8 @@ function pageOf(names: string[], text = "", age = 0): Document {
 }
 
 describe("renderPage", () => {
-  it("links to the simulator's privacy page below the list, also when there is no list", () => {
-    const privacy = 'footer a[href="https://mblint.shortarrow.jp/privacy"]';
+  it("links to the marketplace's own privacy page below the list, also when there is no list", () => {
+    const privacy = 'footer a[href="/privacy"]';
     expect(pageOf(["acme/rigs"]).querySelector(privacy)!.textContent).toBe("Privacy");
     const busy = new DOMParser().parseFromString(renderPage({ kind: "busy" }, [], "", NOW), "text/html");
     expect(busy.querySelector(privacy)).not.toBeNull();
