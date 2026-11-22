@@ -1,6 +1,6 @@
 import { type Kept, type Store, currentAnswer } from "./answer";
 import { EXCLUDED } from "./excluded";
-import { renderPage } from "./page";
+import { renderPage, renderPrivacy } from "./page";
 import { searchTopic } from "./search";
 
 /** The marketplace's bindings: the KV namespace that keeps GitHub's answer, and the token for GitHub. */
@@ -24,7 +24,8 @@ function storeIn(kv: Env["LISTING"]): Store {
 
 /**
  * The answer to `request` at `now`: the marketplace's page at `/`, narrowed by the address's `q`,
- * asking GitHub through `fetch` when the kept answer is due; 503 when busy, 404 for any other path.
+ * asking GitHub through `fetch` when the kept answer is due, or its privacy page at `/privacy`;
+ * 503 when busy, 404 for any other path.
  */
 export async function handle(
   request: Request,
@@ -33,6 +34,7 @@ export async function handle(
   fetch: (request: Request) => Promise<Response>,
 ): Promise<Response> {
   const url = new URL(request.url);
+  if (url.pathname === "/privacy") return new Response(renderPrivacy(), { headers: { "content-type": "text/html; charset=utf-8" } });
   if (url.pathname !== "/") return new Response("Not found", { status: 404 });
   const answer = await currentAnswer(now, storeIn(env.LISTING), () => searchTopic(env.GITHUB_TOKEN, fetch));
   const status = answer.kind === "answer" ? 200 : 503;

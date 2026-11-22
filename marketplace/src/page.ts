@@ -33,6 +33,9 @@ header .button { margin-left: auto; }
 main { padding: 24px; background: var(--bg); min-height: calc(100vh - 56px); }
 main > p { color: var(--muted); margin: 0 0 16px; }
 main > footer { margin-top: 32px; }
+#privacy { max-width: 680px; font-size: 15px; line-height: 24px; overflow-wrap: anywhere; }
+#privacy h2 { font-size: 20px; margin: 0 0 16px; }
+#privacy h3 { font-size: 16px; margin: 28px 0 8px; }
 form { display: flex; gap: 8px; margin: 0 0 20px; max-width: 480px; }
 input, button, .button { font: inherit; color: inherit; background: var(--panel-2); border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px; }
 input { flex: 1; min-width: 0; }
@@ -90,7 +93,7 @@ function frame(body: string, text: string): string {
 <form method="get"><input name="q" type="search" value="${escape(text)}" aria-label="Narrow"><button>Narrow</button></form>
 ${body}
 ${PUBLISH}
-<footer><a href="${SIMULATOR}privacy">Privacy</a></footer>`,
+<footer><a href="/privacy">Privacy</a></footer>`,
   );
 }
 
@@ -116,4 +119,23 @@ export function renderPage(answer: Answer, excluded: string[], text: string, now
   if (answer.kind === "unreachable") return frame("<p>GitHub cannot be reached; try again later.</p>", text);
   const listed = narrow(listRepositories(answer.found, excluded), text);
   return frame(`${age(answer.at, now)}<ul class="repositories">\n${listed.map(item).join("\n")}\n</ul>`, text);
+}
+
+/** The marketplace's privacy page: what Cloudflare Web Analytics reports of a visit, and which other site the page asks. */
+export function renderPrivacy(): string {
+  return shell(
+    "mblint marketplace privacy",
+    `<section id="privacy">
+<h2>Privacy</h2>
+<p>This page covers mblint's marketplace at marketplace.mblint.shortarrow.jp. It does not ask you to sign in and sets no cookie of its own. It keeps nothing about your visit, including the text you narrow the list by.</p>
+<h3>Cloudflare Web Analytics</h3>
+<p>The marketplace is served by Cloudflare, which adds the script of Cloudflare Web Analytics to its pages. For each visit, the script reports the page's address, the site that linked to it, your country, browser, operating system and type of device, and how long the page took to load. The <a href="https://developers.cloudflare.com/web-analytics/data-metrics/dimensions/">list of what it records</a> is Cloudflare's.</p>
+<p>Cloudflare states that Web Analytics uses no state kept in your browser, such as a cookie or local storage, to collect these figures, and that Cloudflare does not fingerprint visitors by their IP address, their browser's User-Agent or any other data for the purpose of displaying analytics. See <a href="https://www.cloudflare.com/web-analytics/">Cloudflare Web Analytics</a>.</p>
+<h3>Other sites your browser asks</h3>
+<p>The marketplace loads its typefaces from Google Fonts, so your browser asks <code>fonts.googleapis.com</code> and <code>fonts.gstatic.com</code> for them. Google receives your IP address and your browser's request, and handles them under its own policy.</p>
+<h3>Questions</h3>
+<p>Ask them in an issue at <a href="https://github.com/ShortArrow/mblint/issues">github.com/ShortArrow/mblint</a>.</p>
+</section>
+<footer><a href="/">Back to the marketplace</a></footer>`,
+  );
 }
