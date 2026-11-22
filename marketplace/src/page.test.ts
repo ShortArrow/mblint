@@ -20,7 +20,7 @@ function pageOf(names: string[], text = "", age = 0): Document {
 
 describe("renderPage", () => {
   it("links to the simulator's privacy page below the list, also when there is no list", () => {
-    const privacy = 'footer a[href="https://mblint.shortarrow.jp/privacy.html"]';
+    const privacy = 'footer a[href="https://mblint.shortarrow.jp/privacy"]';
     expect(pageOf(["acme/rigs"]).querySelector(privacy)!.textContent).toBe("Privacy");
     const busy = new DOMParser().parseFromString(renderPage({ kind: "busy" }, [], "", NOW), "text/html");
     expect(busy.querySelector(privacy)).not.toBeNull();
