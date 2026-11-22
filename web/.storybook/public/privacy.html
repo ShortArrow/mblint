@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>mblint Storybook privacy</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        --bg: light-dark(#f4f5f7, #0d1014);
+        --panel: light-dark(#ffffff, #151a21);
+        --line: light-dark(#d9dde3, #2a323d);
+        --ink: light-dark(#14171c, #e8ecf1);
+        --muted: light-dark(#667085, #8b95a3);
+        --accent: light-dark(#2f6bff, #6e9bff);
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font: 15px/24px Inter, system-ui, sans-serif;
+      }
+      header {
+        display: flex;
+        align-items: center;
+        height: 56px;
+        padding: 0 16px;
+        background: var(--panel);
+        border-bottom: 1px solid var(--line);
+      }
+      header a {
+        color: var(--ink);
+        font-weight: 600;
+        text-decoration: none;
+      }
+      main {
+        max-width: 680px;
+        margin: 0 auto;
+        padding: 24px 16px 48px;
+        overflow-wrap: anywhere;
+      }
+      h1 {
+        font-size: 24px;
+        margin: 8px 0 16px;
+      }
+      h2 {
+        font-size: 17px;
+        margin: 32px 0 8px;
+      }
+      a {
+        color: var(--accent);
+      }
+      code {
+        font-family: "JetBrains Mono", ui-monospace, monospace;
+        font-size: 0.9em;
+      }
+      ul {
+        padding-left: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <header><a href="/">mblint Storybook</a></header>
+    <main>
+      <h1>Privacy</h1>
+      <p>
+        This page covers mblint's Storybook at storybook.mblint.shortarrow.jp, which shows the simulator's parts one at a time.
+        It does not ask you to sign in and sets no cookie of its own.
+      </p>
+
+      <h2>Cloudflare Web Analytics</h2>
+      <p>
+        The Storybook is served by Cloudflare, which adds the script of Cloudflare Web Analytics to its pages. For each visit, the
+        script reports the page's address, the site that linked to it, your country, browser, operating system and type of
+        device, and how long the page took to load. The
+        <a href="https://developers.cloudflare.com/web-analytics/data-metrics/dimensions/">list of what it records</a> is
+        Cloudflare's.
+      </p>
+      <p>
+        Cloudflare states that Web Analytics uses no state kept in your browser, such as a cookie or local storage, to collect
+        these figures, and that Cloudflare does not fingerprint visitors by their IP address, their browser's User-Agent or any
+        other data for the purpose of displaying analytics. See
+        <a href="https://www.cloudflare.com/web-analytics/">Cloudflare Web Analytics</a>.
+      </p>
+
+      <h2>What Storybook keeps in your browser</h2>
+      <p>
+        Storybook keeps how its screen is laid out, its keyboard shortcuts and the stories you viewed last in your browser's
+        local storage and session storage. It sends none of this anywhere.
+      </p>
+
+      <h2>Questions</h2>
+      <p>Ask them in an issue at <a href="https://github.com/ShortArrow/mblint/issues">github.com/ShortArrow/mblint</a>.</p>
+    </main>
+  </body>
+</html>
