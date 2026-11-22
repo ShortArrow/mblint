@@ -180,7 +180,7 @@ Wasm モジュールは、`mblint-wasm` を `wasm32-unknown-unknown` 向けに�
 
 Storybook は、`web/storybook-static` の静的アセットを配る二つ目の Cloudflare Worker として storybook.mblint.shortarrow.jp に、誰でも見られる形で公開する。設定は `web/.storybook/wrangler.jsonc` にある。その Workers Builds のプロジェクトは `web/.storybook` で動き、`main` を公開し、ほかのブランチを preview としてビルドする。そのとき `web/scripts/cloudflare-build.sh build-storybook` を実行する。Storybook のページはスクリプトを直接書いているので、その応答には Content Security Policy を付けない。ページとは別のオリジンなので、ページの保存した値は読めない。
 
-すべての応答に、`web/public/_headers` にある Content Security Policy を付ける。スクリプトと Wasm はページと同じオリジンのものだけを動かすので、`index.html` にはスクリプトを直接書かない。例外は、本番で Cloudflare がページに差し込む Cloudflare Web Analytics の計測スクリプトで、これは https://static.cloudflareinsights.com から動かす。スタイルはページと Google Fonts から、フォントは Google Fonts から読み、通信はページ、GitHub の API、その生のファイルの置き場と、計測スクリプトが送る先の https://cloudflareinsights.com にだけ行い、ほかのサイトがページを枠の中に表示することを許さない。
+すべての応答に、`web/public/_headers` にある Content Security Policy を付ける。スクリプトと Wasm はページと同じオリジンのものだけを動かすので、`index.html` にはスクリプトを直接書かない。例外は、本番で Cloudflare がページに差し込む Cloudflare Web Analytics の計測スクリプトで、これは https://static.cloudflareinsights.com から動かす。スタイルはページと Google Fonts から、フォントは Google Fonts から読み、通信はページ、GitHub の API、その生のファイルの置き場にだけ行い、計測スクリプトもページと同じオリジンの `/cdn-cgi/rum` に送る。また、ほかのサイトがページを枠の中に表示することを許さない。
 
 エディタが勧めるキーと列挙された値は、ボード、デバイス、rig のコアの Rust の型から生成し、コミットされたものが生成したものと異なるとき、CI は失敗する。
 
