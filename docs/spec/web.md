@@ -172,6 +172,8 @@ The controls in the header are icons, each named in its tooltip: loading files, 
 
 The settings choose the theme, which is the system's light or dark theme, light, or dark, and whether the header shows the names of its controls beside their icons. The browser remembers both. Switching or choosing a theme reveals it in a circle growing from the control, or at once when the system asks for reduced motion. The page is drawn in its theme from the first paint, and the sidebars and the bracket hold their places while the module loads, so that loading the page neither flashes another theme nor rearranges it. The page does not scroll sideways; a part of it that must scroll has a thin scrollbar in the theme's colours, shown while the pointer is over that part.
 
+The settings end with a link to the privacy page at `/privacy.html`. That page says what the simulator, the marketplace and the Storybook record about a visit: what the beacon of Cloudflare Web Analytics reports, citing Cloudflare's own description of it, what the browser remembers, and which other sites the pages ask. The page holds no script.
+
 ## Build
 
 The Wasm module is `mblint-wasm` built for `wasm32-unknown-unknown`, then wrapped as an ES module with its TypeScript declarations by the `wasm-bindgen` command line. The command line must be the version of the `wasm-bindgen` crate in `Cargo.lock`.
@@ -180,7 +182,7 @@ The page is published at mblint.shortarrow.jp as a Cloudflare Worker serving the
 
 The Storybook is published at storybook.mblint.shortarrow.jp, open to anyone, as a second Cloudflare Worker serving the static assets in `web/storybook-static`, configured in `web/.storybook/wrangler.jsonc`. Its Workers Builds project runs in `web/.storybook`, deploys `main` and builds other branches as previews, running `web/scripts/cloudflare-build.sh build-storybook`. Its responses carry no Content Security Policy, because Storybook's pages run inline scripts; it is a separate origin from the page, so it reads none of the page's storage.
 
-Every response carries the Content Security Policy in `web/public/_headers`. It runs scripts and Wasm only from the page's own origin, so `index.html` holds no inline script; takes styles from the page and Google Fonts, and fonts from Google Fonts; fetches only from the page, GitHub's API and its host of raw files; and lets no other site frame the page.
+Every response carries the Content Security Policy in `web/public/_headers`. It runs scripts and Wasm only from the page's own origin, so `index.html` holds no inline script, with one exception: the beacon of Cloudflare Web Analytics, which Cloudflare adds to the page in production, runs from https://static.cloudflareinsights.com. The policy takes styles from the page and Google Fonts, and fonts from Google Fonts; fetches only from the page, GitHub's API and its host of raw files, the beacon reporting to `/cdn-cgi/rum` on the page's own origin; and lets no other site frame the page.
 
 The keys and the listed values the editor offers are generated from the core's Rust types of the board, the device and the rig, and CI fails when the ones committed differ from what is generated.
 

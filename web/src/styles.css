@@ -1203,6 +1203,14 @@ dialog fieldset {
 dialog fieldset + fieldset {
   border-top: 1px solid var(--line);
 }
+dialog .settings-foot {
+  margin: 0;
+  padding: 12px 16px;
+  border-top: 1px solid var(--line);
+}
+dialog .settings-foot a {
+  color: var(--accent);
+}
 dialog legend {
   float: left;
   width: 100%;

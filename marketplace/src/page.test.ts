@@ -19,6 +19,13 @@ function pageOf(names: string[], text = "", age = 0): Document {
 }
 
 describe("renderPage", () => {
+  it("links to the simulator's privacy page below the list, also when there is no list", () => {
+    const privacy = 'footer a[href="https://mblint.shortarrow.jp/privacy.html"]';
+    expect(pageOf(["acme/rigs"]).querySelector(privacy)!.textContent).toBe("Privacy");
+    const busy = new DOMParser().parseFromString(renderPage({ kind: "busy" }, [], "", NOW), "text/html");
+    expect(busy.querySelector(privacy)).not.toBeNull();
+  });
+
   it("shows each repository with a link to it on GitHub and a link opening it in the simulator", () => {
     const entry = pageOf(["acme/rigs"]).querySelector(".repositories > li")!;
     expect(entry.querySelector('a[href="https://github.com/acme/rigs"]')!.textContent).toBe("acme/rigs");
