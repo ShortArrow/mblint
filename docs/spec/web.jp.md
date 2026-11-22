@@ -172,7 +172,7 @@ rig をエディタで開いている間は、その rig が組み立て中の r
 
 設定では、テーマ（システムのライトかダーク、ライト、ダークのいずれか）と、ヘッダーの操作の名前をアイコンの横に出すかどうかを選ぶ。どちらもブラウザに記憶する。テーマを切り替えるか選ぶと、新しいテーマがその操作から広がる円の中に現れる。システムが動きを減らすよう求めているときは、すぐに切り替える。ページは最初の描画からそのテーマで描き、モジュールを読み込む間もサイドバーとトーナメント表の位置を保つ。これで、ページを読み込むときに別のテーマが一瞬見えることも、配置が組み変わることもない。ページは横にスクロールしない。スクロールが要る部分は、テーマの色の細いスクロールバーを持ち、ポインタがその部分にある間だけそれを見せる。
 
-設定の最後には、プライバシーのページ `/privacy` へのリンクを置く。このページは、シミュレーター、マーケットプレイス、Storybook が訪問について記録するものを示す。Cloudflare Web Analytics の計測スクリプトが送るものは Cloudflare 自身の説明を出典にして示し、ブラウザーが覚えるものと、ページが問い合わせるほかのサイトも示す。このページはスクリプトを持たない。
+設定の最後には、プライバシーのページ `/privacy` へのリンクを置く。このページは、シミュレーター、マーケットプレイス、Storybook が訪問について記録するものを示す。Cloudflare Web Analytics の計測スクリプトが送るものは Cloudflare 自身の説明を出典にして示し、ブラウザーが覚えるものと、ページが問い合わせるほかのサイトも示す。Cloudflare の JavaScript Detections のスクリプトが Cookie `cf_clearance` を置くことも、Cloudflare の説明を出典にして示す。その Cookie を使うルールはサイトにないこと、サイト自身は Cookie を置かないことも示す。このページはスクリプトを持たない。
 
 ## ビルド
 
@@ -180,7 +180,7 @@ Wasm モジュールは、`mblint-wasm` を `wasm32-unknown-unknown` 向けに�
 
 ページは、`web/dist` の静的アセットを配る Cloudflare Worker として mblint.shortarrow.jp に公開する。設定は `web/wrangler.jsonc` にある。Cloudflare Workers Builds は `main` を公開し、ほかのブランチを preview としてビルドする。そのとき `web/scripts/cloudflare-build.sh` を実行し、ページをビルドする前に Rust と `wasm-bindgen` コマンドラインを入れる。
 
-Storybook は、`web/storybook-static` の静的アセットを配る二つ目の Cloudflare Worker として storybook.mblint.shortarrow.jp に、誰でも見られる形で公開する。設定は `web/.storybook/wrangler.jsonc` にある。その Workers Builds のプロジェクトは `web/.storybook` で動き、`main` を公開し、ほかのブランチを preview としてビルドする。そのとき `web/scripts/cloudflare-build.sh build-storybook` を実行する。Storybook のページはスクリプトを直接書いているので、その応答には Content Security Policy を付けない。ページとは別のオリジンなので、ページの保存した値は読めない。Storybook 自身のプライバシーのページは `/privacy` にあり、元のファイルは `web/.storybook/public/privacy.html` である。このページは、Cloudflare Web Analytics の計測スクリプトが送るものを Cloudflare 自身の説明を出典にして示し、Storybook がブラウザーに残すものも示す。Storybook の画面は Storybook 自身が作るので、このページへのリンクは置かない。
+Storybook は、`web/storybook-static` の静的アセットを配る二つ目の Cloudflare Worker として storybook.mblint.shortarrow.jp に、誰でも見られる形で公開する。設定は `web/.storybook/wrangler.jsonc` にある。その Workers Builds のプロジェクトは `web/.storybook` で動き、`main` を公開し、ほかのブランチを preview としてビルドする。そのとき `web/scripts/cloudflare-build.sh build-storybook` を実行する。Storybook のページはスクリプトを直接書いているので、その応答には Content Security Policy を付けない。ページとは別のオリジンなので、ページの保存した値は読めない。Storybook 自身のプライバシーのページは `/privacy` にあり、元のファイルは `web/.storybook/public/privacy.html` である。このページは、Cloudflare Web Analytics の計測スクリプトが送るものを Cloudflare 自身の説明を出典にして示し、Storybook がブラウザーに残すものも示す。Cloudflare の JavaScript Detections のスクリプトが Cookie `cf_clearance` を置くことも、Cloudflare の説明を出典にして示す。その Cookie を使うルールはサイトにないこと、Storybook 自身は Cookie を置かないことも示す。Storybook の画面は Storybook 自身が作るので、このページへのリンクは置かない。
 
 すべての応答に、`web/public/_headers` にある Content Security Policy を付ける。スクリプトと Wasm はページと同じオリジンのものだけを動かすので、`index.html` にはスクリプトを直接書かない。例外は、本番で Cloudflare がページに差し込む Cloudflare Web Analytics の計測スクリプトで、これは https://static.cloudflareinsights.com から動かす。スタイルはページと Google Fonts から、フォントは Google Fonts から読み、通信はページ、GitHub の API、その生のファイルの置き場にだけ行い、計測スクリプトもページと同じオリジンの `/cdn-cgi/rum` に送る。また、ほかのサイトがページを枠の中に表示することを許さない。
 
