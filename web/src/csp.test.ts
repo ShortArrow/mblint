@@ -18,12 +18,17 @@ function policy(): Map<string, string[]> {
 }
 
 describe("the Content Security Policy", () => {
-  it("runs scripts and Wasm only from the page's origin", () => {
-    expect(policy().get("script-src")).toEqual(["'self'", "'wasm-unsafe-eval'"]);
+  it("runs scripts and Wasm from the page's origin, and Cloudflare Web Analytics' beacon from its host", () => {
+    expect(policy().get("script-src")).toEqual(["'self'", "'wasm-unsafe-eval'", "https://static.cloudflareinsights.com"]);
   });
 
-  it("fetches only from the page, GitHub's API and its host of raw files", () => {
-    expect(policy().get("connect-src")).toEqual(["'self'", "https://api.github.com", "https://raw.githubusercontent.com"]);
+  it("fetches only from the page, GitHub's API, its host of raw files and where the beacon reports", () => {
+    expect(policy().get("connect-src")).toEqual([
+      "'self'",
+      "https://api.github.com",
+      "https://raw.githubusercontent.com",
+      "https://cloudflareinsights.com",
+    ]);
   });
 
   it("takes fonts only from Google Fonts and lets no site frame the page", () => {
