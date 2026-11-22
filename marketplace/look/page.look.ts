@@ -1,5 +1,5 @@
 import { type Page, expect, test } from "@playwright/test";
-import { renderPage } from "../src/page";
+import { renderPage, renderPrivacy } from "../src/page";
 
 const NOW = Date.UTC(2026, 10, 13, 12);
 
@@ -84,4 +84,18 @@ test("puts the link back to the simulator at the right of the header", async ({ 
   const link = await page.locator('header a[href="https://mblint.shortarrow.jp/"]').boundingBox();
   expect(link!.x).toBeGreaterThan(1440 / 2);
   expect(link!.x).toBeGreaterThan(title!.x + title!.width);
+});
+
+test("the privacy page does not scroll sideways on a phone, and asks only Google Fonts", async ({ page }) => {
+  await page.setViewportSize({ width: 360, height: 740 });
+  const hosts: string[] = [];
+  await page.route("**/*", (route) => {
+    hosts.push(new URL(route.request().url()).host);
+    return route.abort();
+  });
+  await page.setContent(renderPrivacy());
+  await expect(page.locator("h2")).toHaveText("Privacy");
+  const [scroll, client] = await page.evaluate(() => [document.documentElement.scrollWidth, document.documentElement.clientWidth]);
+  expect(scroll).toBeLessThanOrEqual(client);
+  expect([...new Set(hosts)]).toEqual(["fonts.googleapis.com"]);
 });

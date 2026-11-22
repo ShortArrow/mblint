@@ -45,6 +45,27 @@ describe("handle", () => {
     expect((await handle(new Request("https://marketplace.mblint.shortarrow.jp/"), env, NOW, github)).status).toBe(503);
   });
 
+  it("answers its privacy page at /privacy without asking GitHub or the store", async () => {
+    const env = envOf(null);
+    env.LISTING.get = async () => Promise.reject(new Error("the store was asked"));
+    const asked: string[] = [];
+    const response = await handle(new Request("https://marketplace.mblint.shortarrow.jp/privacy"), env, NOW, async (request) => {
+      asked.push(request.url);
+      return github();
+    });
+    expect(response.status).toBe(200);
+    expect(response.headers.get("content-type")).toBe("text/html; charset=utf-8");
+    const html = await response.text();
+    expect(html).toContain("<h2>Privacy</h2>");
+    expect(html).toContain("Cloudflare Web Analytics");
+    expect(html).toContain('href="https://www.cloudflare.com/web-analytics/"');
+    expect(html).toContain('href="https://developers.cloudflare.com/web-analytics/data-metrics/dimensions/"');
+    expect(html).toContain("fonts.googleapis.com");
+    expect(html).not.toContain("<script");
+    expect(asked).toEqual([]);
+    expect(env.put).toEqual([]);
+  });
+
   it("answers 404 for any other path", async () => {
     expect((await handle(new Request("https://marketplace.mblint.shortarrow.jp/x"), envOf(null), NOW, github)).status).toBe(404);
   });
