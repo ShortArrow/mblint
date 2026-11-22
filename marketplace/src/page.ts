@@ -79,7 +79,7 @@ ${STYLE}
 <form method="get"><input name="q" type="search" value="${escape(text)}" aria-label="Narrow"><button>Narrow</button></form>
 ${body}
 ${PUBLISH}
-<footer><a href="${SIMULATOR}privacy.html">Privacy</a></footer>
+<footer><a href="${SIMULATOR}privacy">Privacy</a></footer>
 </main>
 </body>
 </html>
