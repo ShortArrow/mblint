@@ -5,7 +5,7 @@ test("the settings link to the privacy page", async ({ page }) => {
   await page.locator("#settings-open").click();
   const link = page.locator("dialog#settings a", { hasText: "Privacy" });
 
-  await expect(link).toHaveAttribute("href", "/privacy.html");
+  await expect(link).toHaveAttribute("href", "/privacy");
 });
 
 test("the privacy page says what Cloudflare Web Analytics reports, citing Cloudflare, and holds no script", async ({ page }) => {
