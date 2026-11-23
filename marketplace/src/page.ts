@@ -127,10 +127,13 @@ export function renderPrivacy(): string {
     "mblint marketplace privacy",
     `<section id="privacy">
 <h2>Privacy</h2>
-<p>This page covers mblint's marketplace at marketplace.mblint.shortarrow.jp. It does not ask you to sign in and sets no cookie of its own. It keeps nothing about your visit, including the text you narrow the list by.</p>
+<p>This page covers mblint's marketplace at marketplace.mblint.shortarrow.jp. It does not ask you to sign in. It sets no cookie itself; the one Cloudflare sets is described below. It keeps nothing about your visit, including the text you narrow the list by.</p>
 <h3>Cloudflare Web Analytics</h3>
 <p>The marketplace is served by Cloudflare, which adds the script of Cloudflare Web Analytics to its pages. For each visit, the script reports the page's address, the site that linked to it, your country, browser, operating system and type of device, and how long the page took to load. The <a href="https://developers.cloudflare.com/web-analytics/data-metrics/dimensions/">list of what it records</a> is Cloudflare's.</p>
 <p>Cloudflare states that Web Analytics uses no state kept in your browser, such as a cookie or local storage, to collect these figures, and that Cloudflare does not fingerprint visitors by their IP address, their browser's User-Agent or any other data for the purpose of displaying analytics. See <a href="https://www.cloudflare.com/web-analytics/">Cloudflare Web Analytics</a>.</p>
+<h3>Cloudflare's check for automated browsers</h3>
+<p>Cloudflare also adds the script of its JavaScript Detections to the marketplace's pages, to tell browsers run by software from those used by people. When the script runs, Cloudflare sets a cookie named <code>cf_clearance</code> in your browser, holding the outcome of that check.</p>
+<p>The outcome blocks or challenges a visit only through a rule that the site sets up to act on it. The marketplace has no such rule, so the cookie stops nobody. See <a href="https://developers.cloudflare.com/cloudflare-challenges/challenge-types/javascript-detections/">JavaScript Detections</a>.</p>
 <h3>Other sites your browser asks</h3>
 <p>The marketplace loads its typefaces from Google Fonts, so your browser asks <code>fonts.googleapis.com</code> and <code>fonts.gstatic.com</code> for them. Google receives your IP address and your browser's request, and handles them under its own policy.</p>
 <h3>Questions</h3>

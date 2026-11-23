@@ -68,7 +68,7 @@
       <h1>Privacy</h1>
       <p>
         This page covers mblint's Storybook at storybook.mblint.shortarrow.jp, which shows the simulator's parts one at a time.
-        It does not ask you to sign in and sets no cookie of its own.
+        It does not ask you to sign in. It sets no cookie itself; the one Cloudflare sets is described below.
       </p>
 
       <h2>Cloudflare Web Analytics</h2>
@@ -84,6 +84,17 @@
         these figures, and that Cloudflare does not fingerprint visitors by their IP address, their browser's User-Agent or any
         other data for the purpose of displaying analytics. See
         <a href="https://www.cloudflare.com/web-analytics/">Cloudflare Web Analytics</a>.
+      </p>
+
+      <h2>Cloudflare's check for automated browsers</h2>
+      <p>
+        Cloudflare also adds the script of its JavaScript Detections to the Storybook's pages, to tell browsers run by software from those
+        used by people. When the script runs, Cloudflare sets a cookie named <code>cf_clearance</code> in your browser, holding
+        the outcome of that check.
+      </p>
+      <p>
+        The outcome blocks or challenges a visit only through a rule that the site sets up to act on it. The Storybook has no such rule, so the cookie
+        stops nobody. See <a href="https://developers.cloudflare.com/cloudflare-challenges/challenge-types/javascript-detections/">JavaScript Detections</a>.
       </p>
 
       <h2>What Storybook keeps in your browser</h2>
