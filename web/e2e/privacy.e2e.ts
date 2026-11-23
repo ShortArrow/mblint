@@ -18,6 +18,8 @@ test("the privacy page says what Cloudflare Web Analytics reports, citing Cloudf
   await expect(page.locator('a[href="https://developers.cloudflare.com/web-analytics/data-metrics/dimensions/"]')).toHaveCount(1);
   await expect(page.locator("main")).toContainText("fonts.googleapis.com");
   await expect(page.locator("main")).toContainText("api.github.com");
+  await expect(page.locator("main")).toContainText("cf_clearance");
+  await expect(page.locator('a[href="https://developers.cloudflare.com/cloudflare-challenges/challenge-types/javascript-detections/"]')).toHaveCount(1);
   await expect(page.locator("script")).toHaveCount(0);
 });
 

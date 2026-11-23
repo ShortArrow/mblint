@@ -9,6 +9,8 @@ test("the Storybook's privacy page says what Cloudflare Web Analytics reports an
   await expect(page.locator('a[href="https://www.cloudflare.com/web-analytics/"]')).toHaveCount(1);
   await expect(page.locator('a[href="https://developers.cloudflare.com/web-analytics/data-metrics/dimensions/"]')).toHaveCount(1);
   await expect(page.locator("main")).toContainText("local storage");
+  await expect(page.locator("main")).toContainText("cf_clearance");
+  await expect(page.locator('a[href="https://developers.cloudflare.com/cloudflare-challenges/challenge-types/javascript-detections/"]')).toHaveCount(1);
   await expect(page.locator("script")).toHaveCount(0);
 });
 
