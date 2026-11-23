@@ -61,6 +61,8 @@ describe("handle", () => {
     expect(html).toContain('href="https://www.cloudflare.com/web-analytics/"');
     expect(html).toContain('href="https://developers.cloudflare.com/web-analytics/data-metrics/dimensions/"');
     expect(html).toContain("fonts.googleapis.com");
+    expect(html).toContain("cf_clearance");
+    expect(html).toContain('href="https://developers.cloudflare.com/cloudflare-challenges/challenge-types/javascript-detections/"');
     expect(html).not.toContain("<script");
     expect(asked).toEqual([]);
     expect(env.put).toEqual([]);

@@ -69,7 +69,8 @@
       <h1>Privacy</h1>
       <p>
         This page covers mblint's simulator at mblint.shortarrow.jp, its marketplace at marketplace.mblint.shortarrow.jp and its
-        Storybook at storybook.mblint.shortarrow.jp. None of them asks you to sign in or sets a cookie of its own.
+        Storybook at storybook.mblint.shortarrow.jp. None of them asks you to sign in. None of them sets a cookie
+        itself; the one Cloudflare sets is described below.
       </p>
 
       <h2>Cloudflare Web Analytics</h2>
@@ -85,6 +86,17 @@
         these figures, and that Cloudflare does not fingerprint visitors by their IP address, their browser's User-Agent or any
         other data for the purpose of displaying analytics. See
         <a href="https://www.cloudflare.com/web-analytics/">Cloudflare Web Analytics</a>.
+      </p>
+
+      <h2>Cloudflare's check for automated browsers</h2>
+      <p>
+        Cloudflare also adds the script of its JavaScript Detections to the sites' pages, to tell browsers run by software from those
+        used by people. When the script runs, Cloudflare sets a cookie named <code>cf_clearance</code> in your browser, holding
+        the outcome of that check.
+      </p>
+      <p>
+        The outcome blocks or challenges a visit only through a rule that the site sets up to act on it. The sites have no such rule, so the cookie
+        stops nobody. See <a href="https://developers.cloudflare.com/cloudflare-challenges/challenge-types/javascript-detections/">JavaScript Detections</a>.
       </p>
 
       <h2>What the simulator keeps in your browser</h2>
